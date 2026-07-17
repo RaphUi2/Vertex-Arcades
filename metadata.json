@@ -1,0 +1,6 @@
+{
+  "name": "Vertex Arcades",
+  "description": "Une suite de 12 mini-jeux d'arcade rétro-néon incluant des jeux de clicker, de mémorisation, de réflexes, de casse-brique, de snake et bien d'autres, avec un design rétro moderne et fluide.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

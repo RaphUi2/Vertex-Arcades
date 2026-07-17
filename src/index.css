@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --font-mono: "Orbitron", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Custom retro styling additions */
+@layer base {
+  body {
+    background-color: #020617; /* slate-950 */
+    overflow-y: scroll;
+  }
+
+  /* Custom styled scrollbars for retro neon look */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #020617;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 4px;
+    border: 2px solid #020617;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #06b6d4; /* cyan glow */
+  }
+}
+
+/* Extra utility classes for custom gaming features */
+@utility animate-spin-slow {
+  animation: spin 8s linear infinite;
+}
+
+@utility animate-bounce-slow {
+  animation: bounce 2s infinite;
+}
+
+@utility grid-cols-15 {
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+}
