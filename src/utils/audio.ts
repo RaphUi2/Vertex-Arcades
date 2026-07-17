@@ -35,35 +35,39 @@ class AudioManager {
     gainStart: number = 0.1
   ) {
     if (!this.soundEnabled) return;
-    this.init();
-    if (!this.ctx) return;
+    try {
+      this.init();
+      if (!this.ctx) return;
 
-    const ctx = this.ctx;
-    const now = ctx.currentTime;
+      const ctx = this.ctx;
+      const now = ctx.currentTime;
 
-    const osc = ctx.createOscillator();
-    const gainNode = ctx.createGain();
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
 
-    osc.type = type;
-    osc.connect(gainNode);
-    gainNode.connect(ctx.destination);
+      osc.type = type;
+      osc.connect(gainNode);
+      gainNode.connect(ctx.destination);
 
-    gainNode.gain.setValueAtTime(gainStart, now);
+      gainNode.gain.setValueAtTime(gainStart, now);
 
-    let timeOffset = 0;
-    freqs.forEach((freq, idx) => {
-      const dur = durations[idx] || 0.1;
-      osc.frequency.setValueAtTime(freq, now + timeOffset);
-      timeOffset += dur;
-    });
+      let timeOffset = 0;
+      freqs.forEach((freq, idx) => {
+        const dur = durations[idx] || 0.1;
+        osc.frequency.setValueAtTime(freq, now + timeOffset);
+        timeOffset += dur;
+      });
 
-    if (sweepFreq !== undefined) {
-      osc.frequency.exponentialRampToValueAtTime(sweepFreq, now + timeOffset);
+      if (sweepFreq !== undefined && sweepFreq > 0) {
+        osc.frequency.linearRampToValueAtTime(sweepFreq, now + timeOffset);
+      }
+
+      gainNode.gain.linearRampToValueAtTime(0.0001, now + timeOffset);
+      osc.start(now);
+      osc.stop(now + timeOffset + 0.05);
+    } catch (e) {
+      console.warn("Audio synthesis failed gracefully:", e);
     }
-
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + timeOffset);
-    osc.start(now);
-    osc.stop(now + timeOffset + 0.05);
   }
 
   playClick() {
@@ -94,6 +98,10 @@ class AudioManager {
   playGameOver() {
     // Sad descending tones
     this.playTone([440, 392, 349.23, 293.66, 220], [0.12, 0.12, 0.12, 0.12, 0.35], 'sawtooth', 80, 0.08);
+  }
+
+  playFrequency(freq: number, duration: number = 0.35) {
+    this.playTone([freq], [duration], 'sine', undefined, 0.15);
   }
 }
 

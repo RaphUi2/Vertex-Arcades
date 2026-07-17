@@ -50,13 +50,13 @@ export default function WhackNode({ onScore, onGameOver, onBack, highScore }: Ga
     };
   }, [isPlaying, isEnded, score]);
 
-  // General 30s countdown timer
+  // General 30s countdown timer - Only starts/stops on isPlaying state change
   useEffect(() => {
-    if (isPlaying && timeLeft > 0) {
+    if (isPlaying) {
       gameTimerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            clearInterval(gameTimerRef.current!);
+            if (gameTimerRef.current) clearInterval(gameTimerRef.current);
             handleTimeOut();
             return 0;
           }
@@ -67,7 +67,7 @@ export default function WhackNode({ onScore, onGameOver, onBack, highScore }: Ga
     return () => {
       if (gameTimerRef.current) clearInterval(gameTimerRef.current);
     };
-  }, [isPlaying, timeLeft]);
+  }, [isPlaying]);
 
   const handleTimeOut = () => {
     setIsPlaying(false);

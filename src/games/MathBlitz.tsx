@@ -53,23 +53,24 @@ export default function MathBlitz({ onScore, onGameOver, onBack, highScore }: Ga
     };
   };
 
-  // High resolution tick timer
+  // High resolution tick timer - Runs when a new equation is loaded
   useEffect(() => {
-    if (isPlaying && !isEnded && timeLeft > 0) {
+    if (isPlaying && !isEnded && equation) {
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 0.1) {
+            if (timerRef.current) clearInterval(timerRef.current);
             handleTimeOut();
             return 0;
           }
           return Math.round((prev - 0.1) * 10) / 10;
         });
-      }, 100);
+      }, 1000 * 0.1);
     }
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isPlaying, isEnded, timeLeft]);
+  }, [isPlaying, isEnded, equation]);
 
   const handleTimeOut = () => {
     audio.playHit();

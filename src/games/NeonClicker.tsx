@@ -46,13 +46,13 @@ export default function NeonClicker({ onScore, onGameOver, onBack, highScore }: 
     };
   }, [gameStarted, autoRate]);
 
-  // Timer countdown
+  // Timer countdown - Only starts/stops on gameStarted status change to prevent stuck timer
   useEffect(() => {
-    if (gameStarted && timeLeft > 0) {
+    if (gameStarted) {
       timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            clearInterval(timerRef.current!);
+            if (timerRef.current) clearInterval(timerRef.current);
             handleGameOver();
             return 0;
           }
@@ -63,7 +63,7 @@ export default function NeonClicker({ onScore, onGameOver, onBack, highScore }: 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [gameStarted, timeLeft]);
+  }, [gameStarted]);
 
   const handleGameOver = () => {
     setGameStarted(false);
@@ -73,14 +73,35 @@ export default function NeonClicker({ onScore, onGameOver, onBack, highScore }: 
 
   const handleNodeClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!gameStarted) {
+      if (timeLeft <= 0) {
+        setTimeLeft(60);
+        setScore(0);
+        setMultiplier(1);
+        setAutoRate(0);
+        setAutoCost(15);
+        setMultCost(25);
+      }
       setGameStarted(true);
       audio.playCoin();
     }
     
     audio.playClick();
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    
+    // Check clientX/Y and fallback for touch interfaces safely
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+    
+    if (!clientX && (e.nativeEvent as any).touches && (e.nativeEvent as any).touches.length > 0) {
+      clientX = (e.nativeEvent as any).touches[0].clientX;
+      clientY = (e.nativeEvent as any).touches[0].clientY;
+    }
+    
+    const finalX = typeof clientX === 'number' && !isNaN(clientX) ? clientX : (rect.left + rect.width / 2);
+    const finalY = typeof clientY === 'number' && !isNaN(clientY) ? clientY : (rect.top + rect.height / 2);
+
+    const x = finalX - rect.left;
+    const y = finalY - rect.top;
 
     const gained = multiplier;
     setScore((prev) => prev + gained);

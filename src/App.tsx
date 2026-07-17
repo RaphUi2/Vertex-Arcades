@@ -33,13 +33,13 @@ const AVATAR_COLORS = [
 export default function App() {
   // Load initial global state from localStorage
   const [state, setState] = useState<GlobalState>(() => {
-    const saved = localStorage.getItem('vertex_arcades_state');
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem('vertex_arcades_state');
+      if (saved) {
         return JSON.parse(saved);
-      } catch (e) {
-        console.warn("Failed to load local state", e);
       }
+    } catch (e) {
+      console.warn("Failed to load local state from localStorage", e);
     }
     
     // Default fallback state
@@ -71,7 +71,11 @@ export default function App() {
 
   // Synchronize state changes to localStorage
   useEffect(() => {
-    localStorage.setItem('vertex_arcades_state', JSON.stringify(state));
+    try {
+      localStorage.setItem('vertex_arcades_state', JSON.stringify(state));
+    } catch (e) {
+      console.warn("Failed to save state to localStorage", e);
+    }
   }, [state]);
 
   const toggleSound = () => {

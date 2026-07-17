@@ -48,27 +48,7 @@ export default function SimonMemory({ onScore, onGameOver, onBack, highScore }: 
   };
 
   const playPadSound = (padId: number) => {
-    if (!audio.isSoundEnabled()) return;
-    try {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      const ctx = new AudioContextClass();
-      const osc = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(PAD_CONFIGS[padId].soundFreq, ctx.currentTime);
-      
-      osc.connect(gainNode);
-      gainNode.connect(ctx.destination);
-      
-      gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
-      
-      osc.start();
-      osc.stop(ctx.currentTime + 0.4);
-    } catch (e) {
-      console.warn("Audio error:", e);
-    }
+    audio.playFrequency(PAD_CONFIGS[padId].soundFreq, 0.35);
   };
 
   const startNewGame = () => {

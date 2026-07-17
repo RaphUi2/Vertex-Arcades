@@ -31,13 +31,13 @@ export default function ReflexTap({ onScore, onGameOver, onBack, highScore }: Ga
     };
   }, [isPlaying, activeNode, speed]);
 
-  // General Timer countdown
+  // General Timer countdown - Only starts/stops on isPlaying state change
   useEffect(() => {
-    if (isPlaying && timeLeft > 0) {
+    if (isPlaying) {
       gameTimerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            clearInterval(gameTimerRef.current!);
+            if (gameTimerRef.current) clearInterval(gameTimerRef.current);
             handleGameOver();
             return 0;
           }
@@ -48,7 +48,7 @@ export default function ReflexTap({ onScore, onGameOver, onBack, highScore }: Ga
     return () => {
       if (gameTimerRef.current) clearInterval(gameTimerRef.current);
     };
-  }, [isPlaying, timeLeft]);
+  }, [isPlaying]);
 
   const triggerNextNode = () => {
     if (nodeTimerRef.current) clearTimeout(nodeTimerRef.current);
