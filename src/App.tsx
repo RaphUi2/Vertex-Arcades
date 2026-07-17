@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Zap, Brain, Target, Play, Grid, Layers, Shield, Cpu, Sword, PlusCircle, Grid3X3, Sparkles, Award, Trophy, User, ShoppingBag, Settings, Volume2, VolumeX, Medal, Flame, PlayCircle, Eye, Info
+  Zap, Brain, Target, Play, Grid, Layers, Shield, Cpu, Sword, PlusCircle, Grid3X3, Sparkles, Award, Trophy, User, ShoppingBag, Settings, Volume2, VolumeX, Medal, Flame, PlayCircle, Eye, Info, Check, Lock
 } from 'lucide-react';
 
 import { audio } from './utils/audio';
-import { GlobalState, GameStats, Achievement } from './types';
-import { GAMES_LIST, CABINET_SKINS, INITIAL_ACHIEVEMENTS } from './gamesData';
+import { GlobalState, GameStats, Achievement, Quest, ArcadePass } from './types';
+import { GAMES_LIST, CABINET_SKINS, INITIAL_ACHIEVEMENTS, INITIAL_QUESTS, PASS_LEVELS } from './gamesData';
 
 // Mini games imports
 import NeonClicker from './games/NeonClicker';
@@ -27,36 +27,77 @@ const AVATAR_COLORS = [
   { id: 'pink', hex: '#ec4899', text: 'text-pink-400', border: 'border-pink-500' },
   { id: 'purple', hex: '#a855f7', text: 'text-purple-400', border: 'border-purple-500' },
   { id: 'emerald', hex: '#10b981', text: 'text-emerald-400', border: 'border-emerald-500' },
-  { id: 'yellow', hex: '#eab308', text: 'text-yellow-400', border: 'border-yellow-500' }
+  { id: 'yellow', hex: '#eab308', text: 'text-yellow-400', border: 'border-yellow-500' },
+  { id: 'rose_neon', hex: '#f43f5e', text: 'text-rose-400 font-bold', border: 'border-rose-500 animate-pulse' },
+  { id: 'gold_rainbow', hex: '#fbbf24', text: 'text-yellow-400 font-extrabold bg-gradient-to-r from-yellow-400 via-rose-500 to-cyan-400 bg-clip-text text-transparent', border: 'border-yellow-400 shadow-[0_0_15px_#eab308] border-dashed animate-pulse' }
 ];
 
 export default function App() {
   // Load initial global state from localStorage
   const [state, setState] = useState<GlobalState>(() => {
+    let parsed: any = null;
     try {
       const saved = localStorage.getItem('vertex_arcades_state');
       if (saved) {
-        return JSON.parse(saved);
+        parsed = JSON.parse(saved);
       }
     } catch (e) {
       console.warn("Failed to load local state from localStorage", e);
     }
     
     // Default fallback state
-    return {
-      profile: {
-        username: 'PLAYER_ONE',
-        avatarColor: 'cyan',
-        totalPixels: 0,
-        unlockedSkins: ['neon'],
-        activeSkin: 'neon'
-      },
-      stats: GAMES_LIST.reduce((acc, g) => {
-        acc[g.id] = { plays: 0, highScore: 0 };
-        return acc;
-      }, {} as Record<string, GameStats>),
-      achievements: INITIAL_ACHIEVEMENTS
-    };
+    if (!parsed) {
+      parsed = {
+        profile: {
+          username: 'PLAYER_ONE',
+          avatarColor: 'cyan',
+          totalPixels: 0,
+          unlockedSkins: ['neon'],
+          activeSkin: 'neon',
+          title: 'DÉBUTANT',
+          unlockedTitles: ['DÉBUTANT'],
+          unlockedColors: ['cyan', 'pink', 'purple', 'emerald', 'yellow']
+        },
+        stats: GAMES_LIST.reduce((acc, g) => {
+          acc[g.id] = { plays: 0, highScore: 0 };
+          return acc;
+        }, {} as Record<string, GameStats>),
+        achievements: INITIAL_ACHIEVEMENTS,
+        quests: INITIAL_QUESTS,
+        arcadePass: {
+          level: 1,
+          xp: 0,
+          isPremium: false,
+          claimedFreeRewards: [],
+          claimedPremiumRewards: []
+        }
+      };
+    }
+
+    // Dynamic schema upgrade for existing saves
+    if (!parsed.profile.title) {
+      parsed.profile.title = 'DÉBUTANT';
+    }
+    if (!parsed.profile.unlockedTitles) {
+      parsed.profile.unlockedTitles = ['DÉBUTANT'];
+    }
+    if (!parsed.profile.unlockedColors) {
+      parsed.profile.unlockedColors = ['cyan', 'pink', 'purple', 'emerald', 'yellow'];
+    }
+    if (!parsed.quests || parsed.quests.length === 0) {
+      parsed.quests = INITIAL_QUESTS;
+    }
+    if (!parsed.arcadePass) {
+      parsed.arcadePass = {
+        level: 1,
+        xp: 0,
+        isPremium: false,
+        claimedFreeRewards: [],
+        claimedPremiumRewards: []
+      };
+    }
+
+    return parsed;
   });
 
   const [activeGameId, setActiveGameId] = useState<string | null>(null);
@@ -66,6 +107,8 @@ export default function App() {
   const [showSkinsModal, setShowSkinsModal] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
+  const [showQuestsModal, setShowQuestsModal] = useState(false);
+  const [showPassModal, setShowPassModal] = useState(false);
   const [usernameInput, setUsernameInput] = useState(state.profile.username);
   const [activeNotification, setActiveNotification] = useState<string | null>(null);
 
@@ -116,10 +159,28 @@ export default function App() {
         return ach;
       });
 
+      // Update quests progress for pixels_earned
+      const updatedQuests = (prev.quests || INITIAL_QUESTS).map(q => {
+        if (q.type === 'pixels_earned' && !q.isCompleted) {
+          const nextCurrent = q.current + earnedPixels;
+          const isNowCompleted = nextCurrent >= q.target;
+          if (isNowCompleted) {
+            setTimeout(() => {
+              audio.playWin();
+              setActiveNotification(`🎯 QUÊTE RÉUSSIE : ${q.title} (+${q.rewardPixels} PX) !`);
+              setTimeout(() => setActiveNotification(null), 4500);
+            }, 100);
+          }
+          return { ...q, current: nextCurrent, isCompleted: isNowCompleted };
+        }
+        return q;
+      });
+
       return {
         ...prev,
         profile: nextProfile,
-        achievements: updatedAchievements
+        achievements: updatedAchievements,
+        quests: updatedQuests
       };
     });
   };
@@ -169,6 +230,37 @@ export default function App() {
         return ach;
       });
 
+      // Update Quests for game over
+      const updatedQuests = (prev.quests || INITIAL_QUESTS).map(q => {
+        if (q.isCompleted) return q;
+
+        let nextCurrent = q.current;
+        let isNowCompleted = false;
+
+        if (q.type === 'plays_total') {
+          nextCurrent = q.current + 1;
+          isNowCompleted = nextCurrent >= q.target;
+        } else if (q.type === 'score_specific' && q.gameId === gameId) {
+          nextCurrent = Math.max(q.current, finalScore);
+          isNowCompleted = nextCurrent >= q.target;
+        } else if (q.type === 'math_streak' && gameId === 'math') {
+          nextCurrent = Math.max(q.current, finalScore);
+          isNowCompleted = nextCurrent >= q.target;
+        }
+
+        if (nextCurrent !== q.current) {
+          if (isNowCompleted) {
+            setTimeout(() => {
+              audio.playWin();
+              setActiveNotification(`🎯 QUÊTE RÉUSSIE : ${q.title} (+${q.rewardPixels} PX) !`);
+              setTimeout(() => setActiveNotification(null), 4500);
+            }, 200);
+          }
+          return { ...q, current: nextCurrent, isCompleted: isNowCompleted };
+        }
+        return q;
+      });
+
       return {
         ...prev,
         profile: {
@@ -176,7 +268,8 @@ export default function App() {
           totalPixels: prev.profile.totalPixels + extraPixels
         },
         stats: updatedStats,
-        achievements: updatedAchievements
+        achievements: updatedAchievements,
+        quests: updatedQuests
       };
     });
   };
@@ -202,6 +295,159 @@ export default function App() {
         avatarColor: colorId
       }
     }));
+  };
+
+  const claimQuest = (questId: string) => {
+    audio.playCoin();
+    setState(prev => {
+      const quest = (prev.quests || INITIAL_QUESTS).find(q => q.id === questId);
+      if (!quest || !quest.isCompleted || quest.isClaimed) return prev;
+
+      const updatedQuests = (prev.quests || INITIAL_QUESTS).map(q => {
+        if (q.id === questId) {
+          return { ...q, isClaimed: true };
+        }
+        return q;
+      });
+
+      let nextPixels = prev.profile.totalPixels + quest.rewardPixels;
+      let nextPass = { ...(prev.arcadePass || { level: 1, xp: 0, isPremium: false, claimedFreeRewards: [], claimedPremiumRewards: [] }) };
+      
+      nextPass.xp += quest.rewardXp;
+      
+      let levelUps = 0;
+      while (nextPass.xp >= 100 && nextPass.level < 10) {
+        nextPass.xp -= 100;
+        nextPass.level += 1;
+        levelUps++;
+      }
+
+      if (levelUps > 0) {
+        setTimeout(() => {
+          audio.playWin();
+          setActiveNotification(`🎉 PASS ARCADE : Niveau ${nextPass.level} atteint !`);
+          setTimeout(() => setActiveNotification(null), 4500);
+        }, 100);
+      }
+
+      return {
+        ...prev,
+        profile: {
+          ...prev.profile,
+          totalPixels: nextPixels
+        },
+        quests: updatedQuests,
+        arcadePass: nextPass
+      };
+    });
+  };
+
+  const buyPremiumPass = () => {
+    if (state.profile.totalPixels >= 300) {
+      audio.playWin();
+      setState(prev => {
+        const nextPass = { ...(prev.arcadePass || { level: 1, xp: 0, isPremium: false, claimedFreeRewards: [], claimedPremiumRewards: [] }) };
+        nextPass.isPremium = true;
+
+        return {
+          ...prev,
+          profile: {
+            ...prev.profile,
+            totalPixels: prev.profile.totalPixels - 300
+          },
+          arcadePass: nextPass
+        };
+      });
+      setActiveNotification(`💎 PASS ELITE PREMIUM ACTIVÉ ! Amuse-toi bien !`);
+      setTimeout(() => setActiveNotification(null), 4500);
+    } else {
+      audio.playHit();
+    }
+  };
+
+  const claimPassReward = (lvl: number, track: 'free' | 'premium') => {
+    audio.playCoin();
+    setState(prev => {
+      const pass = prev.arcadePass || { level: 1, xp: 0, isPremium: false, claimedFreeRewards: [], claimedPremiumRewards: [] };
+      if (pass.level < lvl) return prev;
+      if (track === 'premium' && !pass.isPremium) return prev;
+
+      const alreadyClaimed = track === 'free' 
+        ? pass.claimedFreeRewards.includes(lvl) 
+        : pass.claimedPremiumRewards.includes(lvl);
+      if (alreadyClaimed) return prev;
+
+      const rewardLevelObj = PASS_LEVELS.find(pl => pl.level === lvl);
+      if (!rewardLevelObj) return prev;
+
+      const reward = track === 'free' ? rewardLevelObj.freeReward : rewardLevelObj.premiumReward;
+
+      // Deep copy profile
+      const nextProfile = { ...prev.profile };
+      
+      if (reward.type === 'pixels') {
+        nextProfile.totalPixels += (reward.value as number);
+      } else if (reward.type === 'title') {
+        const titleVal = reward.value as string;
+        const unlockedTitles = nextProfile.unlockedTitles || ['DÉBUTANT'];
+        if (!unlockedTitles.includes(titleVal)) {
+          nextProfile.unlockedTitles = [...unlockedTitles, titleVal];
+        }
+        nextProfile.title = titleVal;
+      } else if (reward.type === 'skin') {
+        const skinVal = reward.value as string;
+        const unlockedSkins = nextProfile.unlockedSkins || ['neon'];
+        if (!unlockedSkins.includes(skinVal)) {
+          nextProfile.unlockedSkins = [...unlockedSkins, skinVal];
+        }
+        nextProfile.activeSkin = skinVal;
+      } else if (reward.type === 'color') {
+        const colorVal = reward.value as string;
+        const unlockedColors = nextProfile.unlockedColors || ['cyan', 'pink', 'purple', 'emerald', 'yellow'];
+        if (!unlockedColors.includes(colorVal)) {
+          nextProfile.unlockedColors = [...unlockedColors, colorVal];
+        }
+        nextProfile.avatarColor = colorVal;
+      }
+
+      const nextPass = { ...pass };
+      if (track === 'free') {
+        nextPass.claimedFreeRewards = [...pass.claimedFreeRewards, lvl];
+      } else {
+        nextPass.claimedPremiumRewards = [...pass.claimedPremiumRewards, lvl];
+      }
+
+      setTimeout(() => {
+        audio.playWin();
+        setActiveNotification(`🎁 RÉCOMPENSE DU PASS OBTENUE : ${reward.label} !`);
+        setTimeout(() => setActiveNotification(null), 4000);
+      }, 100);
+
+      return {
+        ...prev,
+        profile: nextProfile,
+        arcadePass: nextPass
+      };
+    });
+  };
+
+  const refreshQuests = () => {
+    audio.playClick();
+    setState(prev => {
+      // Re-seed all quests with current counts at 0
+      const resetQuests = INITIAL_QUESTS.map(q => ({
+        ...q,
+        current: 0,
+        isCompleted: false,
+        isClaimed: false
+      }));
+      return {
+        ...prev,
+        quests: resetQuests
+      };
+    });
+    setActiveNotification(`🔄 QUÊTES RÉGÉNÉRÉES ! Nouveaux défis prêts !`);
+    setTimeout(() => setActiveNotification(null), 4000);
   };
 
   const buySkin = (skinId: string, cost: number) => {
@@ -347,10 +593,35 @@ export default function App() {
             {soundOn ? <Volume2 size={16} /> : <VolumeX size={16} className="text-red-400" />}
           </button>
 
+          {/* Quests Button */}
+          <button
+            onClick={() => { audio.playClick(); setShowQuestsModal(true); }}
+            className="flex items-center gap-1.5 px-3 py-2.5 rounded-lg border border-slate-800 bg-slate-900/60 text-slate-400 hover:text-slate-100 hover:border-slate-700 transition-all cursor-pointer text-xs font-mono relative animate-[pulse_2s_infinite]"
+          >
+            <Target size={14} className="text-emerald-400" /> Quêtes
+            {state.quests?.some(q => q.isCompleted && !q.isClaimed) && (
+              <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+              </span>
+            )}
+          </button>
+
+          {/* Arcade Pass Button */}
+          <button
+            onClick={() => { audio.playClick(); setShowPassModal(true); }}
+            className="flex items-center gap-1.5 px-3 py-2.5 rounded-lg border border-slate-800 bg-slate-900/60 text-slate-400 hover:text-slate-100 hover:border-slate-700 transition-all cursor-pointer text-xs font-mono relative"
+          >
+            <Flame size={14} className="text-rose-400 animate-pulse" /> Pass Arcade
+            <span className="text-[9px] bg-rose-500/20 text-rose-300 font-bold px-1 py-0.5 rounded border border-rose-500/30">
+              Niv.{state.arcadePass?.level || 1}
+            </span>
+          </button>
+
           {/* Stats Button */}
           <button
             onClick={() => { audio.playClick(); setShowStatsModal(true); }}
-            className="flex items-center gap-1 px-3 py-2.5 rounded-lg border border-slate-800 bg-slate-900/60 text-slate-400 hover:text-slate-100 hover:border-slate-700 transition-all cursor-pointer text-xs font-mono"
+            className="flex items-slate-400 gap-1 px-3 py-2.5 rounded-lg border border-slate-800 bg-slate-900/60 text-slate-400 hover:text-slate-100 hover:border-slate-700 transition-all cursor-pointer text-xs font-mono"
           >
             <Trophy size={14} className="text-yellow-400" /> Stats
           </button>
@@ -547,17 +818,46 @@ export default function App() {
               />
             </div>
 
+            <div className="mb-4">
+              <label className="text-[10px] text-slate-400 block mb-1">TITRE SÉLECTIONNÉ</label>
+              <select
+                value={state.profile.title || 'DÉBUTANT'}
+                onChange={(e) => {
+                  audio.playClick();
+                  const selectedTitle = e.target.value;
+                  setState(prev => ({
+                    ...prev,
+                    profile: { ...prev.profile, title: selectedTitle }
+                  }));
+                }}
+                className="w-full bg-slate-900 border border-slate-800 p-2.5 rounded-lg text-xs text-yellow-400 font-bold focus:outline-none focus:border-yellow-400"
+              >
+                {(state.profile.unlockedTitles || ['DÉBUTANT']).map(t => (
+                  <option key={t} value={t} className="bg-slate-950 text-white">{t}</option>
+                ))}
+              </select>
+            </div>
+
             <div className="mb-6">
               <label className="text-[10px] text-slate-400 block mb-2">COULEUR D'AVATAR</label>
-              <div className="flex gap-3">
-                {AVATAR_COLORS.map(c => (
-                  <button
-                    key={c.id}
-                    onClick={() => setAvatarColor(c.id)}
-                    className={`w-8 h-8 rounded-full border-2 ${state.profile.avatarColor === c.id ? 'border-white scale-110 shadow-lg' : 'border-transparent'} transition-all`}
-                    style={{ backgroundColor: c.hex }}
-                  />
-                ))}
+              <div className="flex flex-wrap gap-2.5">
+                {AVATAR_COLORS.map(c => {
+                  const isUnlocked = (state.profile.unlockedColors || ['cyan', 'pink', 'purple', 'emerald', 'yellow']).includes(c.id);
+                  return (
+                    <button
+                      key={c.id}
+                      disabled={!isUnlocked}
+                      onClick={() => setAvatarColor(c.id)}
+                      className={`w-8 h-8 rounded-full border-2 flex items-center justify-center relative ${
+                        state.profile.avatarColor === c.id ? 'border-white scale-110 shadow-lg' : 'border-transparent'
+                      } ${!isUnlocked ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'} transition-all`}
+                      style={{ backgroundColor: c.hex }}
+                      title={isUnlocked ? c.id : 'Bloqué (Débloquez via le Pass!)'}
+                    >
+                      {!isUnlocked && <span className="text-[10px] text-white">🔒</span>}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -740,6 +1040,258 @@ export default function App() {
             <button
               onClick={() => { audio.playClick(); setShowStatsModal(false); }}
               className="w-full bg-slate-900 hover:bg-slate-850 text-slate-300 font-bold py-2.5 rounded-xl text-xs mt-6 border border-slate-850 cursor-pointer"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* --- Quests Modal --- */}
+      {showQuestsModal && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-950 border-2 border-slate-800 p-6 rounded-2xl w-full max-w-lg font-mono text-white relative">
+            <h3 className="text-base font-bold text-emerald-400 mb-2 uppercase tracking-widest flex items-center gap-2">
+              <Target size={18} className="animate-pulse" /> 🎯 QUÊTES ARCADE
+            </h3>
+            <p className="text-[10px] text-slate-400 mb-4">
+              RELEVE LES DÉFIS DE L'ARCADE POUR GAGNER DE L'EXP ET DES PIXELS !
+            </p>
+
+            <div className="flex flex-col gap-3 max-h-[350px] overflow-y-auto pr-1">
+              {(state.quests || INITIAL_QUESTS).map((quest) => {
+                const ratio = Math.min(quest.current, quest.target) / quest.target;
+                const percent = Math.floor(ratio * 100);
+
+                return (
+                  <div
+                    key={quest.id}
+                    className={`p-4 rounded-xl border flex flex-col gap-3 transition-all ${
+                      quest.isClaimed 
+                        ? 'bg-slate-900/20 border-slate-950 opacity-60' 
+                        : quest.isCompleted
+                          ? 'bg-slate-900/80 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
+                          : 'bg-slate-900/50 border-slate-900'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start gap-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-bold ${quest.isCompleted && !quest.isClaimed ? 'text-emerald-400' : 'text-slate-200'}`}>
+                            {quest.title}
+                          </span>
+                          {quest.isClaimed && (
+                            <span className="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700/50">
+                              REÇU
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1">{quest.description}</p>
+                      </div>
+
+                      <div className="text-right flex flex-col gap-1">
+                        <span className="text-[10px] text-yellow-400 font-bold">
+                          +{quest.rewardPixels} PX
+                        </span>
+                        <span className="text-[10px] text-rose-400 font-bold">
+                          +{quest.rewardXp} XP
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="w-full flex items-center gap-3">
+                      <div className="flex-1 bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800 relative">
+                        <div
+                          className={`h-full transition-all duration-500 ${
+                            quest.isCompleted ? 'bg-emerald-500' : 'bg-cyan-500'
+                          }`}
+                          style={{ width: `${percent}%` }}
+                        />
+                      </div>
+                      <span className="text-[10px] font-bold text-slate-300 min-w-[45px] text-right">
+                        {quest.current}/{quest.target}
+                      </span>
+                    </div>
+
+                    {/* Claim Button */}
+                    {!quest.isClaimed && (
+                      <button
+                        disabled={!quest.isCompleted}
+                        onClick={() => claimQuest(quest.id)}
+                        className={`w-full py-2 rounded-lg font-bold text-xs transition-all cursor-pointer ${
+                          quest.isCompleted
+                            ? 'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]'
+                            : 'bg-slate-950 text-slate-500 border border-slate-900 cursor-not-allowed'
+                        }`}
+                      >
+                        {quest.isCompleted ? '🎯 RÉCLAMER LA RÉCOMPENSE' : 'EN COURS...'}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={refreshQuests}
+                className="flex-1 bg-slate-950 hover:bg-slate-900 text-slate-400 hover:text-slate-200 py-2.5 rounded-xl text-xs font-bold border border-slate-900 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                title="Régénère toutes les quêtes pour repartir de zéro !"
+              >
+                🔄 Régénérer les Quêtes
+              </button>
+
+              <button
+                onClick={() => { audio.playClick(); setShowQuestsModal(false); }}
+                className="flex-1 bg-slate-900 hover:bg-slate-850 text-slate-300 font-bold py-2.5 rounded-xl text-xs border border-slate-850 cursor-pointer text-center"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- Arcade Pass Modal --- */}
+      {showPassModal && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-950 border-2 border-slate-800 p-6 rounded-2xl w-full max-w-xl font-mono text-white relative flex flex-col max-h-[90vh]">
+            
+            {/* Header */}
+            <div className="flex justify-between items-start gap-4 mb-4 text-left">
+              <div>
+                <h3 className="text-base font-bold text-rose-400 uppercase tracking-widest flex items-center gap-2">
+                  <Flame size={18} className="text-rose-500 animate-pulse" /> PASS ARCADE - SAISON 1
+                </h3>
+                <p className="text-[10px] text-slate-400">
+                  MONTE EN NIVEAU POUR OBTENIR DES TITRES, SKINS ET COULEURS EXCLUSIFS !
+                </p>
+              </div>
+
+              {state.arcadePass?.isPremium ? (
+                <div className="bg-gradient-to-r from-amber-500 to-yellow-600 text-slate-950 text-[9px] font-black px-2.5 py-1 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.3)] uppercase tracking-wider animate-pulse flex items-center gap-1 shrink-0">
+                  <Sparkles size={10} /> Élite Actif
+                </div>
+              ) : (
+                <button
+                  onClick={buyPremiumPass}
+                  className="bg-gradient-to-r from-rose-500 via-purple-600 to-indigo-600 hover:from-rose-400 hover:via-purple-500 hover:to-indigo-500 text-white text-[9px] font-black px-3 py-1.5 rounded-lg shadow-[0_0_15px_rgba(168,85,247,0.4)] transition-all cursor-pointer uppercase tracking-wider flex items-center gap-1 animate-bounce shrink-0"
+                >
+                  👑 ÉLITE (300 PX)
+                </button>
+              )}
+            </div>
+
+            {/* Level & XP Gauge */}
+            <div className="bg-slate-900/60 border border-slate-900 p-4 rounded-xl flex items-center gap-4 mb-4 text-left">
+              <div className="relative">
+                <div className="absolute inset-0 bg-rose-500/30 rounded-xl blur-md"></div>
+                <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-rose-500 to-purple-600 flex flex-col items-center justify-center border border-rose-400 shadow-md">
+                  <span className="text-[8px] font-bold text-rose-200 uppercase">Niveau</span>
+                  <span className="text-lg font-black text-white leading-none mt-0.5">{state.arcadePass?.level || 1}</span>
+                </div>
+              </div>
+
+              <div className="flex-1">
+                <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 mb-1.5">
+                  <span>EXPÉRIENCE DE SAISON</span>
+                  <span className="text-rose-400 font-extrabold">{state.arcadePass?.xp || 0} / 100 XP</span>
+                </div>
+                <div className="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800 relative">
+                  <div
+                    className="h-full bg-gradient-to-r from-rose-500 to-purple-500 transition-all duration-500"
+                    style={{ width: `${state.arcadePass?.xp || 0}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Rewards Scrollable List */}
+            <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2 mb-4 scrollbar-thin scrollbar-thumb-slate-800 text-left">
+              {PASS_LEVELS.map((pLevel) => {
+                const currentLevel = state.arcadePass?.level || 1;
+                const isPremiumUnlocked = state.arcadePass?.isPremium || false;
+                const isLevelReached = currentLevel >= pLevel.level;
+
+                const isFreeClaimed = state.arcadePass?.claimedFreeRewards?.includes(pLevel.level) || false;
+                const isPremiumClaimed = state.arcadePass?.claimedPremiumRewards?.includes(pLevel.level) || false;
+
+                return (
+                  <div
+                    key={pLevel.level}
+                    className={`p-3 rounded-xl border flex items-center gap-3 transition-all ${
+                      isLevelReached 
+                        ? 'bg-slate-900/40 border-slate-900' 
+                        : 'bg-slate-950/20 border-slate-950 opacity-40'
+                    }`}
+                  >
+                    {/* Level Hexagon */}
+                    <div className="w-9 h-9 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-center font-bold text-xs text-slate-400 shrink-0">
+                      N.{pLevel.level}
+                    </div>
+
+                    {/* Free Track Reward Card */}
+                    <div className="flex-1 p-2 rounded-lg bg-slate-950/60 border border-slate-900/50 flex items-center justify-between gap-2">
+                      <div>
+                        <span className="text-[8px] text-slate-500 block uppercase font-bold">Gratuit</span>
+                        <span className="text-[10px] font-bold text-slate-200">{pLevel.freeReward.label}</span>
+                      </div>
+
+                      {isFreeClaimed ? (
+                        <span className="text-emerald-400 text-xs font-bold" title="Récupéré">✓</span>
+                      ) : (
+                        <button
+                          disabled={!isLevelReached}
+                          onClick={() => claimPassReward(pLevel.level, 'free')}
+                          className={`text-[9px] font-bold px-2 py-1 rounded transition-all cursor-pointer ${
+                            isLevelReached
+                              ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm'
+                              : 'bg-slate-900 text-slate-600 cursor-not-allowed'
+                          }`}
+                        >
+                          {isLevelReached ? 'PRENDRE' : 'BLOQUÉ'}
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Premium Track Reward Card */}
+                    <div className="flex-1 p-2 rounded-lg bg-indigo-950/10 border border-indigo-900/20 flex items-center justify-between gap-2 relative overflow-hidden">
+                      {/* Premium Accent line overlay */}
+                      <div className="absolute top-0 right-0 w-16 h-16 bg-purple-500/5 rounded-full blur-xl pointer-events-none"></div>
+
+                      <div>
+                        <span className="text-[8px] text-purple-400 block uppercase font-bold flex items-center gap-0.5">
+                          💎 Élite
+                        </span>
+                        <span className="text-[10px] font-bold text-purple-200">{pLevel.premiumReward.label}</span>
+                      </div>
+
+                      {isPremiumClaimed ? (
+                        <span className="text-purple-400 text-xs font-bold" title="Récupéré">✓</span>
+                      ) : (
+                        <button
+                          disabled={!isLevelReached || !isPremiumUnlocked}
+                          onClick={() => claimPassReward(pLevel.level, 'premium')}
+                          className={`text-[9px] font-bold px-2 py-1 rounded transition-all cursor-pointer ${
+                            isLevelReached && isPremiumUnlocked
+                              ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-sm'
+                              : 'bg-slate-900 text-slate-600 cursor-not-allowed'
+                          }`}
+                        >
+                          {isLevelReached && isPremiumUnlocked ? 'PRENDRE' : 'BLOQUÉ'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Footer Close */}
+            <button
+              onClick={() => { audio.playClick(); setShowPassModal(false); }}
+              className="w-full bg-slate-900 hover:bg-slate-850 text-slate-300 font-bold py-2.5 rounded-xl text-xs border border-slate-850 cursor-pointer text-center shrink-0"
             >
               Fermer
             </button>

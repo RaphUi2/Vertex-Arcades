@@ -127,7 +127,8 @@ export const CABINET_SKINS = [
   { id: 'neon', name: 'Cyber Néon', cost: 0, theme: 'from-slate-950 via-slate-900 to-indigo-950 border-cyan-500/80 shadow-[0_0_30px_rgba(6,182,212,0.4)]' },
   { id: 'retrowave', name: 'Retrowave Doré', cost: 150, theme: 'from-slate-950 via-fuchsia-950 to-slate-950 border-yellow-500/80 shadow-[0_0_30px_rgba(234,179,8,0.4)]' },
   { id: 'slime', name: 'Cosmic Slime', cost: 250, theme: 'from-slate-950 via-slate-900 to-emerald-950 border-emerald-500/80 shadow-[0_0_30px_rgba(16,185,129,0.4)]' },
-  { id: 'matrix', name: 'Matrix Terminal', cost: 400, theme: 'from-black via-zinc-900 to-black border-green-500/80 shadow-[0_0_30px_rgba(34,197,94,0.4)]' }
+  { id: 'matrix', name: 'Matrix Terminal', cost: 400, theme: 'from-black via-zinc-900 to-black border-green-500/80 shadow-[0_0_30px_rgba(34,197,94,0.4)]' },
+  { id: 'prismatic', name: 'Prisme Magmatique', cost: 600, theme: 'from-slate-950 via-rose-950 to-violet-950 border-pink-500/80 shadow-[0_0_35px_rgba(236,72,153,0.6)]' }
 ];
 
 export const INITIAL_ACHIEVEMENTS = [
@@ -141,4 +142,90 @@ export const INITIAL_ACHIEVEMENTS = [
   { id: 'ach8', title: 'Color Harvester', frenchTitle: 'Moissonneur de Couleur', description: 'Score over 120 points in Color Catch', frenchDescription: 'Scorez plus de 120 points dans Color Catch', pixelReward: 50, isUnlocked: false, icon: 'Shield' },
   { id: 'ach9', title: 'AI Slayer', frenchTitle: 'Fléau de l\'I.A.', description: 'Defeat AI "VERTEX-9000" in Tic-Tac-Toe', frenchDescription: 'Battez l\'I.A. "VERTEX-9000" au Morpion Néon', pixelReward: 50, isUnlocked: false, icon: 'Sword' },
   { id: 'ach10', title: 'Math Genius', frenchTitle: 'Génie Mathématique', description: 'Get a 10 streak in Math Blitz', frenchDescription: 'Obtenez une série de 10 réponses correctes dans Math Blitz', pixelReward: 50, isUnlocked: false, icon: 'PlusCircle' }
+];
+
+export const INITIAL_QUESTS = [
+  { id: 'q1', title: 'Session d\'Entraînement', description: 'Jouez à 3 parties de n\'importe quel jeu', type: 'plays_total', target: 3, current: 0, rewardPixels: 40, rewardXp: 50, isCompleted: false, isClaimed: false },
+  { id: 'q2', title: 'Accumulateur de Pixels', description: 'Gagnez un total de 150 PX', type: 'pixels_earned', target: 150, current: 0, rewardPixels: 50, rewardXp: 60, isCompleted: false, isClaimed: false },
+  { id: 'q3', title: 'Score Parfait en Math', description: 'Obtenez une série de 5 bonnes réponses en Math Blitz', type: 'math_streak', target: 5, current: 0, rewardPixels: 60, rewardXp: 70, isCompleted: false, isClaimed: false },
+  { id: 'q4', title: 'Maître du Clic', description: 'Scorez plus de 100 points dans Néon Clicker', type: 'score_specific', target: 100, current: 0, rewardPixels: 30, rewardXp: 40, isCompleted: false, isClaimed: false, gameId: 'clicker' },
+  { id: 'q5', title: 'Explorateur de Vitesse', description: 'Scorez plus de 30 points dans Vitesse Réflexe', type: 'score_specific', target: 30, current: 0, rewardPixels: 35, rewardXp: 45, isCompleted: false, isClaimed: false, gameId: 'reflex' }
+];
+
+export interface PassLevelReward {
+  level: number;
+  xpRequired: number;
+  freeReward: {
+    type: 'pixels' | 'title' | 'skin' | 'color';
+    value: string | number;
+    label: string;
+  };
+  premiumReward: {
+    type: 'pixels' | 'title' | 'skin' | 'color';
+    value: string | number;
+    label: string;
+  };
+}
+
+export const PASS_LEVELS: PassLevelReward[] = [
+  {
+    level: 1,
+    xpRequired: 100,
+    freeReward: { type: 'pixels', value: 50, label: '+50 PX' },
+    premiumReward: { type: 'pixels', value: 150, label: '+150 PX' }
+  },
+  {
+    level: 2,
+    xpRequired: 100,
+    freeReward: { type: 'title', value: 'NOVICE', label: 'Titre: Novice' },
+    premiumReward: { type: 'title', value: 'SOLDAT DU NÉON', label: 'Titre: Soldat Néon' }
+  },
+  {
+    level: 3,
+    xpRequired: 100,
+    freeReward: { type: 'pixels', value: 80, label: '+80 PX' },
+    premiumReward: { type: 'color', value: 'rose_neon', label: 'Avatar: Rose Néon' }
+  },
+  {
+    level: 4,
+    xpRequired: 100,
+    freeReward: { type: 'pixels', value: 100, label: '+100 PX' },
+    premiumReward: { type: 'pixels', value: 250, label: '+250 PX' }
+  },
+  {
+    level: 5,
+    xpRequired: 100,
+    freeReward: { type: 'title', value: 'GAMER', label: 'Titre: Gamer' },
+    premiumReward: { type: 'title', value: 'CYBER LÉGENDE', label: 'Titre: Cyber Légende' }
+  },
+  {
+    level: 6,
+    xpRequired: 100,
+    freeReward: { type: 'pixels', value: 150, label: '+150 PX' },
+    premiumReward: { type: 'pixels', value: 400, label: '+400 PX' }
+  },
+  {
+    level: 7,
+    xpRequired: 100,
+    freeReward: { type: 'title', value: 'PRO D\'ARCADE', label: 'Titre: Pro Arcade' },
+    premiumReward: { type: 'color', value: 'gold_rainbow', label: 'Avatar: Or Arc-en-Ciel' }
+  },
+  {
+    level: 8,
+    xpRequired: 100,
+    freeReward: { type: 'pixels', value: 200, label: '+200 PX' },
+    premiumReward: { type: 'pixels', value: 500, label: '+500 PX' }
+  },
+  {
+    level: 9,
+    xpRequired: 100,
+    freeReward: { type: 'title', value: 'MAÎTRE DU PIXEL', label: 'Titre: Maître Pixel' },
+    premiumReward: { type: 'title', value: 'VERTEX CHAMPION', label: 'Titre: Vertex Champion' }
+  },
+  {
+    level: 10,
+    xpRequired: 100,
+    freeReward: { type: 'skin', value: 'matrix', label: 'Châssis Matrix' },
+    premiumReward: { type: 'skin', value: 'prismatic', label: 'Châssis Prismatique' }
+  }
 ];
