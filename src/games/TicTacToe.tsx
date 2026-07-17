@@ -16,6 +16,7 @@ export default function TicTacToe({ onScore, onGameOver, onBack, highScore }: Ga
   const [isPlayerTurn, setIsPlayerTurn] = useState(true);
   const [winner, setWinner] = useState<'X' | 'O' | 'Draw' | null>(null);
   const [score, setScore] = useState(0);
+  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'expert'>('medium');
 
   const checkWinner = (grid: BoardValue[]): 'X' | 'O' | 'Draw' | null => {
     const lines = [
@@ -103,7 +104,27 @@ export default function TicTacToe({ onScore, onGameOver, onBack, highScore }: Ga
     // AI's Turn
     setIsPlayerTurn(false);
     setTimeout(() => {
-      const bestIdx = getBestMove(newBoard);
+      // Determine if AI plays a random move based on difficulty
+      let bestIdx = -1;
+      const emptyCells: number[] = [];
+      newBoard.forEach((cell, idx) => {
+        if (cell === null) emptyCells.push(idx);
+      });
+
+      let playRandom = false;
+      const randVal = Math.random();
+      if (difficulty === 'easy') {
+        playRandom = randVal < 0.70; // 70% chance of random play
+      } else if (difficulty === 'medium') {
+        playRandom = randVal < 0.35; // 35% chance of random play
+      }
+
+      if (playRandom && emptyCells.length > 0) {
+        bestIdx = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      } else {
+        bestIdx = getBestMove(newBoard);
+      }
+
       if (bestIdx !== -1) {
         newBoard[bestIdx] = 'O';
         setBoard(newBoard);
@@ -174,6 +195,28 @@ export default function TicTacToe({ onScore, onGameOver, onBack, highScore }: Ga
         <p className="text-xs text-slate-400 mt-1 font-mono">
           AFFRONTE L'I.A. "VERTEX-9000" EN DUEL STRATÉGIQUE !
         </p>
+      </div>
+
+      {/* Difficulty Selector */}
+      <div className="flex justify-center gap-2 mb-4 relative z-10 font-mono text-[10px]">
+        {(['easy', 'medium', 'expert'] as const).map((diff) => (
+          <button
+            key={diff}
+            disabled={!isPlayerTurn || !!winner}
+            onClick={() => { audio.playClick(); setDifficulty(diff); }}
+            className={`px-3 py-1.5 rounded-lg border uppercase font-bold transition-all ${
+              !!winner || !isPlayerTurn ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+            } ${
+              difficulty === diff
+                ? 'bg-fuchsia-500/20 border-fuchsia-400 text-fuchsia-300 shadow-[0_0_8px_rgba(217,70,239,0.2)]'
+                : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300'
+            }`}
+          >
+            {diff === 'easy' && 'Facile'}
+            {diff === 'medium' && 'Normal'}
+            {diff === 'expert' && 'Expert (9000)'}
+          </button>
+        ))}
       </div>
 
       {/* Turn state notifier */}

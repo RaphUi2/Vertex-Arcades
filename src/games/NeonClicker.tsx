@@ -196,22 +196,31 @@ export default function NeonClicker({ onScore, onGameOver, onBack, highScore }: 
       </div>
 
       {/* Click Stage */}
-      <div className="flex justify-center items-center h-48 mb-6 relative">
+      <div className="flex justify-center items-center h-56 mb-6 relative">
+        {/* Pulsating cosmic outer shadow glow ring */}
+        <div className="absolute w-40 h-40 rounded-full bg-cyan-500/10 border border-cyan-500/20 animate-ping" style={{ animationDuration: '3s' }}></div>
+        <div className="absolute w-44 h-44 rounded-full bg-purple-500/5 border border-purple-500/10 animate-pulse"></div>
+
         <div
           id="click-node"
           onClick={handleNodeClick}
-          className="relative w-36 h-36 rounded-full bg-cyan-950/40 border-4 border-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.6)] hover:scale-105 active:scale-95 transition-transform duration-75 cursor-pointer flex flex-col justify-center items-center select-none"
+          className="relative w-40 h-40 rounded-full bg-slate-900/80 border-4 border-cyan-400 shadow-[0_0_35px_rgba(34,211,238,0.7),inset_0_0_20px_rgba(34,211,238,0.3)] hover:scale-105 active:scale-95 transition-all duration-75 cursor-pointer flex flex-col justify-center items-center select-none z-10"
         >
-          <div className="absolute inset-2 rounded-full border-2 border-dashed border-cyan-400/40 animate-spin" style={{ animationDuration: '12s' }}></div>
+          {/* Outer dashed mechanical ring spinning */}
+          <div className="absolute inset-1 rounded-full border-2 border-dashed border-cyan-400/30 animate-spin" style={{ animationDuration: '14s' }}></div>
+          {/* Inner tight pink neon accent ring */}
+          <div className="absolute inset-3 rounded-full border border-purple-500/40 animate-pulse"></div>
+          
           <motion.div
-            animate={gameStarted ? { scale: [1, 1.05, 1], rotate: [0, 180, 360] } : {}}
-            transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
-            className="text-cyan-400"
+            animate={gameStarted ? { scale: [1, 1.08, 1], rotate: [0, 180, 360] } : {}}
+            transition={{ repeat: Infinity, duration: 3.5, ease: "linear" }}
+            className="text-cyan-400 relative z-20"
           >
-            <Zap size={44} className="drop-shadow-[0_0_10px_rgba(34,211,238,0.8)]" />
+            <Zap size={48} className="drop-shadow-[0_0_12px_rgba(34,211,238,0.9)] text-cyan-300" />
           </motion.div>
-          <span className="text-[10px] font-mono tracking-widest text-cyan-300 mt-2 font-bold uppercase">
-            {gameStarted ? 'VERTEX_NODE' : 'START_CORE'}
+          
+          <span className="text-[9px] font-mono tracking-widest text-cyan-300 mt-2 font-black uppercase relative z-20 bg-slate-950/90 px-2 py-0.5 rounded border border-cyan-500/20 shadow-[0_0_8px_rgba(34,211,238,0.3)]">
+            {gameStarted ? 'CORE_ACTIVE' : 'START_CORE'}
           </span>
 
           {/* Render click text particles */}
@@ -220,10 +229,10 @@ export default function NeonClicker({ onScore, onGameOver, onBack, highScore }: 
               <motion.span
                 key={p.id}
                 initial={{ opacity: 1, y: p.y - 20, scale: 0.8 }}
-                animate={{ opacity: 0, y: p.y - 70, x: p.x + (Math.random() * 40 - 20), scale: 1.2 }}
+                animate={{ opacity: 0, y: p.y - 80, x: p.x + (Math.random() * 50 - 25), scale: 1.3 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="absolute font-mono font-bold text-purple-400 text-sm pointer-events-none drop-shadow-[0_0_4px_rgba(168,85,247,0.8)]"
+                className="absolute font-mono font-black text-yellow-400 text-sm pointer-events-none drop-shadow-[0_0_5px_rgba(234,179,8,0.8)] z-30"
                 style={{ left: p.x, top: p.y }}
               >
                 +{p.amount} PX

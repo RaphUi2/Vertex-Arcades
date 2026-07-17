@@ -12,11 +12,11 @@ interface GameProps {
 
 export default function ReflexTap({ onScore, onGameOver, onBack, highScore }: GameProps) {
   const [score, setScore] = useState(0);
-  const [lives, setLives] = useState(3);
+  const [lives, setLives] = useState(6);
   const [timeLeft, setTimeLeft] = useState(30);
   const [activeNode, setActiveNode] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [speed, setSpeed] = useState(1000); // ms between changes
+  const [speed, setSpeed] = useState(2000); // ms between changes (much more friendly start)
 
   const nodeTimerRef = useRef<NodeJS.Timeout | null>(null);
   const gameTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -91,12 +91,12 @@ export default function ReflexTap({ onScore, onGameOver, onBack, highScore }: Ga
 
     if (index === activeNode) {
       audio.playClick();
-      const addedPoints = 15;
+      const addedPoints = 10;
       setScore((prev) => {
         const nextScore = prev + addedPoints;
-        // Accelerate speed dynamically as score grows
-        if (nextScore % 60 === 0) {
-          setSpeed((s) => Math.max(400, s - 80));
+        // Accelerate speed dynamically as score grows, but with a safe floor of 900ms
+        if (nextScore % 30 === 0) {
+          setSpeed((s) => Math.max(900, s - 100));
         }
         return nextScore;
       });
@@ -118,9 +118,9 @@ export default function ReflexTap({ onScore, onGameOver, onBack, highScore }: Ga
   const startNewGame = () => {
     audio.playCoin();
     setScore(0);
-    setLives(3);
+    setLives(6);
     setTimeLeft(30);
-    setSpeed(1000);
+    setSpeed(2000);
     setIsPlaying(true);
   };
 
@@ -166,10 +166,10 @@ export default function ReflexTap({ onScore, onGameOver, onBack, highScore }: Ga
         <div className="bg-slate-900/80 p-2 rounded-xl border border-slate-800 flex flex-col items-center justify-center">
           <p className="text-[10px] text-slate-400">VIES</p>
           <div className="flex justify-center gap-0.5 mt-0.5">
-            {[...Array(3)].map((_, i) => (
+            {[...Array(6)].map((_, i) => (
               <Heart
                 key={i}
-                size={14}
+                size={12}
                 className={i < lives ? "fill-rose-500 text-rose-500 animate-pulse" : "text-slate-800"}
               />
             ))}

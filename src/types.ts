@@ -7,6 +7,8 @@ export interface UserProfile {
   title?: string;
   unlockedTitles?: string[];
   unlockedColors?: string[];
+  avatarIcon?: string;
+  unlockedAvatarIcons?: string[];
 }
 
 export interface GameStats {
