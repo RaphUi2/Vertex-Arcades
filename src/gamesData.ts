@@ -9,7 +9,8 @@ export const GAMES_LIST: GameData[] = [
     icon: 'Zap',
     category: 'clicker',
     difficulty: 'easy',
-    color: 'text-cyan-400 border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)] bg-cyan-950/20 hover:border-cyan-400'
+    color: 'text-cyan-400 border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)] bg-cyan-950/20 hover:border-cyan-400',
+    rarity: 'commun'
   },
   {
     id: 'simon',
@@ -19,7 +20,8 @@ export const GAMES_LIST: GameData[] = [
     icon: 'Brain',
     category: 'memory',
     difficulty: 'medium',
-    color: 'text-purple-400 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.3)] bg-purple-950/20 hover:border-purple-400'
+    color: 'text-purple-400 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.3)] bg-purple-950/20 hover:border-purple-400',
+    rarity: 'rare'
   },
   {
     id: 'reflex',
@@ -29,7 +31,8 @@ export const GAMES_LIST: GameData[] = [
     icon: 'Target',
     category: 'reflex',
     difficulty: 'medium',
-    color: 'text-rose-400 border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.3)] bg-rose-950/20 hover:border-rose-400'
+    color: 'text-rose-400 border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.3)] bg-rose-950/20 hover:border-rose-400',
+    rarity: 'rare'
   },
   {
     id: 'snake',
@@ -39,7 +42,8 @@ export const GAMES_LIST: GameData[] = [
     icon: 'Play',
     category: 'arcade',
     difficulty: 'medium',
-    color: 'text-emerald-400 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)] bg-emerald-950/20 hover:border-emerald-400'
+    color: 'text-emerald-400 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)] bg-emerald-950/20 hover:border-emerald-400',
+    rarity: 'commun'
   },
   {
     id: 'brick',
@@ -49,7 +53,8 @@ export const GAMES_LIST: GameData[] = [
     icon: 'Grid',
     category: 'arcade',
     difficulty: 'medium',
-    color: 'text-cyan-400 border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)] bg-cyan-950/20 hover:border-cyan-400'
+    color: 'text-cyan-400 border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)] bg-cyan-950/20 hover:border-cyan-400',
+    rarity: 'commun'
   },
   {
     id: 'stacker',
@@ -59,7 +64,8 @@ export const GAMES_LIST: GameData[] = [
     icon: 'Layers',
     category: 'arcade',
     difficulty: 'medium',
-    color: 'text-purple-400 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.3)] bg-purple-950/20 hover:border-purple-400'
+    color: 'text-purple-400 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.3)] bg-purple-950/20 hover:border-purple-400',
+    rarity: 'rare'
   },
   {
     id: 'catch',
@@ -69,7 +75,8 @@ export const GAMES_LIST: GameData[] = [
     icon: 'Shield',
     category: 'reflex',
     difficulty: 'hard',
-    color: 'text-yellow-400 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.3)] bg-yellow-950/20 hover:border-yellow-400'
+    color: 'text-yellow-400 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.3)] bg-yellow-950/20 hover:border-yellow-400',
+    rarity: 'epique'
   },
   {
     id: 'binary',
@@ -79,7 +86,8 @@ export const GAMES_LIST: GameData[] = [
     icon: 'Cpu',
     category: 'puzzle',
     difficulty: 'hard',
-    color: 'text-cyan-400 border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)] bg-cyan-950/20 hover:border-cyan-400'
+    color: 'text-cyan-400 border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)] bg-cyan-950/20 hover:border-cyan-400',
+    rarity: 'rare'
   },
   {
     id: 'tictactoe',
@@ -89,7 +97,8 @@ export const GAMES_LIST: GameData[] = [
     icon: 'Sword',
     category: 'puzzle',
     difficulty: 'easy',
-    color: 'text-fuchsia-400 border-fuchsia-500 shadow-[0_0_15px_rgba(217,70,239,0.3)] bg-fuchsia-950/20 hover:border-fuchsia-400'
+    color: 'text-fuchsia-400 border-fuchsia-500 shadow-[0_0_15px_rgba(217,70,239,0.3)] bg-fuchsia-950/20 hover:border-fuchsia-400',
+    rarity: 'commun'
   },
   {
     id: 'math',
@@ -99,7 +108,8 @@ export const GAMES_LIST: GameData[] = [
     icon: 'PlusCircle',
     category: 'puzzle',
     difficulty: 'medium',
-    color: 'text-emerald-400 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)] bg-emerald-950/20 hover:border-emerald-400'
+    color: 'text-emerald-400 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)] bg-emerald-950/20 hover:border-emerald-400',
+    rarity: 'commun'
   },
   {
     id: 'gridmemory',
@@ -109,7 +119,8 @@ export const GAMES_LIST: GameData[] = [
     icon: 'Grid3X3',
     category: 'memory',
     difficulty: 'medium',
-    color: 'text-purple-400 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.3)] bg-purple-950/20 hover:border-purple-400'
+    color: 'text-purple-400 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.3)] bg-purple-950/20 hover:border-purple-400',
+    rarity: 'rare'
   },
   {
     id: 'whack',
@@ -119,7 +130,8 @@ export const GAMES_LIST: GameData[] = [
     icon: 'Sparkles',
     category: 'reflex',
     difficulty: 'easy',
-    color: 'text-yellow-400 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.3)] bg-yellow-950/20 hover:border-yellow-400'
+    color: 'text-yellow-400 border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.3)] bg-yellow-950/20 hover:border-yellow-400',
+    rarity: 'commun'
   },
   {
     id: 'invaders',
@@ -129,7 +141,8 @@ export const GAMES_LIST: GameData[] = [
     icon: 'Cpu',
     category: 'arcade',
     difficulty: 'medium',
-    color: 'text-fuchsia-400 border-fuchsia-500 shadow-[0_0_15px_rgba(217,70,239,0.3)] bg-fuchsia-950/20 hover:border-fuchsia-400'
+    color: 'text-fuchsia-400 border-fuchsia-500 shadow-[0_0_15px_rgba(217,70,239,0.3)] bg-fuchsia-950/20 hover:border-fuchsia-400',
+    rarity: 'epique'
   },
   {
     id: 'meteor',
@@ -139,7 +152,74 @@ export const GAMES_LIST: GameData[] = [
     icon: 'Sparkles',
     category: 'reflex',
     difficulty: 'hard',
-    color: 'text-amber-400 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)] bg-amber-950/20 hover:border-amber-400'
+    color: 'text-amber-400 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)] bg-amber-950/20 hover:border-amber-400',
+    rarity: 'epique'
+  },
+  {
+    id: 'flappy',
+    name: 'Neon Flappy',
+    frenchName: 'Néon Flappy',
+    description: 'Sauter au bon moment pour faire passer votre drone à travers les portails d\'énergie instables.',
+    icon: 'Navigation',
+    category: 'arcade',
+    difficulty: 'medium',
+    color: 'text-amber-400 border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)] bg-amber-950/20 hover:border-amber-400',
+    rarity: 'rare'
+  },
+  {
+    id: 'highway',
+    name: 'Cyber Highway',
+    frenchName: 'Cyber Highway',
+    description: 'Esquivez les obstacles à haute tension sur une autoroute numérique à trois voies. Accélérez !',
+    icon: 'Zap',
+    category: 'reflex',
+    difficulty: 'hard',
+    color: 'text-rose-400 border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.3)] bg-rose-950/20 hover:border-rose-400',
+    rarity: 'epique'
+  },
+  {
+    id: 'lock',
+    name: 'Cyber Lock Hacker',
+    frenchName: 'Hacker de Verrou',
+    description: 'Arrêtez le rotor laser de piratage précisément au niveau des segments de code lumineux pour forcer le coffre.',
+    icon: 'Key',
+    category: 'puzzle',
+    difficulty: 'hard',
+    color: 'text-yellow-400 border-yellow-500 shadow-[0_0_20px_rgba(234,179,8,0.5)] bg-yellow-950/20 hover:border-yellow-400',
+    rarity: 'divin'
+  },
+  {
+    id: 'bubble',
+    name: 'Neon Bubble Pop',
+    frenchName: 'Éclate-Nodes',
+    description: 'Éclatez les orbes de données bleues qui s\'élèvent, mais évitez à tout prix les charges électriques rouges.',
+    icon: 'Sparkles',
+    category: 'reflex',
+    difficulty: 'easy',
+    color: 'text-cyan-400 border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.3)] bg-cyan-950/20 hover:border-cyan-400',
+    rarity: 'commun'
+  },
+  {
+    id: 'pairs',
+    name: 'Memory Pairs',
+    frenchName: 'Paires Néon',
+    description: 'Retournez les cartes de la matrice cybernétique pour retrouver toutes les paires identiques avant le temps imparti.',
+    icon: 'Grid',
+    category: 'memory',
+    difficulty: 'easy',
+    color: 'text-purple-400 border-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.3)] bg-purple-950/20 hover:border-purple-400',
+    rarity: 'commun'
+  },
+  {
+    id: 'target',
+    name: 'Neon Target',
+    frenchName: 'Cible Néon',
+    description: 'Un curseur oscille sur une jauge. Cliquez pile au centre dans la zone de surcharge critique pour marquer !',
+    icon: 'Target',
+    category: 'reflex',
+    difficulty: 'medium',
+    color: 'text-emerald-400 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)] bg-emerald-950/20 hover:border-emerald-400',
+    rarity: 'rare'
   }
 ];
 
@@ -154,6 +234,14 @@ export const CABINET_SKINS = [
   { id: 'quantum_void', name: 'Vide Quantique 🌌', cost: 850, theme: 'from-slate-950 via-indigo-950 to-purple-950 border-purple-500/90 shadow-[0_0_40px_rgba(168,85,247,0.75)] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] animate-[pulse_3s_infinite]' },
   { id: 'gold_emperor', name: 'Empereur d\'Or 👑', cost: 1000, theme: 'from-slate-950 via-yellow-950 to-slate-950 border-yellow-400 shadow-[0_0_40px_rgba(234,179,8,0.8),inset_0_0_15px_rgba(234,179,8,0.2)]' },
   { id: 'frozen_glacier', name: 'Glacier Éternel ❄️', cost: 1200, theme: 'from-slate-950 via-cyan-950 to-slate-900 border-sky-300 shadow-[0_0_35px_rgba(125,211,252,0.6)]' }
+];
+
+export const AURA_COSMETICS = [
+  { id: 'none', name: 'Aucune Aura 📭', cost: 0, glowClass: 'border-slate-800' },
+  { id: 'fire', name: 'Aura Solaire 🔥', cost: 200, glowClass: 'border-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.85)] animate-pulse' },
+  { id: 'cyber', name: 'Aura Hologramme 💎', cost: 350, glowClass: 'border-cyan-400 border-dashed shadow-[0_0_25px_rgba(6,182,212,0.9)] animate-[pulse_2s_infinite]' },
+  { id: 'quantum', name: 'Aura Shifting 🌀', cost: 500, glowClass: 'border-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.9)] animate-bounce-slow' },
+  { id: 'rainbow', name: 'Aura Royale 👑', cost: 800, glowClass: 'border-yellow-400 shadow-[0_0_35px_rgba(253,224,71,0.95)] animate-pulse' }
 ];
 
 export const INITIAL_ACHIEVEMENTS = [
@@ -217,19 +305,21 @@ export const INITIAL_QUESTS = [
   { id: 'q5', title: 'Explorateur de Vitesse', description: 'Scorez plus de 30 points dans Vitesse Réflexe', type: 'score_specific', target: 30, current: 0, rewardPixels: 35, rewardXp: 45, isCompleted: false, isClaimed: false, gameId: 'reflex' },
   { id: 'q6', title: 'Survie de l\'Espace', description: 'Scorez plus de 50 points dans Tempête Météore', type: 'score_specific', target: 50, current: 0, rewardPixels: 45, rewardXp: 55, isCompleted: false, isClaimed: false, gameId: 'meteor' },
   { id: 'q7', title: 'Pilote d\'Élite', description: 'Scorez plus de 40 points dans Envahisseurs Néon', type: 'score_specific', target: 40, current: 0, rewardPixels: 40, rewardXp: 50, isCompleted: false, isClaimed: false, gameId: 'invaders' },
-  { id: 'q8', title: 'Série de Défis', description: 'Jouez à 6 parties de n\'importe quel jeu', type: 'plays_total', target: 6, current: 0, rewardPixels: 50, rewardXp: 60, isCompleted: false, isClaimed: false }
+  { id: 'q8', title: 'Série de Défis', description: 'Jouez à 6 parties de n\'importe quel jeu', type: 'plays_total', target: 6, current: 0, rewardPixels: 50, rewardXp: 60, isCompleted: false, isClaimed: false },
+  { id: 'q9', title: 'Légende Flappy', description: 'Scorez plus de 80 points dans Néon Flappy', type: 'score_specific', target: 80, current: 0, rewardPixels: 50, rewardXp: 65, isCompleted: false, isClaimed: false, gameId: 'flappy' },
+  { id: 'q10', title: 'As du Volant', description: 'Scorez plus de 90 points dans Cyber Highway', type: 'score_specific', target: 90, current: 0, rewardPixels: 60, rewardXp: 75, isCompleted: false, isClaimed: false, gameId: 'highway' }
 ];
 
 export interface PassLevelReward {
   level: number;
   xpRequired: number;
   freeReward: {
-    type: 'pixels' | 'title' | 'skin' | 'color';
+    type: 'pixels' | 'title' | 'skin' | 'color' | 'aura';
     value: string | number;
     label: string;
   };
   premiumReward: {
-    type: 'pixels' | 'title' | 'skin' | 'color';
+    type: 'pixels' | 'title' | 'skin' | 'color' | 'aura';
     value: string | number;
     label: string;
   };
@@ -295,5 +385,95 @@ export const PASS_LEVELS: PassLevelReward[] = [
     xpRequired: 100,
     freeReward: { type: 'skin', value: 'matrix', label: 'Châssis Matrix' },
     premiumReward: { type: 'skin', value: 'prismatic', label: 'Châssis Prismatique' }
+  },
+  {
+    level: 11,
+    xpRequired: 100,
+    freeReward: { type: 'pixels', value: 300, label: '+300 PX' },
+    premiumReward: { type: 'pixels', value: 600, label: '+600 PX' }
+  },
+  {
+    level: 12,
+    xpRequired: 100,
+    freeReward: { type: 'title', value: 'SPEEDSTER', label: 'Titre: Speedster' },
+    premiumReward: { type: 'aura', value: 'fire', label: 'Aura Solaire' }
+  },
+  {
+    level: 13,
+    xpRequired: 100,
+    freeReward: { type: 'pixels', value: 350, label: '+350 PX' },
+    premiumReward: { type: 'pixels', value: 700, label: '+700 PX' }
+  },
+  {
+    level: 14,
+    xpRequired: 100,
+    freeReward: { type: 'color', value: 'emerald', label: 'Avatar: Émeraude' },
+    premiumReward: { type: 'title', value: 'HACKER ROYAL', label: 'Titre: Hacker Royal' }
+  },
+  {
+    level: 15,
+    xpRequired: 100,
+    freeReward: { type: 'pixels', value: 400, label: '+400 PX' },
+    premiumReward: { type: 'aura', value: 'cyber', label: 'Aura Hologramme' }
+  },
+  {
+    level: 16,
+    xpRequired: 100,
+    freeReward: { type: 'title', value: 'GLITCHER', label: 'Titre: Glitcher' },
+    premiumReward: { type: 'pixels', value: 800, label: '+800 PX' }
+  },
+  {
+    level: 17,
+    xpRequired: 100,
+    freeReward: { type: 'pixels', value: 450, label: '+450 PX' },
+    premiumReward: { type: 'skin', value: 'gold_emperor', label: 'Châssis d\'Or 👑' }
+  },
+  {
+    level: 18,
+    xpRequired: 100,
+    freeReward: { type: 'color', value: 'cyan', label: 'Avatar: Cyan' },
+    premiumReward: { type: 'title', value: 'SEIGNEUR QUANTIQUE', label: 'Titre: Seigneur Quantique' }
+  },
+  {
+    level: 19,
+    xpRequired: 100,
+    freeReward: { type: 'pixels', value: 500, label: '+500 PX' },
+    premiumReward: { type: 'pixels', value: 1000, label: '+1000 PX' }
+  },
+  {
+    level: 20,
+    xpRequired: 100,
+    freeReward: { type: 'aura', value: 'quantum', label: 'Aura Shifting' },
+    premiumReward: { type: 'skin', value: 'quantum_void', label: 'Châssis Vide Quantique 🌌' }
+  },
+  {
+    level: 21,
+    xpRequired: 100,
+    freeReward: { type: 'title', value: 'VÉTÉRAN DU NÉON', label: 'Titre: Vétéran' },
+    premiumReward: { type: 'pixels', value: 1200, label: '+1200 PX' }
+  },
+  {
+    level: 22,
+    xpRequired: 100,
+    freeReward: { type: 'pixels', value: 600, label: '+600 PX' },
+    premiumReward: { type: 'title', value: 'EMPEREUR DES CODES', label: 'Titre: Empereur' }
+  },
+  {
+    level: 23,
+    xpRequired: 100,
+    freeReward: { type: 'color', value: 'purple', label: 'Avatar: Violet' },
+    premiumReward: { type: 'pixels', value: 1500, label: '+1500 PX' }
+  },
+  {
+    level: 24,
+    xpRequired: 100,
+    freeReward: { type: 'pixels', value: 800, label: '+800 PX' },
+    premiumReward: { type: 'title', value: 'DIEU DU CLIC', label: 'Titre: Dieu du Clic' }
+  },
+  {
+    level: 25,
+    xpRequired: 100,
+    freeReward: { type: 'aura', value: 'rainbow', label: 'Aura Royale 👑' },
+    premiumReward: { type: 'title', value: 'VERTEX EMPEREUR 👑', label: 'Titre: Vertex Empereur' }
   }
 ];

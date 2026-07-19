@@ -18,6 +18,11 @@ export default function WhackNode({ onScore, onGameOver, onBack, highScore }: Ga
 
   const spawnIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const gameTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const scoreRef = useRef(0);
+  useEffect(() => {
+    scoreRef.current = score;
+  }, [score]);
 
   // Spawning loop
   useEffect(() => {
@@ -73,7 +78,7 @@ export default function WhackNode({ onScore, onGameOver, onBack, highScore }: Ga
     setIsPlaying(false);
     setIsEnded(true);
     audio.playGameOver();
-    onGameOver(score);
+    onGameOver(scoreRef.current);
   };
 
   const whackNode = (index: number) => {

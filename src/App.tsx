@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Zap, Brain, Target, Play, Grid, Layers, Shield, Cpu, Sword, PlusCircle, Grid3X3, Sparkles, Award, Trophy, User, ShoppingBag, Settings, Volume2, VolumeX, Medal, Flame, PlayCircle, Eye, Info, Check, Lock
+  Zap, Brain, Target, Play, Grid, Layers, Shield, Cpu, Sword, PlusCircle, Grid3X3, Sparkles, Award, Trophy, User, ShoppingBag, Settings, Volume2, VolumeX, Medal, Flame, PlayCircle, Eye, Info, Check, Lock, Key, Navigation
 } from 'lucide-react';
 
 import { audio } from './utils/audio';
 import { GlobalState, GameStats, Achievement, Quest, ArcadePass } from './types';
-import { GAMES_LIST, CABINET_SKINS, INITIAL_ACHIEVEMENTS, INITIAL_QUESTS, PASS_LEVELS } from './gamesData';
+import { GAMES_LIST, CABINET_SKINS, INITIAL_ACHIEVEMENTS, INITIAL_QUESTS, PASS_LEVELS, AURA_COSMETICS } from './gamesData';
 
 // Mini games imports
 import NeonClicker from './games/NeonClicker';
@@ -23,6 +23,12 @@ import GridMemory from './games/GridMemory';
 import WhackNode from './games/WhackNode';
 import NeonInvaders from './games/NeonInvaders';
 import MeteorStorm from './games/MeteorStorm';
+import NeonFlappy from './games/NeonFlappy';
+import CyberHighway from './games/CyberHighway';
+import CyberLock from './games/CyberLock';
+import NeonBubble from './games/NeonBubble';
+import MemoryPairs from './games/MemoryPairs';
+import NeonTarget from './games/NeonTarget';
 
 const AVATAR_COLORS = [
   { id: 'cyan', hex: '#06b6d4', text: 'text-cyan-400', border: 'border-cyan-500' },
@@ -66,7 +72,9 @@ export default function App() {
           activeSkin: 'neon',
           title: 'DÉBUTANT',
           unlockedTitles: ['DÉBUTANT'],
-          unlockedColors: ['cyan', 'pink', 'purple', 'emerald', 'yellow', 'plasma_violet']
+          unlockedColors: ['cyan', 'pink', 'purple', 'emerald', 'yellow', 'plasma_violet'],
+          activeAura: 'none',
+          unlockedAuras: ['none']
         },
         stats: GAMES_LIST.reduce((acc, g) => {
           acc[g.id] = { plays: 0, highScore: 0 };
@@ -96,6 +104,12 @@ export default function App() {
     }
     if (!parsed.profile.unlockedColors.includes('plasma_violet')) {
       parsed.profile.unlockedColors.push('plasma_violet');
+    }
+    if (!parsed.profile.activeAura) {
+      parsed.profile.activeAura = 'none';
+    }
+    if (!parsed.profile.unlockedAuras) {
+      parsed.profile.unlockedAuras = ['none'];
     }
     if (!parsed.achievements) {
       parsed.achievements = INITIAL_ACHIEVEMENTS;
@@ -154,6 +168,7 @@ export default function App() {
   const [selectedTitleInput, setSelectedTitleInput] = useState(state.profile.title || 'DÉBUTANT');
   const [selectedAvatarColorInput, setSelectedAvatarColorInput] = useState(state.profile.avatarColor);
   const [selectedAvatarIconInput, setSelectedAvatarIconInput] = useState(state.profile.avatarIcon || 'Crown');
+  const [selectedAuraInput, setSelectedAuraInput] = useState(state.profile.activeAura || 'none');
   const [activeNotification, setActiveNotification] = useState<string | null>(null);
 
   // Sync profile edits when modal opens
@@ -163,6 +178,7 @@ export default function App() {
       setSelectedTitleInput(state.profile.title || 'DÉBUTANT');
       setSelectedAvatarColorInput(state.profile.avatarColor);
       setSelectedAvatarIconInput(state.profile.avatarIcon || 'Crown');
+      setSelectedAuraInput(state.profile.activeAura || 'none');
     }
   }, [showProfileModal, state.profile]);
 
@@ -337,7 +353,8 @@ export default function App() {
         username: usernameInput.trim() || 'PLAYER_ONE',
         title: selectedTitleInput,
         avatarColor: selectedAvatarColorInput,
-        avatarIcon: selectedAvatarIconInput
+        avatarIcon: selectedAvatarIconInput,
+        activeAura: selectedAuraInput
       }
     }));
     setShowProfileModal(false);
@@ -373,7 +390,7 @@ export default function App() {
       nextPass.xp += quest.rewardXp;
       
       let levelUps = 0;
-      while (nextPass.xp >= 100 && nextPass.level < 10) {
+      while (nextPass.xp >= 100 && nextPass.level < 25) {
         nextPass.xp -= 100;
         nextPass.level += 1;
         levelUps++;
@@ -468,6 +485,13 @@ export default function App() {
           nextProfile.unlockedColors = [...unlockedColors, colorVal];
         }
         nextProfile.avatarColor = colorVal;
+      } else if (reward.type === 'aura') {
+        const auraVal = reward.value as string;
+        const unlockedAuras = nextProfile.unlockedAuras || ['none'];
+        if (!unlockedAuras.includes(auraVal)) {
+          nextProfile.unlockedAuras = [...unlockedAuras, auraVal];
+        }
+        nextProfile.activeAura = auraVal;
       }
 
       const nextPass = { ...pass };
@@ -650,6 +674,18 @@ export default function App() {
         return <NeonInvaders {...gameProps} />;
       case 'meteor':
         return <MeteorStorm {...gameProps} />;
+      case 'flappy':
+        return <NeonFlappy {...gameProps} />;
+      case 'highway':
+        return <CyberHighway {...gameProps} />;
+      case 'lock':
+        return <CyberLock {...gameProps} />;
+      case 'bubble':
+        return <NeonBubble {...gameProps} />;
+      case 'pairs':
+        return <MemoryPairs {...gameProps} />;
+      case 'target':
+        return <NeonTarget {...gameProps} />;
       default:
         return (
           <div className="text-center py-10 font-mono text-red-400">
@@ -705,7 +741,7 @@ export default function App() {
               Vertex Arcades
             </h1>
             <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mt-0.5">
-              14 Jeux Rétro Néon d'Élite
+              20 Jeux Rétro Néon d'Élite
             </p>
           </div>
         </div>
@@ -729,8 +765,7 @@ export default function App() {
             <Target size={14} className="text-emerald-400" /> Quêtes
             {state.quests?.some(q => q.isCompleted && !q.isClaimed) && (
               <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 shadow-[0_0_5px_#ef4444]"></span>
               </span>
             )}
           </button>
@@ -780,16 +815,27 @@ export default function App() {
           </button>
 
           {/* Profile Quick Setup Button */}
-          <button
-            onClick={() => { audio.playClick(); setShowProfileModal(true); }}
-            className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-slate-800 bg-slate-900/60 text-slate-300 hover:text-slate-100 hover:border-slate-700 transition-all cursor-pointer text-xs font-mono"
-          >
-            <div
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: AVATAR_COLORS.find(c => c.id === state.profile.avatarColor)?.hex }}
-            />
-            <span>{state.profile.username}</span>
-          </button>
+          {(() => {
+            const userColorHex = AVATAR_COLORS.find(c => c.id === state.profile.avatarColor)?.hex || '#06b6d4';
+            const userAuraObj = AURA_COSMETICS.find(a => a.id === state.profile.activeAura) || AURA_COSMETICS[0];
+            return (
+              <button
+                onClick={() => { audio.playClick(); setShowProfileModal(true); }}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg border border-slate-800 bg-slate-900/60 text-slate-300 hover:text-slate-100 hover:border-slate-700 transition-all cursor-pointer text-xs font-mono"
+              >
+                <div
+                  className={`w-6 h-6 rounded-md border flex items-center justify-center relative shrink-0 transition-all ${userAuraObj.glowClass}`}
+                  style={{ backgroundColor: userColorHex }}
+                >
+                  {renderIcon(state.profile.avatarIcon || 'Crown', "w-3.5 h-3.5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]")}
+                </div>
+                <div className="text-left">
+                  <p className="font-sans font-black text-[11px] leading-tight text-white">{state.profile.username}</p>
+                  <p className="text-[7px] text-yellow-400 font-bold tracking-wider uppercase mt-0.5">{state.profile.title || 'DÉBUTANT'}</p>
+                </div>
+              </button>
+            );
+          })()}
 
           {/* Score Counter (Pixels currency) */}
           <div className="flex items-center gap-1.5 px-3 py-2.5 rounded-lg bg-yellow-950/20 border border-yellow-500/30 text-yellow-400 font-mono text-xs font-extrabold shadow-[0_0_10px_rgba(234,179,8,0.1)]">
@@ -836,7 +882,7 @@ export default function App() {
               <div className="flex justify-center gap-6 mt-8 font-mono text-center text-xs">
                 <div>
                   <p className="text-slate-500 text-[10px]">TOTAL JEUX</p>
-                  <p className="text-lg font-bold text-cyan-400">14 Mini-Jeux</p>
+                  <p className="text-lg font-bold text-cyan-400">20 Mini-Jeux</p>
                 </div>
                 <div className="w-[1px] bg-slate-800"></div>
                 <div>
@@ -923,9 +969,9 @@ export default function App() {
 
                       <button
                         onClick={() => handleLaunchGame(game.id)}
-                        className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-mono text-xs font-black py-2.5 px-4 rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.4)] hover:shadow-[0_0_25px_rgba(6,182,212,0.8)] transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer tracking-wider border border-cyan-400/30"
+                        className="flex items-center gap-2 bg-gradient-to-b from-yellow-400 to-amber-500 hover:from-yellow-350 hover:to-amber-400 text-slate-950 font-sans text-xs font-black py-2 px-5 rounded-xl border-b-4 border-amber-700 active:border-b-0 active:translate-y-[2px] transition-all shadow-[0_4px_10px_rgba(234,179,8,0.3)] hover:shadow-[0_6px_15px_rgba(234,179,8,0.5)] cursor-pointer tracking-wider font-extrabold uppercase"
                       >
-                        <PlayCircle size={15} className="animate-pulse" /> JOUER
+                        <PlayCircle size={15} className="animate-pulse text-slate-950" /> JOUER
                       </button>
                     </div>
                   </div>
@@ -946,18 +992,23 @@ export default function App() {
 
             {/* Square Brawl Stars style Avatar Live Preview */}
             <div className="flex flex-col items-center justify-center mb-6 bg-slate-900/40 p-4 rounded-xl border border-slate-900">
-              <div
-                className={`w-16 h-16 rounded-xl border-2 flex items-center justify-center transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)] relative ${
-                  selectedAvatarColorInput === 'plasma_violet' ? 'shadow-[0_0_15px_#a855f7] animate-pulse' :
-                  selectedAvatarColorInput === 'rose_neon' ? 'animate-pulse' :
-                  selectedAvatarColorInput === 'gold_rainbow' ? 'shadow-[0_0_20px_#eab308] border-yellow-400 border-dashed animate-pulse' : ''
-                }`}
-                style={{
-                  backgroundColor: AVATAR_COLORS.find(c => c.id === selectedAvatarColorInput)?.hex || '#06b6d4'
-                }}
-              >
-                {renderIcon(selectedAvatarIconInput, "w-8 h-8 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]")}
-              </div>
+              {(() => {
+                const selectedAuraObj = AURA_COSMETICS.find(a => a.id === selectedAuraInput) || AURA_COSMETICS[0];
+                return (
+                  <div
+                    className={`w-16 h-16 rounded-xl border-2 flex items-center justify-center transition-all relative ${
+                      selectedAvatarColorInput === 'plasma_violet' ? 'shadow-[0_0_15px_#a855f7] animate-pulse' :
+                      selectedAvatarColorInput === 'rose_neon' ? 'animate-pulse' :
+                      selectedAvatarColorInput === 'gold_rainbow' ? 'shadow-[0_0_20px_#eab308] border-yellow-400 border-dashed animate-pulse' : ''
+                    } ${selectedAuraObj.glowClass}`}
+                    style={{
+                      backgroundColor: AVATAR_COLORS.find(c => c.id === selectedAvatarColorInput)?.hex || '#06b6d4'
+                    }}
+                  >
+                    {renderIcon(selectedAvatarIconInput, "w-8 h-8 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]")}
+                  </div>
+                );
+              })()}
               <p className="text-[10px] text-slate-300 mt-2 font-bold uppercase tracking-wider">{usernameInput || 'PLAYER_ONE'}</p>
               <p className="text-[8px] text-yellow-400 font-bold tracking-widest mt-0.5">{selectedTitleInput}</p>
             </div>
@@ -976,19 +1027,57 @@ export default function App() {
 
             {/* Title selection */}
             <div className="mb-4">
-              <label className="text-[10px] text-slate-400 block mb-1 font-bold">TITRE SÉLECTIONNÉ</label>
-              <select
-                value={selectedTitleInput}
-                onChange={(e) => {
-                  audio.playClick();
-                  setSelectedTitleInput(e.target.value);
-                }}
-                className="w-full bg-slate-900 border border-slate-800 p-2 rounded-lg text-xs text-yellow-400 font-bold focus:outline-none focus:border-yellow-400"
-              >
-                {(state.profile.unlockedTitles || ['DÉBUTANT']).map(t => (
-                  <option key={t} value={t} className="bg-slate-950 text-white">{t}</option>
-                ))}
-              </select>
+              <label className="text-[10px] text-slate-400 block mb-1.5 font-bold">TITRE DE PROFIL SÉLECTIONNÉ</label>
+              <div className="flex flex-wrap gap-1.5 bg-slate-900/60 p-2 rounded-xl border border-slate-850">
+                {(state.profile.unlockedTitles || ['DÉBUTANT']).map(t => {
+                  const isSelected = selectedTitleInput === t;
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => {
+                        audio.playClick();
+                        setSelectedTitleInput(t);
+                      }}
+                      className={`px-3 py-1.5 rounded-lg border text-[10px] font-mono font-bold tracking-wider uppercase transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-yellow-500/20 border-yellow-400 text-yellow-400 shadow-[0_0_8px_rgba(234,179,8,0.3)]'
+                          : 'bg-slate-950/80 border-slate-850 text-slate-500 hover:text-slate-300'
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Aura selection */}
+            <div className="mb-4">
+              <label className="text-[10px] text-slate-400 block mb-1.5 font-bold">AURA COSMÉTIQUE SÉLECTIONNÉE</label>
+              <div className="flex flex-wrap gap-1.5 bg-slate-900/60 p-2 rounded-xl border border-slate-850">
+                {(state.profile.unlockedAuras || ['none']).map(auraId => {
+                  const auraObj = AURA_COSMETICS.find(a => a.id === auraId) || AURA_COSMETICS[0];
+                  const isSelected = selectedAuraInput === auraId;
+                  return (
+                    <button
+                      key={auraId}
+                      type="button"
+                      onClick={() => {
+                        audio.playClick();
+                        setSelectedAuraInput(auraId);
+                      }}
+                      className={`px-3 py-1.5 rounded-lg border text-[10px] font-mono font-bold tracking-wider uppercase transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-purple-500/20 border-purple-400 text-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.3)]'
+                          : 'bg-slate-950/80 border-slate-850 text-slate-500 hover:text-slate-300'
+                      }`}
+                    >
+                      {auraObj.name}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Avatar color choices */}
@@ -1224,182 +1313,7 @@ export default function App() {
       )}
 
 
-      {/* --- Leaderboard Modal --- */}
-      {showLeaderboardModal && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-950 border-2 border-slate-800 p-6 rounded-2xl w-full max-w-lg font-mono text-white relative">
-            <h3 className="text-base font-bold text-yellow-400 mb-1 uppercase tracking-widest flex items-center gap-2">
-              <Trophy size={18} className="text-yellow-500 animate-bounce" /> CLASSEMENT VERTEX
-            </h3>
-            <p className="text-[10px] text-slate-400 mb-4">
-              AFFICHE TES RECORDS AUTHENTIQUES OU COMPARE-TOI AUX SIMULATEURS D'I.A. !
-            </p>
 
-            {/* Mode selection toggle */}
-            <div className="flex gap-2 mb-4 bg-slate-900/60 p-1 rounded-xl border border-slate-800">
-              <button
-                onClick={() => { audio.playClick(); setLeaderboardShowSolo(true); }}
-                className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer ${
-                  leaderboardShowSolo
-                    ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/40 shadow'
-                    : 'text-slate-500 hover:text-slate-300'
-                }`}
-              >
-                🏆 Solo (Réel)
-              </button>
-              <button
-                onClick={() => { audio.playClick(); setLeaderboardShowSolo(false); }}
-                className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all cursor-pointer ${
-                  !leaderboardShowSolo
-                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow'
-                    : 'text-slate-500 hover:text-slate-300'
-                }`}
-              >
-                🤖 Simulateurs I.A.
-              </button>
-            </div>
-
-            {/* Leaderboard list calculation */}
-            {(() => {
-              const staticPlayers = [
-                { id: '1', username: 'VertexMaster99', title: 'VERTEX EMPEREUR', pixels: 2450, colorId: 'gold_rainbow', isUser: false, invadersScore: 280, meteorScore: 320 },
-                { id: '2', username: 'NeonGlitcher', title: 'NÉON GOD', pixels: 1890, colorId: 'plasma_violet', isUser: false, invadersScore: 190, meteorScore: 240 },
-                { id: '3', username: 'CyberPunk_88', title: 'CHASSEUR DE PIXELS', pixels: 1420, colorId: 'rose_neon', isUser: false, invadersScore: 130, meteorScore: 180 },
-                { id: '4', username: 'RetroRider', title: 'SANS RETOUR', pixels: 1100, colorId: 'purple', isUser: false, invadersScore: 90, meteorScore: 140 },
-                { id: '5', username: 'PixelLord', title: 'DÉBUTANT', pixels: 850, colorId: 'cyan', isUser: false, invadersScore: 70, meteorScore: 110 },
-                { id: '6', username: 'PixelKing', title: 'DÉBUTANT', pixels: 480, colorId: 'emerald', isUser: false, invadersScore: 40, meteorScore: 75 },
-                { id: '7', username: 'ArcadeKid', title: 'DÉBUTANT', pixels: 250, colorId: 'yellow', isUser: false, invadersScore: 25, meteorScore: 40 }
-              ];
-
-              // Insert real user stats
-              const userInvadersScore = state.stats['invaders']?.highScore || 0;
-              const userMeteorScore = state.stats['meteor']?.highScore || 0;
-              const userRecord = {
-                id: 'user_current',
-                username: `${state.profile.username} (Toi)`,
-                title: state.profile.title || 'DÉBUTANT',
-                pixels: state.profile.totalPixels,
-                colorId: state.profile.avatarColor,
-                isUser: true,
-                invadersScore: userInvadersScore,
-                meteorScore: userMeteorScore
-              };
-
-              // Filter or keep competitors based on mode
-              const activePlayers = leaderboardShowSolo ? [userRecord] : [...staticPlayers, userRecord];
-
-              // We'll have general scoreboard list sorted by pixels, and game-specific lists
-              const allPixelsList = [...activePlayers].sort((a, b) => b.pixels - a.pixels);
-              const allInvadersList = [...activePlayers].sort((a, b) => b.invadersScore - a.invadersScore);
-              const allMeteorList = [...activePlayers].sort((a, b) => b.meteorScore - a.meteorScore);
-
-              return (
-                <div>
-                  {/* Info notice about realism */}
-                  {leaderboardShowSolo && (
-                    <div className="bg-yellow-950/20 border border-yellow-600/30 text-yellow-400 p-2.5 rounded-xl mb-4 text-[9px] leading-relaxed text-center">
-                      📍 CLASSEMENT LOCAL RÉEL : 1 Joueur Enregitré sur cette machine. Les autres joueurs étant des simulations d'I.A. (clique sur "Simulateurs I.A." pour comparer tes scores !).
-                    </div>
-                  )}
-
-                  {/* Internal tabs */}
-                  <div className="flex gap-1 mb-4 bg-slate-900/80 p-1.5 rounded-lg border border-slate-800 text-[10px]">
-                    <button
-                      onClick={() => { audio.playClick(); (window as any)._boardTab = 'general'; setState(p => ({ ...p })); }}
-                      className={`flex-1 py-1 rounded font-bold cursor-pointer uppercase transition-all ${
-                        !(window as any)._boardTab || (window as any)._boardTab === 'general'
-                          ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/40 shadow'
-                          : 'text-slate-500 hover:text-slate-300'
-                      }`}
-                    >
-                      🏆 Général (PX)
-                    </button>
-                    <button
-                      onClick={() => { audio.playClick(); (window as any)._boardTab = 'invaders'; setState(p => ({ ...p })); }}
-                      className={`flex-1 py-1 rounded font-bold cursor-pointer uppercase transition-all ${
-                        (window as any)._boardTab === 'invaders'
-                          ? 'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/40 shadow'
-                          : 'text-slate-500 hover:text-slate-300'
-                      }`}
-                    >
-                      🛸 Invaders
-                    </button>
-                    <button
-                      onClick={() => { audio.playClick(); (window as any)._boardTab = 'meteor'; setState(p => ({ ...p })); }}
-                      className={`flex-1 py-1 rounded font-bold cursor-pointer uppercase transition-all ${
-                        (window as any)._boardTab === 'meteor'
-                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow'
-                          : 'text-slate-500 hover:text-slate-300'
-                      }`}
-                    >
-                      ☄️ Météores
-                    </button>
-                  </div>
-
-                  {/* Player Rankings */}
-                  <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto pr-1">
-                    {(() => {
-                      const tab = (window as any)._boardTab || 'general';
-                      const list = tab === 'general' ? allPixelsList : tab === 'invaders' ? allInvadersList : allMeteorList;
-
-                      return list.map((player, idx) => {
-                        const isTopThree = idx < 3;
-                        const rankBadge = isTopThree 
-                          ? idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'
-                          : `#${idx + 1}`;
-
-                        const displayScore = tab === 'general' 
-                          ? `${player.pixels} PX` 
-                          : tab === 'invaders' 
-                            ? `${player.invadersScore} pts` 
-                            : `${player.meteorScore} pts`;
-
-                        const pColorObj = AVATAR_COLORS.find(c => c.id === player.colorId) || AVATAR_COLORS[0];
-
-                        return (
-                          <div
-                            key={player.id}
-                            className={`p-2.5 rounded-xl border flex items-center justify-between transition-all ${
-                              player.isUser
-                                ? 'bg-cyan-950/20 border-cyan-500/60 shadow-[0_0_12px_rgba(6,182,212,0.15)] animate-[pulse_3s_infinite]'
-                                : 'bg-slate-900/40 border-slate-900/60'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <span className="text-xs font-bold w-6 text-center">{rankBadge}</span>
-                              <div
-                                className="w-3 h-3 rounded-full shrink-0 animate-pulse"
-                                style={{ backgroundColor: pColorObj.hex }}
-                              />
-                              <div className="text-left">
-                                <p className={`text-xs font-bold flex items-center gap-1.5 ${player.isUser ? 'text-cyan-400' : 'text-slate-200'}`}>
-                                  {player.username}
-                                </p>
-                                <p className="text-[7px] text-slate-500 font-extrabold tracking-wider">{player.title}</p>
-                              </div>
-                            </div>
-
-                            <span className={`text-xs font-extrabold ${isTopThree ? 'text-yellow-400' : player.isUser ? 'text-cyan-300' : 'text-slate-400'}`}>
-                              {displayScore}
-                            </span>
-                          </div>
-                        );
-                      });
-                    })()}
-                  </div>
-                </div>
-              );
-            })()}
-
-            <button
-              onClick={() => { audio.playClick(); setShowLeaderboardModal(false); }}
-              className="w-full bg-slate-900 hover:bg-slate-850 text-slate-300 font-bold py-2.5 rounded-xl text-xs mt-6 border border-slate-850 cursor-pointer"
-            >
-              Fermer
-            </button>
-          </div>
-        </div>
-      )}
 
 
       {showAchievementsModal && (
@@ -1749,29 +1663,38 @@ export default function App() {
 
       {/* --- Global Leaderboard Modal --- */}
       {showLeaderboardModal && (() => {
-        const seedList = [
-          { username: 'CYBER_SHOGUN', title: 'NÉON GOD', pixels: 3450, avatarColor: 'rose_neon', passLevel: 10 },
-          { username: 'RETRO_RUNNER', title: 'VERTEX EMPEREUR', pixels: 2800, avatarColor: 'gold_rainbow', passLevel: 9 },
-          { username: 'NEON_SAMURAI', title: 'CHASSEUR DE PIXELS', pixels: 2150, avatarColor: 'plasma_violet', passLevel: 8 },
-          { username: 'ARCADE_QUEEN', title: 'SANS RETOUR', pixels: 1900, avatarColor: 'pink', passLevel: 7 },
-          { username: 'GLITCH_HUNTER', title: 'DÉBUTANT', pixels: 1450, avatarColor: 'emerald', passLevel: 6 },
-          { username: 'PIXEL_CHEF', title: 'DÉBUTANT', pixels: 980, avatarColor: 'yellow', passLevel: 5 },
-          { username: 'VORTEX_RIDER', title: 'DÉBUTANT', pixels: 720, avatarColor: 'purple', passLevel: 4 },
-          { username: 'SYNTH_BOY', title: 'DÉBUTANT', pixels: 410, avatarColor: 'cyan', passLevel: 3 },
-        ];
-
-        const currentPlayerItem = {
-          username: state.profile.username || 'PLAYER_ONE',
-          title: state.profile.title || 'DÉBUTANT',
-          pixels: state.profile.totalPixels || 0,
-          avatarColor: state.profile.avatarColor || 'cyan',
-          passLevel: state.arcadePass?.level || 1,
-          isPlayer: true
-        };
-
-        const sortedRankings = [...seedList, currentPlayerItem]
-          .sort((a, b) => b.pixels - a.pixels)
-          .map((item, idx) => ({ ...item, rank: idx + 1 }));
+        // We calculate ranks for all 20 games based on user's high score!
+        const gamesRanked = GAMES_LIST.map(game => {
+          const score = state.stats[game.id]?.highScore || 0;
+          let tier = 'NON JOUÉ 👾';
+          let tierColor = 'text-slate-500 border-slate-900';
+          if (score > 0) {
+            tier = 'BRONZE 🥉';
+            tierColor = 'text-amber-500 border-amber-800';
+          }
+          if (score >= 50) {
+            tier = 'ARGENT 🥈';
+            tierColor = 'text-slate-300 border-slate-400';
+          }
+          if (score >= 120) {
+            tier = 'OR 🥇';
+            tierColor = 'text-yellow-400 border-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.2)]';
+          }
+          if (score >= 200) {
+            tier = 'DIAMANT 💎';
+            tierColor = 'text-cyan-400 border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.3)] animate-pulse';
+          }
+          if (score >= 350) {
+            tier = 'LÉGENDE 👑';
+            tierColor = 'text-fuchsia-400 border-fuchsia-400 shadow-[0_0_15px_rgba(217,70,239,0.4)]';
+          }
+          return {
+            ...game,
+            score,
+            tier,
+            tierColor
+          };
+        }).sort((a, b) => b.score - a.score);
 
         return (
           <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -1780,62 +1703,52 @@ export default function App() {
               {/* Header */}
               <div className="text-left mb-4">
                 <h3 className="text-base font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-2">
-                  <Trophy size={18} className="text-cyan-400 animate-bounce" /> CLASSEMENT RETRO MONDIAL
+                  <Trophy size={18} className="text-yellow-400 animate-bounce" /> CLASSEMENT VERTEX RÉEL
                 </h3>
                 <p className="text-[10px] text-slate-400">
-                  SERAS-TU LE DIEU SUPRÊME DU VERTEX ? ACCUMULE TES PIXELS !
+                  CLASSEMENT AUTHENTIQUE DE TES MEILLEURS RÉSULTATS PAR BORNE
                 </p>
               </div>
 
+              {/* Notice */}
+              <div className="bg-cyan-950/20 border border-cyan-800/30 text-cyan-400 p-2 text-[9px] leading-relaxed text-center font-bold rounded-xl mb-4">
+                🔒 CLASSEMENT VÉRIFIÉ : Pas de faux profils I.A. Seuls tes records authentiques sont répertoriés et classés de ta meilleure à ta moins bonne performance !
+              </div>
+
               {/* Ranks list container */}
-              <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2.5 mb-4 text-left">
-                {sortedRankings.map((competitor) => {
-                  const isUser = competitor.username === state.profile.username;
-                  const itemColor = AVATAR_COLORS.find(c => c.id === competitor.avatarColor) || AVATAR_COLORS[0];
-                  
+              <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2 mb-4 text-left">
+                {gamesRanked.map((item, idx) => {
                   return (
                     <div
-                      key={competitor.username}
+                      key={item.id}
                       className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
-                        isUser 
-                          ? 'bg-cyan-950/20 border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.2)] scale-[1.02]' 
-                          : 'bg-slate-900/40 border-slate-900'
+                        item.score > 0 
+                          ? 'bg-slate-900/60 border-slate-800' 
+                          : 'bg-slate-950/20 border-slate-950 opacity-40'
                       }`}
                     >
-                      {/* Left: Rank & Avatar */}
+                      {/* Left: Rank & Game Name */}
                       <div className="flex items-center gap-3">
-                        {/* Rank Badge */}
-                        <div className={`w-6 h-6 rounded-lg font-black text-xs flex items-center justify-center shrink-0 ${
-                          competitor.rank === 1 ? 'bg-yellow-500 text-slate-950 shadow-[0_0_8px_#eab308]' :
-                          competitor.rank === 2 ? 'bg-slate-300 text-slate-950' :
-                          competitor.rank === 3 ? 'bg-amber-600 text-slate-950' :
-                          'bg-slate-950 border border-slate-850 text-slate-400'
-                        }`}>
-                          {competitor.rank}
+                        <div className="w-5 h-5 rounded bg-slate-900 border border-slate-800 text-[10px] font-black flex items-center justify-center text-slate-400">
+                          #{idx + 1}
                         </div>
-
-                        {/* Avatar bubble representation */}
-                        <div
-                          className="w-2.5 h-2.5 rounded-full shrink-0"
-                          style={{ backgroundColor: itemColor.hex }}
-                        />
-
-                        {/* Username & Title */}
                         <div>
-                          <p className={`text-xs font-bold uppercase tracking-wider ${isUser ? 'text-cyan-400' : 'text-slate-200'}`}>
-                            {competitor.username} {isUser && <span className="text-[9px] text-yellow-400 font-bold ml-1">(TOI)</span>}
+                          <p className="text-xs font-bold text-slate-200">
+                            {item.frenchName}
                           </p>
-                          <p className="text-[8px] text-slate-500 uppercase font-black tracking-widest mt-0.5">{competitor.title}</p>
+                          <span className={`text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded-md border inline-block mt-1 ${item.tierColor}`}>
+                            {item.tier}
+                          </span>
                         </div>
                       </div>
 
-                      {/* Right: Pixels balance & Pass level */}
-                      <div className="text-right flex flex-col items-end gap-1 shrink-0">
-                        <span className="text-xs text-yellow-400 font-extrabold flex items-center gap-1">
-                          {competitor.pixels} <span className="text-[10px] text-yellow-500 font-bold">PX</span>
+                      {/* Right: Score */}
+                      <div className="text-right flex flex-col items-end">
+                        <span className="text-xs text-yellow-400 font-extrabold">
+                          {item.score} <span className="text-[10px] text-slate-500 font-bold">PX</span>
                         </span>
-                        <span className="text-[8px] text-rose-400 bg-rose-950/10 px-1.5 py-0.5 rounded border border-rose-950/20 font-bold uppercase">
-                          PASS NIV. {competitor.passLevel}
+                        <span className="text-[8px] text-slate-500 uppercase mt-0.5 tracking-wider">
+                          Rareté: {item.rarity}
                         </span>
                       </div>
                     </div>

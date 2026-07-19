@@ -9,6 +9,8 @@ export interface UserProfile {
   unlockedColors?: string[];
   avatarIcon?: string;
   unlockedAvatarIcons?: string[];
+  activeAura?: string;
+  unlockedAuras?: string[];
 }
 
 export interface GameStats {
@@ -25,6 +27,7 @@ export interface GameData {
   category: 'clicker' | 'memory' | 'reflex' | 'arcade' | 'puzzle';
   difficulty: 'easy' | 'medium' | 'hard';
   color: string; // Tailwind glow/text color
+  rarity?: 'commun' | 'rare' | 'epique' | 'divin';
 }
 
 export interface Achievement {
