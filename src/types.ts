@@ -11,6 +11,8 @@ export interface UserProfile {
   unlockedAvatarIcons?: string[];
   activeAura?: string;
   unlockedAuras?: string[];
+  activeBanner?: string;
+  unlockedBanners?: string[];
 }
 
 export interface GameStats {
@@ -25,9 +27,9 @@ export interface GameData {
   description: string;
   icon: string;
   category: 'clicker' | 'memory' | 'reflex' | 'arcade' | 'puzzle';
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: 'easy' | 'medium' | 'hard' | 'mythic';
   color: string; // Tailwind glow/text color
-  rarity?: 'commun' | 'rare' | 'epique' | 'divin';
+  rarity?: 'commun' | 'rare' | 'epique' | 'divin' | 'mythique';
 }
 
 export interface Achievement {
@@ -45,7 +47,7 @@ export interface Quest {
   id: string;
   title: string;
   description: string;
-  type: 'plays_total' | 'score_specific' | 'pixels_earned' | 'math_streak';
+  type: string;
   target: number;
   current: number;
   rewardPixels: number;
@@ -53,6 +55,18 @@ export interface Quest {
   isCompleted: boolean;
   isClaimed: boolean;
   gameId?: string;
+}
+
+export interface PassLevelReward {
+  type: 'pixels' | 'title' | 'skin' | 'color' | 'aura' | 'banner';
+  value: number | string;
+  label: string;
+}
+
+export interface PassLevel {
+  level: number;
+  freeReward: PassLevelReward;
+  premiumReward: PassLevelReward;
 }
 
 export interface ArcadePass {

@@ -18,6 +18,10 @@ class AudioManager {
     }
   }
 
+  setMuted(muted: boolean) {
+    this.soundEnabled = !muted;
+  }
+
   toggleSound() {
     this.soundEnabled = !this.soundEnabled;
     return this.soundEnabled;
@@ -25,6 +29,10 @@ class AudioManager {
 
   isSoundEnabled() {
     return this.soundEnabled;
+  }
+
+  playFrequency(freq: number, duration: number = 0.2) {
+    this.playTone([freq], [duration], 'sine', undefined, 0.15);
   }
 
   private playTone(
@@ -71,37 +79,27 @@ class AudioManager {
   }
 
   playClick() {
-    // Short clean beep
     this.playTone([600], [0.05], 'sine', undefined, 0.15);
   }
 
   playCoin() {
-    // Classical arcade ascending double beep
     this.playTone([987.77, 1318.51], [0.08, 0.25], 'square', undefined, 0.08);
   }
 
   playLaser() {
-    // Swift frequency downward sweep
     this.playTone([880], [0.15], 'sawtooth', 110, 0.06);
   }
 
   playHit() {
-    // Short low noise-like pulse
     this.playTone([150], [0.12], 'triangle', 40, 0.2);
   }
 
   playWin() {
-    // Upward retro arpeggio
     this.playTone([523.25, 659.25, 783.99, 1046.50], [0.08, 0.08, 0.08, 0.25], 'square', undefined, 0.07);
   }
 
   playGameOver() {
-    // Sad descending tones
     this.playTone([440, 392, 349.23, 293.66, 220], [0.12, 0.12, 0.12, 0.12, 0.35], 'sawtooth', 80, 0.08);
-  }
-
-  playFrequency(freq: number, duration: number = 0.35) {
-    this.playTone([freq], [duration], 'sine', undefined, 0.15);
   }
 }
 

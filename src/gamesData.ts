@@ -1,4 +1,4 @@
-import { GameData } from './types';
+import { GameData, Quest, Achievement, PassLevel, PassLevelReward } from './types';
 
 export const GAMES_LIST: GameData[] = [
   {
@@ -27,12 +27,12 @@ export const GAMES_LIST: GameData[] = [
     id: 'reflex',
     name: 'Reflex Speed Tap',
     frenchName: 'Vitesse Réflexe',
-    description: 'Cliquez sur les nodes lumineuses qui surgissent au hasard à toute vitesse. Vous avez 6 vies et 30 secondes !',
+    description: 'Ultra-simplifié ! Cliquez sur les nodes néon géantes sans stress. Vous avez 10 vies et 60 secondes !',
     icon: 'Target',
     category: 'reflex',
-    difficulty: 'medium',
+    difficulty: 'easy',
     color: 'text-rose-400 border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.3)] bg-rose-950/20 hover:border-rose-400',
-    rarity: 'rare'
+    rarity: 'commun'
   },
   {
     id: 'snake',
@@ -170,12 +170,12 @@ export const GAMES_LIST: GameData[] = [
     id: 'highway',
     name: 'Cyber Highway',
     frenchName: 'Cyber Highway',
-    description: 'Esquivez les obstacles à haute tension sur une autoroute numérique à trois voies. Accélérez !',
+    description: 'Esquivez les obstacles à haute tension sur une autoroute numérique à trois voies. Vitesse extrême !',
     icon: 'Zap',
     category: 'reflex',
-    difficulty: 'hard',
-    color: 'text-rose-400 border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.3)] bg-rose-950/20 hover:border-rose-400',
-    rarity: 'epique'
+    difficulty: 'mythic',
+    color: 'text-rose-400 border-rose-500 shadow-[0_0_20px_rgba(244,63,94,0.5)] bg-rose-950/30 hover:border-rose-400',
+    rarity: 'mythique'
   },
   {
     id: 'lock',
@@ -184,9 +184,9 @@ export const GAMES_LIST: GameData[] = [
     description: 'Arrêtez le rotor laser de piratage précisément au niveau des segments de code lumineux pour forcer le coffre.',
     icon: 'Key',
     category: 'puzzle',
-    difficulty: 'hard',
-    color: 'text-yellow-400 border-yellow-500 shadow-[0_0_20px_rgba(234,179,8,0.5)] bg-yellow-950/20 hover:border-yellow-400',
-    rarity: 'divin'
+    difficulty: 'mythic',
+    color: 'text-yellow-400 border-yellow-500 shadow-[0_0_20px_rgba(234,179,8,0.5)] bg-yellow-950/30 hover:border-yellow-400',
+    rarity: 'mythique'
   },
   {
     id: 'bubble',
@@ -220,31 +220,176 @@ export const GAMES_LIST: GameData[] = [
     difficulty: 'medium',
     color: 'text-emerald-400 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)] bg-emerald-950/20 hover:border-emerald-400',
     rarity: 'rare'
+  },
+  {
+    id: 'pong',
+    name: 'Neon Pong',
+    frenchName: 'Néon Pong',
+    description: 'Duel d\'arcade 1v1 contre l\'I.A. Renvoyez la balle électrisée avec votre raquette néon et accumulez les PX !',
+    icon: 'Shield',
+    category: 'arcade',
+    difficulty: 'medium',
+    color: 'text-cyan-400 border-cyan-500 shadow-[0_0_18px_rgba(6,182,212,0.4)] bg-cyan-950/20 hover:border-cyan-400',
+    rarity: 'rare'
+  },
+  {
+    id: 'laserdodge',
+    name: 'Laser Dodge',
+    frenchName: 'Esquive Laser',
+    description: 'Pilotez votre vaisseau néon et esquivez des grilles laser meurtrières tout en capturant des orbes d\'énergie !',
+    icon: 'Sparkles',
+    category: 'reflex',
+    difficulty: 'mythic',
+    color: 'text-fuchsia-400 border-fuchsia-500 shadow-[0_0_25px_rgba(217,70,239,0.6)] bg-fuchsia-950/30 hover:border-fuchsia-400',
+    rarity: 'mythique'
   }
 ];
 
-export const CABINET_SKINS = [
-  { id: 'neon', name: 'Cyber Néon', cost: 0, theme: 'from-slate-950 via-slate-900 to-indigo-950 border-cyan-500/80 shadow-[0_0_30px_rgba(6,182,212,0.4)]' },
-  { id: 'retrowave', name: 'Retrowave Doré', cost: 150, theme: 'from-slate-950 via-fuchsia-950 to-slate-950 border-yellow-500/80 shadow-[0_0_30px_rgba(234,179,8,0.4)]' },
-  { id: 'slime', name: 'Cosmic Slime', cost: 250, theme: 'from-slate-950 via-slate-900 to-emerald-950 border-emerald-500/80 shadow-[0_0_30px_rgba(16,185,129,0.4)]' },
-  { id: 'sunfire', name: 'Tempête Solaire ☀️', cost: 350, theme: 'from-slate-950 via-amber-950 to-slate-950 border-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.5)]' },
-  { id: 'matrix', name: 'Matrix Terminal', cost: 400, theme: 'from-black via-zinc-900 to-black border-green-500/80 shadow-[0_0_30px_rgba(34,197,94,0.4)]' },
-  { id: 'glitch', name: 'Néon Glitché 🌀', cost: 500, theme: 'from-slate-950 via-slate-900 to-slate-950 border-fuchsia-500 shadow-[0_0_30px_rgba(217,70,239,0.5),0_0_15px_rgba(6,182,212,0.5)] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] animate-[pulse_4s_infinite]' },
-  { id: 'prismatic', name: 'Prisme Magmatique', cost: 600, theme: 'from-slate-950 via-rose-950 to-violet-950 border-pink-500/80 shadow-[0_0_35px_rgba(236,72,153,0.6)]' },
-  { id: 'quantum_void', name: 'Vide Quantique 🌌', cost: 850, theme: 'from-slate-950 via-indigo-950 to-purple-950 border-purple-500/90 shadow-[0_0_40px_rgba(168,85,247,0.75)] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] animate-[pulse_3s_infinite]' },
-  { id: 'gold_emperor', name: 'Empereur d\'Or 👑', cost: 1000, theme: 'from-slate-950 via-yellow-950 to-slate-950 border-yellow-400 shadow-[0_0_40px_rgba(234,179,8,0.8),inset_0_0_15px_rgba(234,179,8,0.2)]' },
-  { id: 'frozen_glacier', name: 'Glacier Éternel ❄️', cost: 1200, theme: 'from-slate-950 via-cyan-950 to-slate-900 border-sky-300 shadow-[0_0_35px_rgba(125,211,252,0.6)]' }
+export interface CabinetSkin {
+  id: string;
+  name: string;
+  cost: number;
+  theme: string;
+  bgGradient: string;
+  cardBg: string;
+  glowColor: string;
+  accentText: string;
+  buttonStyle: string;
+}
+
+export const CABINET_SKINS: CabinetSkin[] = [
+  {
+    id: 'neon',
+    name: 'Cyber Néon Classique',
+    cost: 0,
+    theme: 'border-cyan-500/80 shadow-[0_0_30px_rgba(6,182,212,0.4)]',
+    bgGradient: 'bg-gradient-to-b from-slate-950 via-slate-900 to-indigo-950',
+    cardBg: 'bg-slate-900/60 border-slate-800 hover:border-cyan-500/60',
+    glowColor: 'rgba(6,182,212,0.4)',
+    accentText: 'text-cyan-400',
+    buttonStyle: 'from-cyan-500 to-blue-600'
+  },
+  {
+    id: 'retrowave',
+    name: 'Retrowave Doré 🌅',
+    cost: 150,
+    theme: 'border-yellow-500/80 shadow-[0_0_30px_rgba(234,179,8,0.4)]',
+    bgGradient: 'bg-gradient-to-b from-slate-950 via-fuchsia-950 to-amber-950',
+    cardBg: 'bg-fuchsia-950/40 border-amber-800/60 hover:border-yellow-400',
+    glowColor: 'rgba(234,179,8,0.5)',
+    accentText: 'text-yellow-400',
+    buttonStyle: 'from-amber-500 to-yellow-500 text-slate-950'
+  },
+  {
+    id: 'slime',
+    name: 'Cosmic Slime 🧪',
+    cost: 250,
+    theme: 'border-emerald-500/80 shadow-[0_0_30px_rgba(16,185,129,0.4)]',
+    bgGradient: 'bg-gradient-to-b from-slate-950 via-emerald-950 to-slate-950',
+    cardBg: 'bg-emerald-950/30 border-emerald-900 hover:border-emerald-400',
+    glowColor: 'rgba(16,185,129,0.5)',
+    accentText: 'text-emerald-400',
+    buttonStyle: 'from-emerald-500 to-teal-600'
+  },
+  {
+    id: 'sunfire',
+    name: 'Tempête Solaire ☀️',
+    cost: 350,
+    theme: 'border-orange-500 shadow-[0_0_30px_rgba(249,115,22,0.5)]',
+    bgGradient: 'bg-gradient-to-b from-slate-950 via-amber-950 to-orange-950',
+    cardBg: 'bg-amber-950/40 border-orange-800 hover:border-orange-400',
+    glowColor: 'rgba(249,115,22,0.6)',
+    accentText: 'text-orange-400',
+    buttonStyle: 'from-orange-500 to-red-600'
+  },
+  {
+    id: 'matrix',
+    name: 'Matrix Terminal 💻',
+    cost: 400,
+    theme: 'border-green-500/80 shadow-[0_0_30px_rgba(34,197,94,0.4)]',
+    bgGradient: 'bg-gradient-to-b from-black via-zinc-950 to-green-950',
+    cardBg: 'bg-zinc-900/80 border-green-900 hover:border-green-400',
+    glowColor: 'rgba(34,197,94,0.5)',
+    accentText: 'text-green-400',
+    buttonStyle: 'from-green-500 to-emerald-700'
+  },
+  {
+    id: 'glitch',
+    name: 'Néon Glitché 🌀',
+    cost: 500,
+    theme: 'border-fuchsia-500 shadow-[0_0_30px_rgba(217,70,239,0.5)]',
+    bgGradient: 'bg-gradient-to-b from-slate-950 via-purple-950 to-fuchsia-950',
+    cardBg: 'bg-purple-950/40 border-fuchsia-800 hover:border-fuchsia-400',
+    glowColor: 'rgba(217,70,239,0.6)',
+    accentText: 'text-fuchsia-400',
+    buttonStyle: 'from-fuchsia-600 to-purple-600'
+  },
+  {
+    id: 'prismatic',
+    name: 'Prisme Magmatique 🔥',
+    cost: 600,
+    theme: 'border-pink-500/80 shadow-[0_0_35px_rgba(236,72,153,0.6)]',
+    bgGradient: 'bg-gradient-to-b from-slate-950 via-rose-950 to-violet-950',
+    cardBg: 'bg-rose-950/30 border-pink-900 hover:border-pink-400',
+    glowColor: 'rgba(236,72,153,0.6)',
+    accentText: 'text-pink-400',
+    buttonStyle: 'from-pink-500 to-rose-600'
+  },
+  {
+    id: 'quantum_void',
+    name: 'Vide Quantique 🌌',
+    cost: 850,
+    theme: 'border-purple-500/90 shadow-[0_0_40px_rgba(168,85,247,0.75)]',
+    bgGradient: 'bg-gradient-to-b from-slate-950 via-indigo-950 to-purple-950',
+    cardBg: 'bg-indigo-950/40 border-purple-800 hover:border-purple-400',
+    glowColor: 'rgba(168,85,247,0.7)',
+    accentText: 'text-purple-400',
+    buttonStyle: 'from-purple-600 to-indigo-600'
+  },
+  {
+    id: 'gold_emperor',
+    name: 'Empereur d\'Or 👑',
+    cost: 1000,
+    theme: 'border-yellow-400 shadow-[0_0_40px_rgba(234,179,8,0.8)]',
+    bgGradient: 'bg-gradient-to-b from-slate-950 via-yellow-950 to-slate-950',
+    cardBg: 'bg-yellow-950/30 border-yellow-700 hover:border-yellow-300',
+    glowColor: 'rgba(234,179,8,0.8)',
+    accentText: 'text-yellow-300',
+    buttonStyle: 'from-yellow-400 to-amber-500 text-slate-950'
+  },
+  {
+    id: 'frozen_glacier',
+    name: 'Glacier Éternel ❄️',
+    cost: 1200,
+    theme: 'border-sky-300 shadow-[0_0_35px_rgba(125,211,252,0.6)]',
+    bgGradient: 'bg-gradient-to-b from-slate-950 via-sky-950 to-slate-900',
+    cardBg: 'bg-sky-950/30 border-sky-800 hover:border-sky-300',
+    glowColor: 'rgba(125,211,252,0.7)',
+    accentText: 'text-sky-300',
+    buttonStyle: 'from-sky-400 to-cyan-500 text-slate-950'
+  }
 ];
 
 export const AURA_COSMETICS = [
-  { id: 'none', name: 'Aucune Aura 📭', cost: 0, glowClass: 'border-slate-800' },
-  { id: 'fire', name: 'Aura Solaire 🔥', cost: 200, glowClass: 'border-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.85)] animate-pulse' },
-  { id: 'cyber', name: 'Aura Hologramme 💎', cost: 350, glowClass: 'border-cyan-400 border-dashed shadow-[0_0_25px_rgba(6,182,212,0.9)] animate-[pulse_2s_infinite]' },
-  { id: 'quantum', name: 'Aura Shifting 🌀', cost: 500, glowClass: 'border-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.9)] animate-bounce-slow' },
-  { id: 'rainbow', name: 'Aura Royale 👑', cost: 800, glowClass: 'border-yellow-400 shadow-[0_0_35px_rgba(253,224,71,0.95)] animate-pulse' }
+  { id: 'none', name: 'Aucune Aura 📭', desc: 'Style sobre sans projection d\'énergie.', cost: 0, glowClass: 'border-slate-800' },
+  { id: 'fire', name: 'Aura Solaire 🔥', desc: 'Halo d\'énergie plasma ardent en crépitement permanent.', cost: 200, glowClass: 'border-orange-500 shadow-[0_0_25px_rgba(249,115,22,0.9)] ring-2 ring-orange-500/50 animate-pulse' },
+  { id: 'cyber', name: 'Aura Hologramme 💎', desc: 'Ondes néon cyan laser avec pulsation quantique.', cost: 350, glowClass: 'border-cyan-400 border-dashed shadow-[0_0_30px_rgba(6,182,212,0.95)] ring-2 ring-cyan-400/60 animate-[pulse_2s_infinite]' },
+  { id: 'quantum', name: 'Aura Shifting 🌀', desc: 'Distorsion de flux temporel violet et fuchsia ultra brillant.', cost: 500, glowClass: 'border-purple-500 shadow-[0_0_35px_rgba(168,85,247,0.95)] ring-2 ring-purple-500/60 animate-bounce-slow' },
+  { id: 'rainbow', name: 'Aura Royale 👑', desc: 'Halo doré impérial étincelant, réservé aux seigneurs de l\'arcade.', cost: 800, glowClass: 'border-yellow-400 shadow-[0_0_40px_rgba(253,224,71,1)] ring-4 ring-yellow-400/70 animate-pulse' },
+  { id: 'matrix', name: 'Aura Matrix Émeraude 💻', desc: 'Champ de force vert binaire tiré du code source de l\'Arcade.', cost: 450, glowClass: 'border-emerald-400 shadow-[0_0_30px_rgba(52,211,153,0.9)] ring-2 ring-emerald-400/60 animate-pulse' },
+  { id: 'plasma', name: 'Aura Rose Néon 💖', desc: 'Impulsions plasma rose électrique à haute intensité.', cost: 600, glowClass: 'border-rose-400 shadow-[0_0_35px_rgba(244,63,94,0.95)] ring-2 ring-rose-400/60 animate-pulse' }
 ];
 
-export const INITIAL_ACHIEVEMENTS = [
+export const TITLE_BANNERS = [
+  { id: 'banner_neon', name: 'Bannière Néon Cyber', cost: 0, gradient: 'bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-800' },
+  { id: 'banner_sunset', name: 'Bannière Coucher Retrowave 🌅', cost: 150, gradient: 'bg-gradient-to-r from-fuchsia-600 via-rose-600 to-amber-500' },
+  { id: 'banner_matrix', name: 'Bannière Pluie Matrix 💻', cost: 250, gradient: 'bg-gradient-to-r from-emerald-800 via-green-600 to-teal-800' },
+  { id: 'banner_solar', name: 'Bannière Éruption Solaire ☀️', cost: 400, gradient: 'bg-gradient-to-r from-amber-500 via-orange-600 to-red-700' },
+  { id: 'banner_cosmic', name: 'Bannière Nébuleuse Quantique 🌌', cost: 600, gradient: 'bg-gradient-to-r from-purple-700 via-indigo-600 to-pink-600' },
+  { id: 'banner_gold', name: 'Bannière Impériale d\'Or 👑', cost: 1000, gradient: 'bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-600' }
+];
+
+export const INITIAL_ACHIEVEMENTS: Achievement[] = [
   { id: 'ach1', title: 'First Pixel', frenchTitle: 'Premier Pixel', description: 'Earn your first pixels in any game', frenchDescription: 'Gagnez vos premiers pixels dans n\'importe quel jeu', pixelReward: 20, isUnlocked: false, icon: 'Award' },
   { id: 'ach2', title: 'Click Pioneer', frenchTitle: 'Pionnier du Clic', description: 'Score over 150 pixels in Neon Clicker', frenchDescription: 'Scorez plus de 150 pixels dans Néon Clicker', pixelReward: 40, isUnlocked: false, icon: 'Zap' },
   { id: 'ach3', title: 'Simon King', frenchTitle: 'Roi de Simon', description: 'Reach a sequence length of 6 in Simon Memory', frenchDescription: 'Atteignez une longueur de séquence de 6 dans Simon Mémorisation', pixelReward: 50, isUnlocked: false, icon: 'Brain' },
@@ -288,192 +433,71 @@ export const INITIAL_ACHIEVEMENTS = [
   { id: 'ach41', title: 'Matrix Trainee', frenchTitle: 'Recrue de Matrix', description: 'Score over 40 points in Matrix Memory', frenchDescription: 'Scorez plus de 40 points dans Matrice Mémoire', pixelReward: 25, isUnlocked: false, icon: 'Grid3X3' },
   { id: 'ach42', title: 'Matrix Oracle', frenchTitle: 'Oracle de Matrix', description: 'Score over 100 points in Matrix Memory', frenchDescription: 'Scorez plus de 100 points dans Matrice Mémoire', pixelReward: 80, isUnlocked: false, icon: 'Grid3X3' },
   { id: 'ach43', title: 'Node Tapper', frenchTitle: 'Chasseur de Nodes', description: 'Score over 50 points in Whack-A-Node', frenchDescription: 'Scorez plus de 50 points dans Tape la Node', pixelReward: 25, isUnlocked: false, icon: 'Sparkles' },
-  { id: 'ach44', title: 'Node Destroyer', frenchTitle: 'Démolisseur de Nodes', description: 'Score over 150 points in Whack-A-Node', frenchDescription: 'Scorez plus de 150 points dans Tape la Node', pixelReward: 80, isUnlocked: false, icon: 'Sparkles' },
-  { id: 'ach45', title: 'Galaxy Cadet', frenchTitle: 'Cadet Galactique', description: 'Score over 50 points in Neon Invaders', frenchDescription: 'Scorez plus de 50 points dans Envahisseurs Néon', pixelReward: 25, isUnlocked: false, icon: 'Cpu' },
+  { id: 'ach44', title: 'Pong Ace', frenchTitle: 'As du Pong', description: 'Score over 60 points in Neon Pong', frenchDescription: 'Scorez plus de 60 points dans Néon Pong', pixelReward: 50, isUnlocked: false, icon: 'Shield' },
+  { id: 'ach45', title: 'Laser Runner', frenchTitle: 'Esquiveur Mythique', description: 'Score over 80 points in Laser Dodge', frenchDescription: 'Scorez plus de 80 points dans Esquive Laser', pixelReward: 80, isUnlocked: false, icon: 'Sparkles' },
   { id: 'ach46', title: 'Galaxy Savior', frenchTitle: 'Sauveur de l\'Univers', description: 'Score over 150 points in Neon Invaders', frenchDescription: 'Scorez plus de 150 points dans Envahisseurs Néon', pixelReward: 80, isUnlocked: false, icon: 'Cpu' },
   { id: 'ach47', title: 'Meteor Survivor', frenchTitle: 'Survivant des Étoiles', description: 'Score over 60 points in Meteor Storm', frenchDescription: 'Scorez plus de 60 points dans Tempête Météore', pixelReward: 25, isUnlocked: false, icon: 'Sparkles' },
   { id: 'ach48', title: 'Cosmic Deflector', frenchTitle: 'Protecteur Cosmique', description: 'Score over 200 points in Meteor Storm', frenchDescription: 'Scorez plus de 200 points dans Tempête Météore', pixelReward: 80, isUnlocked: false, icon: 'Sparkles' },
-  { id: 'ach49', title: 'Arcade Elite', frenchTitle: 'Élite du Pass', description: 'Reach level 5 in the Arcade Pass', frenchDescription: 'Atteignez le niveau 5 dans le Pass Arcade', pixelReward: 50, isUnlocked: false, icon: 'Flame' },
+  { id: 'ach49', title: 'Arcade Elite', frenchTitle: 'Élite du Pass', description: 'Reach level 10 in the Arcade Pass', frenchDescription: 'Atteignez le niveau 10 dans le Pass Arcade', pixelReward: 100, isUnlocked: false, icon: 'Flame' },
   { id: 'ach50', title: 'Cosmetic collector', frenchTitle: 'Collectionneur de Bornes', description: 'Unlock 3 cabinet skins from the shop', frenchDescription: 'Débloquez 3 skins de bornes dans la boutique', pixelReward: 50, isUnlocked: false, icon: 'ShoppingBag' }
 ];
 
-export const INITIAL_QUESTS = [
+export const INITIAL_QUESTS: Quest[] = [
   { id: 'q1', title: 'Session d\'Entraînement', description: 'Jouez à 3 parties de n\'importe quel jeu', type: 'plays_total', target: 3, current: 0, rewardPixels: 40, rewardXp: 50, isCompleted: false, isClaimed: false },
   { id: 'q2', title: 'Accumulateur de Pixels', description: 'Gagnez un total de 150 PX', type: 'pixels_earned', target: 150, current: 0, rewardPixels: 50, rewardXp: 60, isCompleted: false, isClaimed: false },
   { id: 'q3', title: 'Score Parfait en Math', description: 'Obtenez une série de 5 bonnes réponses en Math Blitz', type: 'math_streak', target: 5, current: 0, rewardPixels: 60, rewardXp: 70, isCompleted: false, isClaimed: false },
   { id: 'q4', title: 'Maître du Clic', description: 'Scorez plus de 100 points dans Néon Clicker', type: 'score_specific', target: 100, current: 0, rewardPixels: 30, rewardXp: 40, isCompleted: false, isClaimed: false, gameId: 'clicker' },
-  { id: 'q5', title: 'Explorateur de Vitesse', description: 'Scorez plus de 30 points dans Vitesse Réflexe', type: 'score_specific', target: 30, current: 0, rewardPixels: 35, rewardXp: 45, isCompleted: false, isClaimed: false, gameId: 'reflex' },
-  { id: 'q6', title: 'Survie de l\'Espace', description: 'Scorez plus de 50 points dans Tempête Météore', type: 'score_specific', target: 50, current: 0, rewardPixels: 45, rewardXp: 55, isCompleted: false, isClaimed: false, gameId: 'meteor' },
-  { id: 'q7', title: 'Pilote d\'Élite', description: 'Scorez plus de 40 points dans Envahisseurs Néon', type: 'score_specific', target: 40, current: 0, rewardPixels: 40, rewardXp: 50, isCompleted: false, isClaimed: false, gameId: 'invaders' },
-  { id: 'q8', title: 'Série de Défis', description: 'Jouez à 6 parties de n\'importe quel jeu', type: 'plays_total', target: 6, current: 0, rewardPixels: 50, rewardXp: 60, isCompleted: false, isClaimed: false },
-  { id: 'q9', title: 'Légende Flappy', description: 'Scorez plus de 80 points dans Néon Flappy', type: 'score_specific', target: 80, current: 0, rewardPixels: 50, rewardXp: 65, isCompleted: false, isClaimed: false, gameId: 'flappy' },
-  { id: 'q10', title: 'As du Volant', description: 'Scorez plus de 90 points dans Cyber Highway', type: 'score_specific', target: 90, current: 0, rewardPixels: 60, rewardXp: 75, isCompleted: false, isClaimed: false, gameId: 'highway' }
+  { id: 'q5', title: 'Champion du Pong', description: 'Scorez plus de 50 points dans Néon Pong', type: 'score_specific', target: 50, current: 0, rewardPixels: 40, rewardXp: 50, isCompleted: false, isClaimed: false, gameId: 'pong' },
+  { id: 'q6', title: 'Esquiveur Mythique', description: 'Scorez plus de 60 points dans Esquive Laser', type: 'score_specific', target: 60, current: 0, rewardPixels: 60, rewardXp: 80, isCompleted: false, isClaimed: false, gameId: 'laserdodge' },
+  { id: 'q7', title: 'Pilote Facile', description: 'Jouez à 3 parties de jeux de difficulté Facile', type: 'plays_easy', target: 3, current: 0, rewardPixels: 35, rewardXp: 45, isCompleted: false, isClaimed: false },
+  { id: 'q8', title: 'Défieur Intermédiaire', description: 'Jouez à 3 parties de jeux de difficulté Moyen', type: 'plays_medium', target: 3, current: 0, rewardPixels: 45, rewardXp: 55, isCompleted: false, isClaimed: false },
+  { id: 'q9', title: 'Guerrier Mythique', description: 'Jouez à 1 partie d\'un jeu Mythique', type: 'plays_mythic', target: 1, current: 0, rewardPixels: 70, rewardXp: 90, isCompleted: false, isClaimed: false },
+  { id: 'q10', title: 'Client de la Boutique', description: 'Équipez ou débloquez un élément dans le Shop', type: 'shop_buy', target: 1, current: 0, rewardPixels: 50, rewardXp: 60, isCompleted: false, isClaimed: false },
+  { id: 'q11', title: 'Trésor de Pixels', description: 'Possédez au moins 300 PX en banque', type: 'reach_pixels', target: 300, current: 0, rewardPixels: 60, rewardXp: 75, isCompleted: false, isClaimed: false },
+  { id: 'q12', title: 'Polyvalence Arcade', description: 'Jouez à 4 jeux différents', type: 'different_games', target: 4, current: 0, rewardPixels: 55, rewardXp: 70, isCompleted: false, isClaimed: false },
+  { id: 'q13', title: 'Réflexe d\'Acier', description: 'Scorez plus de 50 PX dans un jeu de catégorie Réflexe', type: 'perfect_reflex', target: 50, current: 0, rewardPixels: 45, rewardXp: 55, isCompleted: false, isClaimed: false },
+  { id: 'q14', title: 'Mémoire d\'Éléphant', description: 'Scorez plus de 40 PX dans un jeu de catégorie Mémoire', type: 'perfect_memory', target: 40, current: 0, rewardPixels: 45, rewardXp: 55, isCompleted: false, isClaimed: false },
+  { id: 'q15', title: 'Progression du Pass', description: 'Montez d\'un niveau dans le Pass Arcade', type: 'pass_level', target: 1, current: 0, rewardPixels: 50, rewardXp: 80, isCompleted: false, isClaimed: false }
 ];
 
-export interface PassLevelReward {
-  level: number;
-  xpRequired: number;
-  freeReward: {
-    type: 'pixels' | 'title' | 'skin' | 'color' | 'aura';
-    value: string | number;
-    label: string;
-  };
-  premiumReward: {
-    type: 'pixels' | 'title' | 'skin' | 'color' | 'aura';
-    value: string | number;
-    label: string;
-  };
-}
+export const QUEST_POOL: Quest[] = [
+  ...INITIAL_QUESTS,
+  { id: 'q16', title: 'Session Marathon', description: 'Jouez à 8 parties au total', type: 'plays_total', target: 8, current: 0, rewardPixels: 75, rewardXp: 90, isCompleted: false, isClaimed: false },
+  { id: 'q17', title: 'Fortune du Pixel', description: 'Gagnez un total de 400 PX', type: 'pixels_earned', target: 400, current: 0, rewardPixels: 90, rewardXp: 110, isCompleted: false, isClaimed: false },
+  { id: 'q18', title: 'Survie Météore', description: 'Scorez plus de 60 PX dans Tempête Météore', type: 'score_specific', target: 60, current: 0, rewardPixels: 50, rewardXp: 60, isCompleted: false, isClaimed: false, gameId: 'meteor' },
+  { id: 'q19', title: 'Dompteur de Serpent', description: 'Scorez plus de 80 PX dans Néon Snake', type: 'score_specific', target: 80, current: 0, rewardPixels: 45, rewardXp: 55, isCompleted: false, isClaimed: false, gameId: 'snake' },
+  { id: 'q20', title: 'Empileur Suprême', description: 'Scorez plus de 100 PX dans Stacker', type: 'score_specific', target: 100, current: 0, rewardPixels: 50, rewardXp: 60, isCompleted: false, isClaimed: false, gameId: 'stacker' },
+  { id: 'q21', title: 'Défenseur Étoilé', description: 'Scorez plus de 80 PX dans Envahisseurs Néon', type: 'score_specific', target: 80, current: 0, rewardPixels: 55, rewardXp: 65, isCompleted: false, isClaimed: false, gameId: 'invaders' },
+  { id: 'q22', title: 'As du Piratage', description: 'Scorez plus de 40 PX dans Hacker de Verrou', type: 'score_specific', target: 40, current: 0, rewardPixels: 65, rewardXp: 80, isCompleted: false, isClaimed: false, gameId: 'lock' },
+  { id: 'q23', title: 'Chasseur de Nodes', description: 'Scorez plus de 70 PX dans Tape la Node', type: 'score_specific', target: 70, current: 0, rewardPixels: 40, rewardXp: 50, isCompleted: false, isClaimed: false, gameId: 'whack' },
+  { id: 'q24', title: 'Score Cumulé 500', description: 'Atteignez un score cumulé de 500 PX', type: 'score_total', target: 500, current: 0, rewardPixels: 100, rewardXp: 120, isCompleted: false, isClaimed: false },
+  { id: 'q25', title: 'Gourmand de la Boutique', description: 'Achetez ou débloquez 2 cosmétiques', type: 'shop_buy', target: 2, current: 0, rewardPixels: 80, rewardXp: 100, isCompleted: false, isClaimed: false }
+];
 
-export const PASS_LEVELS: PassLevelReward[] = [
-  {
-    level: 1,
-    xpRequired: 100,
-    freeReward: { type: 'pixels', value: 50, label: '+50 PX' },
-    premiumReward: { type: 'pixels', value: 150, label: '+150 PX' }
-  },
-  {
-    level: 2,
-    xpRequired: 100,
-    freeReward: { type: 'title', value: 'NOVICE', label: 'Titre: Novice' },
-    premiumReward: { type: 'title', value: 'SOLDAT DU NÉON', label: 'Titre: Soldat Néon' }
-  },
-  {
-    level: 3,
-    xpRequired: 100,
-    freeReward: { type: 'pixels', value: 80, label: '+80 PX' },
-    premiumReward: { type: 'color', value: 'rose_neon', label: 'Avatar: Rose Néon' }
-  },
-  {
-    level: 4,
-    xpRequired: 100,
-    freeReward: { type: 'pixels', value: 100, label: '+100 PX' },
-    premiumReward: { type: 'pixels', value: 250, label: '+250 PX' }
-  },
-  {
-    level: 5,
-    xpRequired: 100,
-    freeReward: { type: 'title', value: 'GAMER', label: 'Titre: Gamer' },
-    premiumReward: { type: 'title', value: 'CYBER LÉGENDE', label: 'Titre: Cyber Légende' }
-  },
-  {
-    level: 6,
-    xpRequired: 100,
-    freeReward: { type: 'pixels', value: 150, label: '+150 PX' },
-    premiumReward: { type: 'pixels', value: 400, label: '+400 PX' }
-  },
-  {
-    level: 7,
-    xpRequired: 100,
-    freeReward: { type: 'title', value: 'PRO D\'ARCADE', label: 'Titre: Pro Arcade' },
-    premiumReward: { type: 'color', value: 'gold_rainbow', label: 'Avatar: Or Arc-en-Ciel' }
-  },
-  {
-    level: 8,
-    xpRequired: 100,
-    freeReward: { type: 'pixels', value: 200, label: '+200 PX' },
-    premiumReward: { type: 'pixels', value: 500, label: '+500 PX' }
-  },
-  {
-    level: 9,
-    xpRequired: 100,
-    freeReward: { type: 'title', value: 'MAÎTRE DU PIXEL', label: 'Titre: Maître Pixel' },
-    premiumReward: { type: 'title', value: 'VERTEX CHAMPION', label: 'Titre: Vertex Champion' }
-  },
-  {
-    level: 10,
-    xpRequired: 100,
-    freeReward: { type: 'skin', value: 'matrix', label: 'Châssis Matrix' },
-    premiumReward: { type: 'skin', value: 'prismatic', label: 'Châssis Prismatique' }
-  },
-  {
-    level: 11,
-    xpRequired: 100,
-    freeReward: { type: 'pixels', value: 300, label: '+300 PX' },
-    premiumReward: { type: 'pixels', value: 600, label: '+600 PX' }
-  },
-  {
-    level: 12,
-    xpRequired: 100,
-    freeReward: { type: 'title', value: 'SPEEDSTER', label: 'Titre: Speedster' },
-    premiumReward: { type: 'aura', value: 'fire', label: 'Aura Solaire' }
-  },
-  {
-    level: 13,
-    xpRequired: 100,
-    freeReward: { type: 'pixels', value: 350, label: '+350 PX' },
-    premiumReward: { type: 'pixels', value: 700, label: '+700 PX' }
-  },
-  {
-    level: 14,
-    xpRequired: 100,
-    freeReward: { type: 'color', value: 'emerald', label: 'Avatar: Émeraude' },
-    premiumReward: { type: 'title', value: 'HACKER ROYAL', label: 'Titre: Hacker Royal' }
-  },
-  {
-    level: 15,
-    xpRequired: 100,
-    freeReward: { type: 'pixels', value: 400, label: '+400 PX' },
-    premiumReward: { type: 'aura', value: 'cyber', label: 'Aura Hologramme' }
-  },
-  {
-    level: 16,
-    xpRequired: 100,
-    freeReward: { type: 'title', value: 'GLITCHER', label: 'Titre: Glitcher' },
-    premiumReward: { type: 'pixels', value: 800, label: '+800 PX' }
-  },
-  {
-    level: 17,
-    xpRequired: 100,
-    freeReward: { type: 'pixels', value: 450, label: '+450 PX' },
-    premiumReward: { type: 'skin', value: 'gold_emperor', label: 'Châssis d\'Or 👑' }
-  },
-  {
-    level: 18,
-    xpRequired: 100,
-    freeReward: { type: 'color', value: 'cyan', label: 'Avatar: Cyan' },
-    premiumReward: { type: 'title', value: 'SEIGNEUR QUANTIQUE', label: 'Titre: Seigneur Quantique' }
-  },
-  {
-    level: 19,
-    xpRequired: 100,
-    freeReward: { type: 'pixels', value: 500, label: '+500 PX' },
-    premiumReward: { type: 'pixels', value: 1000, label: '+1000 PX' }
-  },
-  {
-    level: 20,
-    xpRequired: 100,
-    freeReward: { type: 'aura', value: 'quantum', label: 'Aura Shifting' },
-    premiumReward: { type: 'skin', value: 'quantum_void', label: 'Châssis Vide Quantique 🌌' }
-  },
-  {
-    level: 21,
-    xpRequired: 100,
-    freeReward: { type: 'title', value: 'VÉTÉRAN DU NÉON', label: 'Titre: Vétéran' },
-    premiumReward: { type: 'pixels', value: 1200, label: '+1200 PX' }
-  },
-  {
-    level: 22,
-    xpRequired: 100,
-    freeReward: { type: 'pixels', value: 600, label: '+600 PX' },
-    premiumReward: { type: 'title', value: 'EMPEREUR DES CODES', label: 'Titre: Empereur' }
-  },
-  {
-    level: 23,
-    xpRequired: 100,
-    freeReward: { type: 'color', value: 'purple', label: 'Avatar: Violet' },
-    premiumReward: { type: 'pixels', value: 1500, label: '+1500 PX' }
-  },
-  {
-    level: 24,
-    xpRequired: 100,
-    freeReward: { type: 'pixels', value: 800, label: '+800 PX' },
-    premiumReward: { type: 'title', value: 'DIEU DU CLIC', label: 'Titre: Dieu du Clic' }
-  },
-  {
-    level: 25,
-    xpRequired: 100,
-    freeReward: { type: 'aura', value: 'rainbow', label: 'Aura Royale 👑' },
-    premiumReward: { type: 'title', value: 'VERTEX EMPEREUR 👑', label: 'Titre: Vertex Empereur' }
+export const PASS_LEVELS: PassLevel[] = Array.from({ length: 50 }, (_, i) => {
+  const lvl = i + 1;
+  let freeReward: PassLevelReward = { type: 'pixels', value: 50 + lvl * 20, label: `+${50 + lvl * 20} PX` };
+  let premiumReward: PassLevelReward = { type: 'pixels', value: 100 + lvl * 30, label: `+${100 + lvl * 30} PX` };
+
+  if (lvl === 2) freeReward = { type: 'title', value: 'RECRUE', label: 'Titre: Recrue' };
+  if (lvl === 5) premiumReward = { type: 'title', value: 'SOLDAT DU NÉON', label: 'Titre: Soldat Néon' };
+  if (lvl === 8) freeReward = { type: 'color', value: 'rose_neon', label: 'Avatar: Rose Néon' };
+  if (lvl === 10) premiumReward = { type: 'skin', value: 'retrowave', label: 'Châssis Retrowave 🌅' };
+  if (lvl === 15) freeReward = { type: 'aura', value: 'fire', label: 'Aura Solaire 🔥' };
+  if (lvl === 20) premiumReward = { type: 'skin', value: 'matrix', label: 'Châssis Matrix 💻' };
+  if (lvl === 25) freeReward = { type: 'title', value: 'PRO D\'ARCADE', label: 'Titre: Pro Arcade' };
+  if (lvl === 30) premiumReward = { type: 'aura', value: 'cyber', label: 'Aura Hologramme 💎' };
+  if (lvl === 35) freeReward = { type: 'skin', value: 'sunfire', label: 'Châssis Tempête Solaire ☀️' };
+  if (lvl === 40) premiumReward = { type: 'aura', value: 'quantum', label: 'Aura Shifting 🌀' };
+  if (lvl === 45) freeReward = { type: 'title', value: 'LÉGENDE VIVANTE', label: 'Titre: Légende Vivante' };
+  if (lvl === 50) {
+    freeReward = { type: 'title', value: 'SINGULARITÉ NÉON 🌌', label: 'Titre: Singularité Néon' };
+    premiumReward = { type: 'skin', value: 'gold_emperor', label: 'Châssis d\'Or 👑' };
   }
-];
+
+  return {
+    level: lvl,
+    freeReward,
+    premiumReward
+  };
+});
