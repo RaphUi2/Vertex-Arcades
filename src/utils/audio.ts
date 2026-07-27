@@ -94,6 +94,18 @@ class AudioManager {
     this.playTone([150], [0.12], 'triangle', 40, 0.2);
   }
 
+  playExplosion() {
+    this.playTone([220, 160, 110, 55], [0.06, 0.06, 0.08, 0.15], 'sawtooth', 30, 0.25);
+  }
+
+  playPowerup() {
+    this.playTone([330, 440, 550, 660, 880], [0.05, 0.05, 0.05, 0.05, 0.15], 'square', undefined, 0.08);
+  }
+
+  playJump() {
+    this.playTone([180], [0.15], 'square', 440, 0.12);
+  }
+
   playWin() {
     this.playTone([523.25, 659.25, 783.99, 1046.50], [0.08, 0.08, 0.08, 0.25], 'square', undefined, 0.07);
   }

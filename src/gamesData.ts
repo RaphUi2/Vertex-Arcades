@@ -1,4 +1,4 @@
-import { GameData, Quest, Achievement, PassLevel, PassLevelReward } from './types';
+import { GameData, Quest, Achievement, PassLevel, PassLevelReward, Tournament } from './types';
 
 export const GAMES_LIST: GameData[] = [
   {
@@ -242,6 +242,28 @@ export const GAMES_LIST: GameData[] = [
     difficulty: 'mythic',
     color: 'text-fuchsia-400 border-fuchsia-500 shadow-[0_0_25px_rgba(217,70,239,0.6)] bg-fuchsia-950/30 hover:border-fuchsia-400',
     rarity: 'mythique'
+  },
+  {
+    id: 'runner',
+    name: 'Neon Runner',
+    frenchName: 'Course Néon Cyber',
+    description: 'Foncez sur une grille cyberpunk en sautant et double-sautant par-dessus les barrières et drones néon !',
+    icon: 'Flame',
+    category: 'arcade',
+    difficulty: 'hard',
+    color: 'text-amber-400 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.5)] bg-amber-950/30 hover:border-amber-400',
+    rarity: 'epique'
+  },
+  {
+    id: 'pinball',
+    name: 'Neon Pinball',
+    frenchName: 'Pinball Néon',
+    description: 'Propulsez la bille argentée, enchaînez les ricochets sur les bumpers néon et contrôlez les flippers !',
+    icon: 'Disc',
+    category: 'arcade',
+    difficulty: 'medium',
+    color: 'text-cyan-400 border-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.5)] bg-cyan-950/30 hover:border-cyan-400',
+    rarity: 'epique'
   }
 ];
 
@@ -501,3 +523,93 @@ export const PASS_LEVELS: PassLevel[] = Array.from({ length: 50 }, (_, i) => {
     premiumReward
   };
 });
+
+export const INITIAL_TOURNAMENTS: Tournament[] = [
+  {
+    id: 'tourney_reflex',
+    title: 'Grand Prix Réflexe Néon ⚡',
+    frenchTitle: 'Grand Prix Réflexe Néon ⚡',
+    gameId: 'reflex',
+    gameName: 'Vitesse Réflexe',
+    description: 'Touchez les cibles néon et dépassez l\'objectif de 1 200 pts pour décrocher la victoire !',
+    targetScore: 1200,
+    unit: 'pts',
+    prizePool: 10000,
+    titleReward: 'CHAMPION RÉFLEXE ⚡',
+    endsInDays: 2,
+    status: 'active',
+    participantsCount: 1420,
+    leaderboard: [
+      { rank: 1, username: 'CyberNinja_99', avatarColor: '#ec4899', avatarIcon: 'Zap', score: 1150 },
+      { rank: 2, username: 'PixelGod_X', avatarColor: '#3b82f6', avatarIcon: 'Crown', score: 1020 },
+      { rank: 3, username: 'NeonQueen_99', avatarColor: '#a855f7', avatarIcon: 'Sparkles', score: 890 },
+      { rank: 4, username: 'RetroKing', avatarColor: '#eab308', avatarIcon: 'Trophy', score: 750 },
+      { rank: 5, username: 'ArcadeTitan', avatarColor: '#10b981', avatarIcon: 'Shield', score: 600 }
+    ]
+  },
+  {
+    id: 'tourney_simon',
+    title: 'Épreuve Mémorisation Quantique 🧠',
+    frenchTitle: 'Épreuve Mémorisation Quantique 🧠',
+    gameId: 'simon',
+    gameName: 'Simon Mémorisation',
+    description: 'Reproduisez au moins 8 séquences lumineuses à la suite pour réussir le défi quantique.',
+    targetScore: 8,
+    unit: 'séquences',
+    prizePool: 7500,
+    titleReward: 'MAÎTRE MÉMOIRE 🧠',
+    endsInDays: 4,
+    status: 'active',
+    participantsCount: 980,
+    leaderboard: [
+      { rank: 1, username: 'Synapse_Pro', avatarColor: '#a855f7', avatarIcon: 'Brain', score: 7 },
+      { rank: 2, username: 'Brainiac_88', avatarColor: '#06b6d4', avatarIcon: 'Cpu', score: 6 },
+      { rank: 3, username: 'MemoryWizard', avatarColor: '#eab308', avatarIcon: 'Award', score: 5 },
+      { rank: 4, username: 'NeuroGamer', avatarColor: '#10b981', avatarIcon: 'Target', score: 4 },
+      { rank: 5, username: 'Cortex_X', avatarColor: '#f43f5e', avatarIcon: 'Zap', score: 3 }
+    ]
+  },
+  {
+    id: 'tourney_brick',
+    title: 'Championnat Casse-Briques Rétro 🧱',
+    frenchTitle: 'Championnat Casse-Briques Rétro 🧱',
+    gameId: 'brick',
+    gameName: 'Casse-Briques',
+    description: 'Détruisez les briques néon et accumulez plus de 350 points pour dominer le classement.',
+    targetScore: 350,
+    unit: 'pts',
+    prizePool: 5000,
+    titleReward: 'DÉMOLISSEUR NÉON 🧱',
+    endsInDays: 6,
+    status: 'active',
+    participantsCount: 750,
+    leaderboard: [
+      { rank: 1, username: 'BrickSlayer', avatarColor: '#f97316', avatarIcon: 'Shield', score: 320 },
+      { rank: 2, username: 'PaddleKing', avatarColor: '#06b6d4', avatarIcon: 'Trophy', score: 280 },
+      { rank: 3, username: 'BounceMaster', avatarColor: '#10b981', avatarIcon: 'Award', score: 240 },
+      { rank: 4, username: 'WallBreaker', avatarColor: '#3b82f6', avatarIcon: 'Target', score: 190 },
+      { rank: 5, username: 'PixelCrusher', avatarColor: '#ec4899', avatarIcon: 'Sparkles', score: 150 }
+    ]
+  },
+  {
+    id: 'tourney_clicker',
+    title: 'Sprint Néon Clicker ⚡',
+    frenchTitle: 'Sprint Néon Clicker ⚡',
+    gameId: 'clicker',
+    gameName: 'Néon Clicker',
+    description: 'Franchissez la barre des 150 clics dans la session pour remporter la couronne du sprint !',
+    targetScore: 150,
+    unit: 'clics',
+    prizePool: 12000,
+    titleReward: 'ROI DU CLIC 👑',
+    endsInDays: 8,
+    status: 'active',
+    participantsCount: 2100,
+    leaderboard: [
+      { rank: 1, username: 'SpeedFinger_X', avatarColor: '#eab308', avatarIcon: 'Zap', score: 142 },
+      { rank: 2, username: 'TapMaster', avatarColor: '#ec4899', avatarIcon: 'Sparkles', score: 130 },
+      { rank: 3, username: 'ClickDemon', avatarColor: '#3b82f6', avatarIcon: 'Crown', score: 115 }
+    ]
+  }
+];
+

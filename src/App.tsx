@@ -5,8 +5,8 @@ import {
 } from 'lucide-react';
 
 import { audio } from './utils/audio';
-import { GlobalState, GameStats, Achievement, Quest, ArcadePass } from './types';
-import { GAMES_LIST, CABINET_SKINS, INITIAL_ACHIEVEMENTS, INITIAL_QUESTS, QUEST_POOL, PASS_LEVELS, AURA_COSMETICS, TITLE_BANNERS } from './gamesData';
+import { GlobalState, GameStats, Achievement, Quest, ArcadePass, Tournament } from './types';
+import { GAMES_LIST, CABINET_SKINS, INITIAL_ACHIEVEMENTS, INITIAL_QUESTS, QUEST_POOL, PASS_LEVELS, AURA_COSMETICS, TITLE_BANNERS, INITIAL_TOURNAMENTS } from './gamesData';
 
 // Mini games imports
 import NeonClicker from './games/NeonClicker';
@@ -31,6 +31,8 @@ import MemoryPairs from './games/MemoryPairs';
 import NeonTarget from './games/NeonTarget';
 import NeonPong from './games/NeonPong';
 import LaserDodge from './games/LaserDodge';
+import NeonRunner from './games/NeonRunner';
+import NeonPinball from './games/NeonPinball';
 
 const AVATAR_COLORS = [
   { id: 'cyan', hex: '#06b6d4', text: 'text-cyan-400', border: 'border-cyan-500' },
@@ -139,6 +141,7 @@ export default function App() {
   const [showQuestsModal, setShowQuestsModal] = useState(false);
   const [showPassModal, setShowPassModal] = useState(false);
   const [showTournamentsModal, setShowTournamentsModal] = useState(false);
+  const [expandedLeaderboardId, setExpandedLeaderboardId] = useState<string | null>(null);
 
   const [usernameInput, setUsernameInput] = useState(state.profile.username);
   const [selectedTitleInput, setSelectedTitleInput] = useState(state.profile.title || 'DÉBUTANT');
@@ -333,15 +336,53 @@ export default function App() {
         return q;
       });
 
+      // Check and update Tournament High Scores & Objectives
+      const updatedTournamentScores = { ...(prev.tournamentScores || {}) };
+      const claimedTournaments = [...(prev.claimedTournaments || [])];
+      let tournamentBonusPixels = 0;
+      let updatedTitles = [...(prev.profile.unlockedTitles || ['DÉBUTANT'])];
+
+      INITIAL_TOURNAMENTS.forEach(t => {
+        if (t.gameId === gameId && t.status === 'active') {
+          const prevTourneyScore = updatedTournamentScores[t.id] || 0;
+          if (finalScore > prevTourneyScore) {
+            updatedTournamentScores[t.id] = finalScore;
+          }
+
+          // Check if player beat the tournament target score!
+          if (finalScore >= t.targetScore && !claimedTournaments.includes(t.id)) {
+            claimedTournaments.push(t.id);
+            tournamentBonusPixels += t.prizePool;
+            if (!updatedTitles.includes(t.titleReward)) {
+              updatedTitles.push(t.titleReward);
+            }
+            setTimeout(() => {
+              audio.playWin();
+              setActiveNotification(`🥇 VICTOIRE DU TOURNOI (${t.frenchTitle}) ! Score ${finalScore} / ${t.targetScore} ${t.unit || 'pts'} atteint ! +${t.prizePool.toLocaleString()} PX & Titre '${t.titleReward}' débloqué !`);
+              setTimeout(() => setActiveNotification(null), 6000);
+            }, 700);
+          } else if (finalScore > prevTourneyScore) {
+            setTimeout(() => {
+              audio.playWin();
+              setActiveNotification(`🏆 NOUVEAU RECORD TOURNOI (${t.frenchTitle}) : ${finalScore} ${t.unit || 'pts'} ! (Objectif: ${t.targetScore})`);
+              setTimeout(() => setActiveNotification(null), 4500);
+            }, 600);
+          }
+        }
+      });
+
       return {
         ...prev,
         profile: {
           ...prev.profile,
-          totalPixels: prev.profile.totalPixels + extraPixels
+          totalPixels: prev.profile.totalPixels + extraPixels + tournamentBonusPixels,
+          unlockedTitles: updatedTitles
         },
         stats: updatedStats,
         achievements: updatedAchievements,
-        quests: updatedQuests
+        quests: updatedQuests,
+        tournamentScores: updatedTournamentScores,
+        claimedTournaments: claimedTournaments
       };
     });
   };
@@ -665,6 +706,8 @@ export default function App() {
       case 'target': return <NeonTarget {...gameProps} />;
       case 'pong': return <NeonPong {...gameProps} />;
       case 'laserdodge': return <LaserDodge {...gameProps} />;
+      case 'runner': return <NeonRunner {...gameProps} />;
+      case 'pinball': return <NeonPinball {...gameProps} />;
       default:
         return (
           <div className="text-center py-10 font-mono text-red-400">
@@ -764,11 +807,11 @@ export default function App() {
           {/* Tournois (Tournaments) Button */}
           <button
             onClick={() => { audio.playClick(); setShowTournamentsModal(true); }}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-900/50 bg-amber-950/30 text-amber-300 hover:border-amber-500/50 transition-all cursor-pointer text-xs font-mono relative"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-amber-900/50 bg-amber-950/30 text-amber-300 hover:border-amber-500/50 transition-all cursor-pointer text-xs font-mono relative shadow-[0_0_10px_rgba(245,158,11,0.2)]"
           >
             <Calendar size={15} className="text-amber-400 animate-bounce" /> Tournois
-            <span className="text-[8px] bg-amber-500/20 text-amber-300 font-bold px-1 py-0.5 rounded border border-amber-500/30 uppercase">
-              À venir
+            <span className="text-[8px] bg-emerald-500/20 text-emerald-300 font-black px-1.5 py-0.5 rounded border border-emerald-500/40 uppercase animate-pulse">
+              ● EN DIRECT
             </span>
           </button>
 
@@ -862,7 +905,7 @@ export default function App() {
               <div className="flex justify-center gap-6 mt-8 font-mono text-center text-xs">
                 <div>
                   <p className="text-slate-500 text-[10px]">TOTAL JEUX</p>
-                  <p className="text-lg font-bold text-cyan-400">22 Mini-Jeux</p>
+                  <p className="text-lg font-bold text-cyan-400">{GAMES_LIST.length} Mini-Jeux</p>
                 </div>
                 <div className="w-[1px] bg-slate-800"></div>
                 <div>
@@ -1451,36 +1494,232 @@ export default function App() {
       {/* --- Tournois (Tournaments) Modal --- */}
       {showTournamentsModal && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-mono">
-          <div className="bg-slate-950 border-2 border-amber-500 p-6 rounded-2xl w-full max-w-lg text-white relative text-center">
-            <div className="inline-block p-3 bg-amber-950/40 rounded-full border border-amber-500 mb-3 animate-bounce">
-              <Calendar size={32} className="text-amber-400" />
-            </div>
-            <h3 className="text-2xl font-black text-amber-400 uppercase tracking-widest mb-1">
-              TOURNOIS VERTEX ARCADE
-            </h3>
-            <span className="inline-block px-3 py-1 bg-rose-950 text-rose-400 border border-rose-500 text-xs font-black uppercase tracking-widest rounded-full mb-4">
-              PROCHAINEMENT / À VENIR
-            </span>
-
-            <p className="text-xs text-slate-300 leading-relaxed max-w-md mx-auto mb-6">
-              La Saison 1 des Tournois Officiels Vertex débarque très bientôt ! Affrontez les meilleurs joueurs en temps réel dans des compétitions sur élimination directe.
-            </p>
-
-            <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-800 mb-6 text-left space-y-2">
-              <p className="text-xs text-yellow-400 font-bold">🏆 RÉCOMPENSES DU PREMIER TOURNOI :</p>
-              <ul className="text-[11px] text-slate-300 space-y-1 list-disc list-inside">
-                <li><span className="text-amber-400 font-bold">1er Place :</span> +10,000 PX + Titre Exclusif "CHAMPION DU MONDE 🥇"</li>
-                <li><span className="text-slate-300 font-bold">2ème Place :</span> +5,000 PX + Titre "VICE-CHAMPION 🥈"</li>
-                <li><span className="text-amber-600 font-bold">3ème Place :</span> +2,500 PX + Titre "LÉGENDE D'ARGENT 🥉"</li>
-              </ul>
+          <div className="bg-slate-950 border-2 border-amber-500 p-6 rounded-2xl w-full max-w-3xl text-white relative max-h-[88vh] flex flex-col shadow-[0_0_40px_rgba(245,158,11,0.25)]">
+            <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="text-xl font-black text-amber-400 uppercase tracking-widest flex items-center gap-2">
+                  <Trophy size={24} className="text-amber-400 animate-bounce" /> TOURNOIS & COMPÉTITIONS SAISON 1
+                </h3>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Rejoignez les épreuves néon en direct, affrontez les légendes et empochez jusqu'à 10,000 PX !
+                </p>
+              </div>
+              <button
+                onClick={() => setShowTournamentsModal(false)}
+                className="text-slate-400 hover:text-white font-bold cursor-pointer text-sm bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800"
+              >
+                ✕ FERMER
+              </button>
             </div>
 
-            <button
-              onClick={() => setShowTournamentsModal(false)}
-              className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 px-8 rounded-xl text-xs uppercase cursor-pointer"
-            >
-              COMPRIS !
-            </button>
+            {/* How Tournaments Work Explanation Accordion */}
+            <div className="bg-amber-950/30 p-4 rounded-xl border border-amber-500/40 mb-4 space-y-2">
+              <div className="flex items-center gap-2 font-black text-amber-300 text-xs uppercase tracking-wider">
+                <Sparkles size={16} className="text-amber-400" />
+                <span>💡 COMMENT ÇA MARCHE ?</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-[11px] text-slate-300 pt-1">
+                <div className="bg-slate-950/70 p-2.5 rounded-lg border border-amber-500/20">
+                  <p className="font-bold text-amber-400 mb-0.5">1. Choisissez une Épreuve 🎮</p>
+                  <p className="text-slate-400 text-[10px]">Chaque tournoi est basé sur un mini-jeu spécifique (Réflexe, Simon, Casse-Briques...).</p>
+                </div>
+                <div className="bg-slate-950/70 p-2.5 rounded-lg border border-amber-500/20">
+                  <p className="font-bold text-cyan-400 mb-0.5">2. Jouez & Améliorez 📈</p>
+                  <p className="text-slate-400 text-[10px]">Jouez autant de parties que souhaité. Votre meilleur score est automatiquement retenu.</p>
+                </div>
+                <div className="bg-slate-950/70 p-2.5 rounded-lg border border-amber-500/20">
+                  <p className="font-bold text-purple-400 mb-0.5">3. Classement en Direct 📊</p>
+                  <p className="text-slate-400 text-[10px]">Visualisez votre classement global face aux meilleurs joueurs de la communauté.</p>
+                </div>
+                <div className="bg-slate-950/70 p-2.5 rounded-lg border border-amber-500/20">
+                  <p className="font-bold text-emerald-400 mb-0.5">4. Recompenses & Titres 🏆</p>
+                  <p className="text-slate-400 text-[10px]">Remportez la cagnotte en PX et débloquez des Titres de Champion exclusifs !</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Tournaments List */}
+            <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+              {INITIAL_TOURNAMENTS.map((t) => {
+                const userTourneyScore = state.tournamentScores?.[t.id] || 0;
+                const isClaimed = (state.claimedTournaments || []).includes(t.id);
+                const hasBeatenTarget = userTourneyScore >= t.targetScore;
+                
+                // Build full leaderboard with user
+                const rawLb = [...t.leaderboard];
+                if (userTourneyScore > 0) {
+                  rawLb.push({
+                    rank: 0,
+                    username: `${state.profile.username} (VOUS)`,
+                    avatarColor: AVATAR_COLORS.find(c => c.id === state.profile.avatarColor)?.hex || '#06b6d4',
+                    avatarIcon: state.profile.avatarIcon || 'Crown',
+                    score: userTourneyScore,
+                    isUser: true
+                  });
+                }
+                rawLb.sort((a, b) => b.score - a.score);
+                const rankedLb = rawLb.map((item, index) => ({ ...item, rank: index + 1 }));
+                const userEntry = rankedLb.find(e => e.isUser);
+                const isExpanded = expandedLeaderboardId === t.id;
+
+                const progressPercent = Math.min(100, Math.round((userTourneyScore / t.targetScore) * 100));
+
+                return (
+                  <div key={t.id} className={`bg-slate-900/90 rounded-2xl border-2 p-4 space-y-3 relative overflow-hidden transition-all ${
+                    isClaimed || hasBeatenTarget ? 'border-emerald-500/80 shadow-[0_0_20px_rgba(16,185,129,0.2)]' : 'border-slate-800 hover:border-amber-500/50'
+                  }`}>
+                    {/* Status Ribbon */}
+                    <div className="flex flex-wrap justify-between items-start gap-2 border-b border-slate-800 pb-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-black text-sm text-amber-300 uppercase tracking-wide">{t.frenchTitle}</h4>
+                          {isClaimed || hasBeatenTarget ? (
+                            <span className="text-[9px] bg-emerald-950 text-emerald-300 border border-emerald-500 font-black px-2 py-0.5 rounded-full uppercase tracking-wider shadow">
+                              ✅ OBJECTIF BATTU
+                            </span>
+                          ) : t.status === 'active' ? (
+                            <span className="text-[9px] bg-emerald-950 text-emerald-400 border border-emerald-500/60 font-black px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse">
+                              ● EN DIRECT
+                            </span>
+                          ) : (
+                            <span className="text-[9px] bg-amber-950 text-amber-400 border border-amber-500/60 font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                              ⏳ PROCHAINEMENT
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-300 mt-1">{t.description}</p>
+                      </div>
+
+                      <div className="text-right">
+                        <span className="text-[10px] text-slate-400 font-bold block">TEMPS RESTANT</span>
+                        <span className="text-xs text-amber-400 font-black">{t.endsInDays} Jours</span>
+                      </div>
+                    </div>
+
+                    {/* Target Score to Beat Banner */}
+                    <div className="bg-gradient-to-r from-amber-950/80 via-slate-900 to-slate-950 p-3 rounded-xl border border-amber-500/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                      <div>
+                        <span className="text-[10px] text-amber-400 font-black uppercase tracking-wider block">
+                          🎯 SCORE CIBLE À DÉPASSER
+                        </span>
+                        <span className="text-base text-yellow-300 font-black tracking-tight">
+                          {t.targetScore.toLocaleString()} {t.unit || 'pts'}
+                        </span>
+                      </div>
+
+                      <div className="w-full sm:w-auto text-left sm:text-right">
+                        <span className="text-[10px] text-slate-400 font-bold block">VOTRE MEILLEUR SCORE</span>
+                        <span className={`text-sm font-black ${userTourneyScore >= t.targetScore ? 'text-emerald-400' : 'text-cyan-300'}`}>
+                          {userTourneyScore > 0 ? `${userTourneyScore.toLocaleString()} ${t.unit || 'pts'}` : 'Aucune tentative'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Progress Bar towards Target Score */}
+                    <div>
+                      <div className="flex justify-between text-[10px] text-slate-400 font-bold mb-1">
+                        <span>Progression de l'Épreuve</span>
+                        <span>{userTourneyScore} / {t.targetScore} {t.unit || 'pts'} ({progressPercent}%)</span>
+                      </div>
+                      <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                        <div
+                          className={`h-full transition-all duration-500 ${hasBeatenTarget ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]' : 'bg-gradient-to-r from-cyan-500 to-amber-400'}`}
+                          style={{ width: `${progressPercent}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Prize & Rewards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      <div className="bg-slate-950/80 p-2.5 rounded-xl border border-yellow-500/30 flex justify-between items-center">
+                        <span className="text-[10px] text-yellow-500 font-bold uppercase">CAGNOTTE PX</span>
+                        <span className="text-xs text-yellow-300 font-black">+{t.prizePool.toLocaleString()} PX</span>
+                      </div>
+                      <div className="bg-slate-950/80 p-2.5 rounded-xl border border-purple-500/30 flex justify-between items-center">
+                        <span className="text-[10px] text-purple-400 font-bold uppercase">TITRE RÉCOMPENSE</span>
+                        <span className="text-xs text-purple-300 font-bold truncate">{t.titleReward}</span>
+                      </div>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {t.status === 'active' && (
+                        <button
+                          onClick={() => {
+                            audio.playClick();
+                            setShowTournamentsModal(false);
+                            setActiveGameId(t.gameId);
+                          }}
+                          className={`flex-1 font-black text-xs py-2.5 px-4 rounded-xl uppercase tracking-wider cursor-pointer shadow-lg flex items-center justify-center gap-2 transition-all ${
+                            hasBeatenTarget
+                              ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
+                              : 'bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950'
+                          }`}
+                        >
+                          <PlayCircle size={16} /> {hasBeatenTarget ? 'REJOUER L\'ÉPREUVE (RECORD)' : 'REJOINDRE & BATTRE L\'OBJECTIF'}
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => {
+                          audio.playClick();
+                          setExpandedLeaderboardId(isExpanded ? null : t.id);
+                        }}
+                        className="bg-slate-950 hover:bg-slate-800 text-slate-300 border border-slate-700 font-bold text-xs py-2.5 px-4 rounded-xl uppercase tracking-wider cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Trophy size={14} className="text-amber-400" />
+                        {isExpanded ? 'MASQUER LE CLASSEMENT' : `CLASSEMENT (${rankedLb.length})`}
+                      </button>
+                    </div>
+
+                    {/* Expanded Leaderboard Drawer */}
+                    {isExpanded && (
+                      <div className="mt-3 bg-slate-950 p-3 rounded-xl border border-amber-500/30 space-y-1.5 animate-fadeIn">
+                        <p className="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                          🏆 CLASSEMENT OFFICIEL EN DIRECT ({t.frenchTitle})
+                        </p>
+
+                        {rankedLb.length === 0 ? (
+                          <p className="text-xs text-slate-500 italic py-2">Aucun score enregistré pour l'instant.</p>
+                        ) : (
+                          rankedLb.slice(0, 10).map((entry) => (
+                            <div
+                              key={entry.rank + entry.username}
+                              className={`p-2 rounded-lg border flex items-center justify-between text-xs ${
+                                entry.isUser
+                                  ? 'bg-cyan-950/80 border-cyan-400 text-cyan-200 font-black shadow-[0_0_10px_rgba(6,182,212,0.3)]'
+                                  : 'bg-slate-900/60 border-slate-800 text-slate-300'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <span className={`w-6 text-center font-black text-xs ${
+                                  entry.rank === 1 ? 'text-yellow-400 text-sm' :
+                                  entry.rank === 2 ? 'text-slate-300' :
+                                  entry.rank === 3 ? 'text-amber-600' : 'text-slate-500'
+                                }`}>
+                                  {entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : `#${entry.rank}`}
+                                </span>
+
+                                <div
+                                  className="w-6 h-6 rounded-md border flex items-center justify-center shrink-0"
+                                  style={{ backgroundColor: entry.avatarColor }}
+                                >
+                                  {renderIcon(entry.avatarIcon, "w-3.5 h-3.5 text-white")}
+                                </div>
+
+                                <span className="font-bold">{entry.username}</span>
+                              </div>
+
+                              <span className="font-mono font-black text-amber-400">{entry.score.toLocaleString()} {t.unit || 'pts'}</span>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
