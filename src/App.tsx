@@ -954,6 +954,16 @@ export default function App() {
                     </div>
                   </div>
 
+                  {/* Middle Bio Box */}
+                  <div className="flex-1 bg-slate-900 border border-slate-800 p-3 rounded-xl text-xs text-slate-300 leading-relaxed max-w-md">
+                    <div className="flex items-center gap-1.5 text-cyan-400 font-bold mb-1 text-[11px] uppercase tracking-wider">
+                      <Info size={14} /> DESCRIPTION & BIO DU JEU :
+                    </div>
+                    <p className="font-sans font-medium text-slate-200 leading-snug">
+                      {activeGameObj?.description}
+                    </p>
+                  </div>
+
                   {/* Right: Record Score & Back Button */}
                   <div className="flex flex-col items-end gap-2 shrink-0">
                     <div className="flex items-center gap-3 bg-slate-900 border border-yellow-500/50 px-3 py-1.5 rounded-xl">
@@ -1084,9 +1094,19 @@ export default function App() {
                       </div>
 
                       {/* Game Title */}
-                      <h3 className="text-xl font-black font-sans uppercase tracking-wide text-white group-hover:text-cyan-300 transition-colors mb-2">
+                      <h3 className="text-xl font-black font-sans uppercase tracking-wide text-white group-hover:text-cyan-300 transition-colors">
                         {game.frenchName}
                       </h3>
+
+                      {/* --- GAME BIO & DESCRIPTION INSET PANEL --- */}
+                      <div className="mt-2.5 bg-slate-900/90 border border-slate-800 p-3 rounded-2xl shadow-inner group-hover:border-slate-700 transition-colors">
+                        <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-cyan-400 mb-1 uppercase tracking-wider">
+                          <Info size={12} /> BIO DU JEU
+                        </div>
+                        <p className="text-xs text-slate-300 font-sans leading-relaxed">
+                          {game.description}
+                        </p>
+                      </div>
                     </div>
 
                     {/* Footer Stats & Action Play Button */}
