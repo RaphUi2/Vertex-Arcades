@@ -113,6 +113,10 @@ class AudioManager {
   playGameOver() {
     this.playTone([440, 392, 349.23, 293.66, 220], [0.12, 0.12, 0.12, 0.12, 0.35], 'sawtooth', 80, 0.08);
   }
+
+  playLose() {
+    this.playGameOver();
+  }
 }
 
 export const audio = new AudioManager();

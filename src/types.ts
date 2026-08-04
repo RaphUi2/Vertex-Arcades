@@ -6,13 +6,17 @@ export interface UserProfile {
   activeSkin: string;
   title?: string;
   unlockedTitles?: string[];
-  unlockedColors?: string[];
   avatarIcon?: string;
   unlockedAvatarIcons?: string[];
   activeAura?: string;
   unlockedAuras?: string[];
   activeBanner?: string;
   unlockedBanners?: string[];
+  unlockedColors?: string[];
+  prestigeLevel?: number;
+  dailyStreak?: number;
+  lastDailyClaimTimestamp?: number;
+  lastWheelSpinTimestamp?: number;
 }
 
 export interface GameStats {
@@ -26,10 +30,10 @@ export interface GameData {
   frenchName: string;
   description: string;
   icon: string;
-  category: 'clicker' | 'memory' | 'reflex' | 'arcade' | 'puzzle';
+  category: 'clicker' | 'memory' | 'reflex' | 'arcade' | 'puzzle' | 'rhythm';
   difficulty: 'easy' | 'medium' | 'hard' | 'mythic';
   color: string; // Tailwind glow/text color
-  rarity?: 'commun' | 'rare' | 'epique' | 'divin' | 'mythique';
+  rarity?: 'commun' | 'rare' | 'epique' | 'legendaire' | 'mythique' | 'divin';
 }
 
 export interface Achievement {
@@ -104,6 +108,35 @@ export interface Tournament {
   userBestScore?: number;
 }
 
+export interface RankQuest {
+  id: string;
+  title: string;
+  description: string;
+  target: number;
+  rewardRankPts: number;
+  rewardPixels: number;
+  type: 'plays_total' | 'plays_game' | 'highscore' | 'shop_buy' | 'quests_complete' | 'pass_level';
+  gameId?: string;
+  category?: string;
+}
+
+export interface CompetitiveRank {
+  id: string;
+  name: string;
+  frenchName: string;
+  tier: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'master';
+  division: string; // e.g. "III", "II", "I", "APEX"
+  minScore: number;
+  pixelReward: number;
+  titleReward?: string;
+  badgeColor: string;
+  glowColor: string;
+  icon: string;
+  description: string;
+  perkText: string;
+  bonusMultiplier: number; // e.g. 1.05 = +5% PX
+}
+
 export interface GlobalState {
   profile: UserProfile;
   stats: Record<string, GameStats>; // gameId -> stats
@@ -112,4 +145,7 @@ export interface GlobalState {
   arcadePass?: ArcadePass;
   tournamentScores?: Record<string, number>; // tournamentId -> score
   claimedTournaments?: string[]; // IDs of tournaments where prize was claimed
+  claimedRankRewards?: string[]; // IDs of claimed rank tiers
+  rankPoints?: number; // Rank PTS starting at 0
+  claimedRankQuests?: string[]; // IDs of completed/claimed rank quests
 }
