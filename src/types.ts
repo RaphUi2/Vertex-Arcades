@@ -148,4 +148,6 @@ export interface GlobalState {
   claimedRankRewards?: string[]; // IDs of claimed rank tiers
   rankPoints?: number; // Rank PTS starting at 0
   claimedRankQuests?: string[]; // IDs of completed/claimed rank quests
+  favorites?: string[]; // Array of favorited game IDs
+  recentGames?: string[]; // Array of up to 3 recent game IDs (most recent first)
 }

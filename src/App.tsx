@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Zap, Brain, Target, Play, Grid, Layers, Shield, Cpu, Sword, PlusCircle, Grid3X3, Sparkles, Award, Trophy, User, ShoppingBag, Settings, Volume2, VolumeX, Medal, Flame, PlayCircle, Eye, Info, Check, Lock, Key, Navigation, RefreshCw, Calendar, Crown, Music, Compass, Disc
+  Zap, Brain, Target, Play, Grid, Layers, Shield, Cpu, Sword, PlusCircle, Grid3X3, Sparkles, Award, Trophy, User, ShoppingBag, Settings, Volume2, VolumeX, Medal, Flame, PlayCircle, Eye, Info, Check, Lock, Key, Navigation, RefreshCw, Calendar, Crown, Music, Compass, Disc, Star, Clock
 } from 'lucide-react';
 
 import { audio } from './utils/audio';
@@ -135,9 +135,28 @@ export default function App() {
     if (!parsed.arcadePass) {
       parsed.arcadePass = { level: 1, xp: 0, isPremium: false, claimedFreeRewards: [], claimedPremiumRewards: [] };
     }
+    if (!parsed.favorites) {
+      parsed.favorites = [];
+    }
+    if (!parsed.recentGames) {
+      parsed.recentGames = [];
+    }
 
     return parsed;
   });
+
+  const toggleFavorite = (gameId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    audio.playClick();
+    setState(prev => {
+      const currentFavs = prev.favorites || [];
+      const exists = currentFavs.includes(gameId);
+      const newFavs = exists
+        ? currentFavs.filter(id => id !== gameId)
+        : [...currentFavs, gameId];
+      return { ...prev, favorites: newFavs };
+    });
+  };
 
   const [activeGameId, setActiveGameId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -681,6 +700,11 @@ export default function App() {
   const handleLaunchGame = (gameId: string) => {
     audio.playCoin();
     setActiveGameId(gameId);
+    setState(prev => {
+      const currentRecent = prev.recentGames || [];
+      const updatedRecent = [gameId, ...currentRecent.filter(id => id !== gameId)].slice(0, 3);
+      return { ...prev, recentGames: updatedRecent };
+    });
   };
 
   const renderActiveGame = () => {
@@ -746,7 +770,10 @@ export default function App() {
   const activeSkinObj = CABINET_SKINS.find(s => s.id === state.profile.activeSkin) || CABINET_SKINS[0];
 
   const filteredGames = GAMES_LIST.filter(game => {
-    const matchesCategory = selectedCategory === 'all' || game.category === selectedCategory;
+    const matchesCategory =
+      selectedCategory === 'all' ? true :
+      selectedCategory === 'favorites' ? (state.favorites || []).includes(game.id) :
+      game.category === selectedCategory;
     const matchesSearch = !searchQuery ||
       game.frenchName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       game.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1019,17 +1046,23 @@ export default function App() {
 
               {/* Category Pills */}
               <div className="flex justify-center gap-2 flex-wrap font-mono">
-                {['all', 'clicker', 'memory', 'reflex', 'arcade', 'puzzle', 'rhythm'].map((cat) => (
+                {['all', 'favorites', 'clicker', 'memory', 'reflex', 'arcade', 'puzzle', 'rhythm'].map((cat) => (
                   <button
                     key={cat}
                     onClick={() => { audio.playClick(); setSelectedCategory(cat); }}
-                    className={`px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase border transition-all cursor-pointer ${
+                    className={`px-4 py-2 rounded-xl text-xs font-black tracking-wider uppercase border transition-all cursor-pointer flex items-center gap-1.5 ${
                       selectedCategory === cat
                         ? 'bg-cyan-500 border-cyan-400 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.35)] scale-105'
                         : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
                     }`}
                   >
                     {cat === 'all' && `TOUS LES JEUX (${GAMES_LIST.length})`}
+                    {cat === 'favorites' && (
+                      <>
+                        <Star size={13} fill={selectedCategory === 'favorites' ? 'currentColor' : (state.favorites?.length ? '#facc15' : 'none')} className={selectedCategory === 'favorites' ? '' : 'text-yellow-400'} />
+                        FAVORIS ({(state.favorites || []).length})
+                      </>
+                    )}
                     {cat === 'clicker' && 'CLICKER'}
                     {cat === 'memory' && 'MÉMORISATION'}
                     {cat === 'reflex' && 'RÉFLEXES'}
@@ -1041,10 +1074,103 @@ export default function App() {
               </div>
             </div>
 
+            {/* --- DERNIERS JEUX JOUÉS (RECENT SESSIONS) SECTION --- */}
+            {state.recentGames && state.recentGames.length > 0 && selectedCategory === 'all' && !searchQuery && (
+              <div className="max-w-6xl mx-auto mb-10 font-mono">
+                <div className="flex items-center justify-between mb-3 px-1">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-xl bg-cyan-950/80 border border-cyan-500/50 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.3)]">
+                      <Clock size={16} className="animate-pulse" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                        DERNIERS JEUX JOUÉS
+                        <span className="text-[10px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-2.5 py-0.5 rounded-full font-bold">
+                          3 DERNIÈRES SESSIONS
+                        </span>
+                      </h3>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {state.recentGames.slice(0, 3).map((gId) => {
+                    const game = GAMES_LIST.find(g => g.id === gId);
+                    if (!game) return null;
+                    const gameStats = state.stats[game.id] || { plays: 0, highScore: 0 };
+                    const isFav = (state.favorites || []).includes(game.id);
+
+                    return (
+                      <div
+                        key={`recent-${game.id}`}
+                        onClick={() => handleLaunchGame(game.id)}
+                        className="group relative bg-slate-900/95 hover:bg-slate-900 border-2 border-cyan-500/40 hover:border-cyan-400 p-4 rounded-2xl transition-all cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_25px_rgba(6,182,212,0.35)] flex flex-col justify-between"
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-700 group-hover:border-cyan-400 transition-colors">
+                              {renderIcon(game.icon, "w-5 h-5 text-cyan-300")}
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-black text-white group-hover:text-cyan-300 transition-colors">
+                                {game.frenchName}
+                              </h4>
+                              <span className="text-[9px] text-cyan-400/80 font-bold uppercase tracking-wider">
+                                {game.category}
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={(e) => toggleFavorite(game.id, e)}
+                            title={isFav ? "Retirer des favoris" : "Ajouter aux favoris"}
+                            className={`p-1.5 rounded-xl border transition-all cursor-pointer ${
+                              isFav
+                                ? 'bg-yellow-500/20 border-yellow-400 text-yellow-300 shadow-[0_0_8px_rgba(234,179,8,0.5)]'
+                                : 'bg-slate-950 border-slate-800 text-slate-500 hover:text-yellow-400 hover:border-yellow-500/50'
+                            }`}
+                          >
+                            <Star size={13} fill={isFav ? "currentColor" : "none"} />
+                          </button>
+                        </div>
+
+                        <div className="pt-2 border-t border-slate-800/90 flex items-center justify-between">
+                          <span className="text-[10px] text-slate-400 font-medium">
+                            MEILLEUR: <strong className="text-yellow-300 font-bold">{gameStats.highScore}</strong>
+                          </span>
+
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleLaunchGame(game.id); }}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500 text-slate-950 font-black text-[11px] uppercase cursor-pointer hover:bg-cyan-400 transition-all shadow-md group-hover:scale-105"
+                          >
+                            <Play size={11} fill="currentColor" /> REJOUER
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* --- REDESIGNED 100% GAME ENCADRÉS CATALOG GRID WITH STRICT RARITY COLORS --- */}
+            {filteredGames.length === 0 ? (
+              <div className="text-center py-12 px-4 font-mono bg-slate-900/60 border border-slate-800 rounded-3xl max-w-xl mx-auto">
+                <Star size={40} className="mx-auto text-yellow-400/50 mb-3 animate-pulse" />
+                <h3 className="text-lg font-black text-slate-200 uppercase mb-1">
+                  {selectedCategory === 'favorites' ? 'AUCUN JEU EN FAVORIS' : 'AUCUN JEU TROUVÉ'}
+                </h3>
+                <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                  {selectedCategory === 'favorites'
+                    ? 'Cliquez sur la petite étoile ⭐ en haut à droite d\'un jeu pour l\'ajouter à vos favoris !'
+                    : 'Ajustez votre recherche ou sélectionnez une autre catégorie.'}
+                </p>
+              </div>
+            ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {filteredGames.map((game) => {
                 const gameStats = state.stats[game.id] || { plays: 0, highScore: 0 };
+                const isFav = (state.favorites || []).includes(game.id);
 
                 // 100% Rarity Encadré Color System:
                 // Vert = Commun, Bleu = Rare, Violet = Épique, Jaune = Légendaire, Rouge = Mythique
@@ -1070,7 +1196,7 @@ export default function App() {
                     <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-cyan-400 rounded-full shadow-[0_0_6px_#22d3ee]"></div>
 
                     <div>
-                      {/* Top Marquee Header: Icon + Category & Rarity Tags */}
+                      {/* Top Marquee Header: Icon + Category & Rarity Tags + Favorite Star */}
                       <div className="flex justify-between items-center mb-3 border-b border-slate-800 pb-3">
                         <div className="flex items-center gap-2.5">
                           <div className="p-2.5 rounded-2xl bg-slate-900 border border-slate-700 group-hover:border-cyan-400 transition-colors shadow-inner">
@@ -1081,16 +1207,30 @@ export default function App() {
                           </span>
                         </div>
 
-                        {/* Rarity Tag with Strict Color Mapping */}
-                        <span className={`text-[9px] font-mono font-black px-2.5 py-1 rounded-full uppercase border tracking-widest ${
-                          game.rarity === 'mythique' ? 'bg-red-950 text-red-300 border-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]' :
-                          game.rarity === 'legendaire' ? 'bg-yellow-950 text-yellow-300 border-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]' :
-                          game.rarity === 'epique' ? 'bg-purple-950 text-purple-300 border-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]' :
-                          game.rarity === 'rare' ? 'bg-blue-950 text-blue-300 border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]' :
-                          'bg-emerald-950 text-emerald-300 border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]'
-                        }`}>
-                          {game.rarity}
-                        </span>
+                        {/* Rarity Tag & Favorite Star Button */}
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[9px] font-mono font-black px-2.5 py-1 rounded-full uppercase border tracking-widest ${
+                            game.rarity === 'mythique' ? 'bg-red-950 text-red-300 border-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.5)]' :
+                            game.rarity === 'legendaire' ? 'bg-yellow-950 text-yellow-300 border-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]' :
+                            game.rarity === 'epique' ? 'bg-purple-950 text-purple-300 border-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]' :
+                            game.rarity === 'rare' ? 'bg-blue-950 text-blue-300 border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]' :
+                            'bg-emerald-950 text-emerald-300 border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]'
+                          }`}>
+                            {game.rarity}
+                          </span>
+
+                          <button
+                            onClick={(e) => toggleFavorite(game.id, e)}
+                            title={isFav ? "Retirer des favoris" : "Ajouter aux favoris"}
+                            className={`p-1.5 rounded-xl border transition-all cursor-pointer ${
+                              isFav
+                                ? 'bg-yellow-500/20 border-yellow-400 text-yellow-300 shadow-[0_0_12px_rgba(234,179,8,0.6)] scale-105'
+                                : 'bg-slate-900 border-slate-700 text-slate-500 hover:text-yellow-400 hover:border-yellow-500/50'
+                            }`}
+                          >
+                            <Star size={14} fill={isFav ? "currentColor" : "none"} className={isFav ? "text-yellow-400" : ""} />
+                          </button>
+                        </div>
                       </div>
 
                       {/* Game Title */}
@@ -1134,7 +1274,8 @@ export default function App() {
                 );
               })}
             </div>
-          </div>
+          )}
+        </div>
         )}
       </main>
 
