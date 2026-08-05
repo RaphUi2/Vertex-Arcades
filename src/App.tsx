@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Zap, Brain, Target, Play, Grid, Layers, Shield, Cpu, Sword, PlusCircle, Grid3X3, Sparkles, Award, Trophy, User, ShoppingBag, Settings, Volume2, VolumeX, Medal, Flame, PlayCircle, Eye, Info, Check, Lock, Key, Navigation, RefreshCw, Calendar, Crown, Music, Compass, Disc, Star, Clock
+  Zap, Brain, Target, Play, Grid, Layers, Shield, Cpu, Sword, PlusCircle, Grid3X3, Sparkles, Award, Trophy, User, ShoppingBag, Settings, Volume2, VolumeX, Medal, Flame, PlayCircle, Eye, Info, Check, Lock, Key, Navigation, RefreshCw, Calendar, Crown, Music, Compass, Disc, Star, Clock, Tv
 } from 'lucide-react';
 
 import { audio } from './utils/audio';
@@ -23,8 +23,11 @@ import {
   RANK_QUESTS
 } from './gamesData';
 
-import { Avatar3DViewer } from './components/Avatar3DViewer';
+import { ArcadeBackgroundCanvas } from './components/ArcadeBackgroundCanvas';
 import { AchievementToast } from './components/AchievementToast';
+import { WheelOfFortuneModal } from './components/WheelOfFortuneModal';
+import { LootBoxesModal } from './components/LootBoxesModal';
+import { ArcadePassModal } from './components/ArcadePassModal';
 
 // Mini games imports
 import NeonClicker from './games/NeonClicker';
@@ -164,6 +167,7 @@ export default function App() {
   const [activeGameId, setActiveGameId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [soundOn, setSoundOn] = useState(true);
+  const [scanlinesOn, setScanlinesOn] = useState(true);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showShopModal, setShowShopModal] = useState(false);
   const [shopTab, setShopTab] = useState<'skins' | 'auras' | 'titles' | 'banners' | 'icons' | 'colors'>('skins');
@@ -801,11 +805,13 @@ export default function App() {
 
   return (
     <div className={`min-h-screen text-slate-100 flex flex-col font-sans select-none relative overflow-x-hidden pb-10 transition-colors duration-500 ${activeSkinObj.bgGradient}`}>
-      {/* Background grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none"></div>
+      {/* Dynamic 3D Arcade Perspective Grid & Particle Embers Canvas */}
+      <ArcadeBackgroundCanvas />
 
       {/* Retro CRT Scanline overlay effect */}
-      <div className="fixed inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[size:100%_4px,6px_100%] pointer-events-none z-50"></div>
+      {scanlinesOn && (
+        <div className="fixed inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[size:100%_4px,6px_100%] pointer-events-none z-50"></div>
+      )}
 
       {/* Global Toast Notification */}
       <AnimatePresence>
@@ -825,11 +831,11 @@ export default function App() {
       </AnimatePresence>
 
       {/* Top Header Bar */}
-      <header className="border-b-2 border-cyan-500/30 bg-slate-950/95 backdrop-blur-xl sticky top-0 z-40 shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+      <header className="border-b-2 border-cyan-500/40 bg-slate-950/90 backdrop-blur-xl sticky top-0 z-40 shadow-[0_10px_35px_rgba(6,182,212,0.2)]">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-3">
           {/* Top Row: Left Actions, CENTERED Brand & Logo, Right PX Balance */}
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 border-b border-slate-800/80 pb-2.5">
-            {/* Left: Sound & Profile */}
+            {/* Left: Sound, Scanlines & Profile */}
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={toggleSound}
@@ -837,6 +843,18 @@ export default function App() {
                 title={soundOn ? 'Muter le son' : 'Activer le son'}
               >
                 {soundOn ? <Volume2 size={16} className="text-cyan-400" /> : <VolumeX size={16} className="text-red-400" />}
+              </button>
+
+              <button
+                onClick={() => setScanlinesOn(!scanlinesOn)}
+                className={`p-2 rounded-xl border transition-all cursor-pointer shadow-md text-xs font-mono font-bold flex items-center gap-1 ${
+                  scanlinesOn
+                    ? 'border-cyan-500/80 bg-cyan-950/80 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.3)]'
+                    : 'border-slate-800 bg-slate-900 text-slate-500 hover:text-slate-300'
+                }`}
+                title="Basculer l'effet Scanlines CRT Retro Arcade"
+              >
+                <Tv size={16} /> <span className="hidden md:inline">CRT</span>
               </button>
 
               {(() => {
@@ -1342,14 +1360,31 @@ export default function App() {
               </button>
             </div>
 
-            {/* 3D Holographic Avatar Showcase */}
-            <div className="mb-4">
-              <Avatar3DViewer
-                avatarColor={selectedAvatarColorInput}
-                avatarIcon={selectedAvatarIconInput}
-                activeAura={selectedAuraInput}
-                username={usernameInput || state.profile.username}
-              />
+            {/* Profile Avatar Showcase Badge */}
+            <div className="mb-4 bg-slate-900/90 border-2 border-cyan-500/60 p-4 rounded-2xl flex items-center justify-between shadow-[0_0_20px_rgba(6,182,212,0.2)]">
+              <div className="flex items-center gap-3">
+                {(() => {
+                  const colorHex = AVATAR_COLORS_SHOP.find(c => c.id === selectedAvatarColorInput)?.hex || '#06b6d4';
+                  const auraObj = AURA_COSMETICS.find(a => a.id === selectedAuraInput) || AURA_COSMETICS[0];
+                  return (
+                    <div
+                      className={`w-14 h-14 rounded-2xl border-2 flex items-center justify-center relative ${auraObj.glowClass}`}
+                      style={{ backgroundColor: colorHex }}
+                    >
+                      {renderIcon(selectedAvatarIconInput || 'Crown', "w-8 h-8 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]")}
+                    </div>
+                  );
+                })()}
+                <div>
+                  <h4 className="text-sm font-black text-white uppercase tracking-wider">{usernameInput || state.profile.username}</h4>
+                  <p className="text-[10px] text-cyan-300 font-mono font-bold mt-0.5">MEMBER ID: #{state.profile.username.slice(0, 6).toUpperCase()}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-[9px] bg-cyan-950 border border-cyan-400 text-cyan-300 font-bold px-2.5 py-1 rounded-lg uppercase">
+                  AVATAR ARCADE 2D
+                </span>
+              </div>
             </div>
 
             {/* Profile Navigation Tabs */}
@@ -1534,1226 +1569,1319 @@ export default function App() {
       )}
 
       {/* --- Shop Modal --- */}
-      {showShopModal && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-mono">
-          <div className="bg-slate-950 border-2 border-cyan-500 p-6 rounded-2xl w-full max-w-3xl text-white relative max-h-[85vh] flex flex-col shadow-[0_0_40px_rgba(6,182,212,0.25)]">
-            <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-black text-cyan-400 uppercase tracking-widest flex items-center gap-2">
-                <ShoppingBag size={20} /> BOUTIQUE D'ARCADE VERTEX
-              </h3>
-              <button
-                onClick={() => setShowShopModal(false)}
-                className="text-slate-400 hover:text-white font-bold cursor-pointer text-sm"
-              >
-                ✕ FERMER
-              </button>
-            </div>
+      <AnimatePresence>
+        {showShopModal && (
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-5 font-mono select-none">
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.85, opacity: 0, y: 30 }}
+              className="bg-slate-950 border-2 border-cyan-400 p-5 sm:p-6 rounded-3xl w-full max-w-4xl text-white relative max-h-[90vh] flex flex-col shadow-[0_0_60px_rgba(6,182,212,0.35)] overflow-hidden"
+            >
+              {/* Background ambient neon rays */}
+              <div className="absolute -top-20 -left-20 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
+              <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
 
-            {/* Shop Tabs */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              <button
-                onClick={() => setShopTab('skins')}
-                className={`px-3 py-2 text-xs font-bold rounded-lg border cursor-pointer ${shopTab === 'skins' ? 'bg-cyan-950 border-cyan-400 text-cyan-300' : 'bg-slate-900 border-slate-800 text-slate-400'}`}
-              >
-                🕹️ THÈMES ({CABINET_SKINS.length})
-              </button>
-              <button
-                onClick={() => setShopTab('auras')}
-                className={`px-3 py-2 text-xs font-bold rounded-lg border cursor-pointer ${shopTab === 'auras' ? 'bg-purple-950 border-purple-400 text-purple-300' : 'bg-slate-900 border-slate-800 text-slate-400'}`}
-              >
-                ✨ AURAS ({AURA_COSMETICS.length})
-              </button>
-              <button
-                onClick={() => setShopTab('titles')}
-                className={`px-3 py-2 text-xs font-bold rounded-lg border cursor-pointer ${shopTab === 'titles' ? 'bg-amber-950 border-amber-400 text-amber-300' : 'bg-slate-900 border-slate-800 text-slate-400'}`}
-              >
-                🎖️ TITRES ({SHOP_TITLES.length})
-              </button>
-              <button
-                onClick={() => setShopTab('banners')}
-                className={`px-3 py-2 text-xs font-bold rounded-lg border cursor-pointer ${shopTab === 'banners' ? 'bg-rose-950 border-rose-400 text-rose-300' : 'bg-slate-900 border-slate-800 text-slate-400'}`}
-              >
-                🎨 BANNIÈRES ({TITLE_BANNERS.length})
-              </button>
-              <button
-                onClick={() => setShopTab('icons')}
-                className={`px-3 py-2 text-xs font-bold rounded-lg border cursor-pointer ${shopTab === 'icons' ? 'bg-emerald-950 border-emerald-400 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-400'}`}
-              >
-                🖼️ AVATARS ({AVATAR_ICONS_SHOP.length})
-              </button>
-              <button
-                onClick={() => setShopTab('colors')}
-                className={`px-3 py-2 text-xs font-bold rounded-lg border cursor-pointer ${shopTab === 'colors' ? 'bg-yellow-950 border-yellow-400 text-yellow-300' : 'bg-slate-900 border-slate-800 text-slate-400'}`}
-              >
-                🎨 COULEURS ({AVATAR_COLORS_SHOP.length})
-              </button>
-            </div>
-
-            {/* Tab Content */}
-            <div className="flex-1 overflow-y-auto pr-1 space-y-3">
-              {shopTab === 'skins' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {CABINET_SKINS.map((skin) => {
-                    const isUnlocked = state.profile.unlockedSkins.includes(skin.id);
-                    const isActive = state.profile.activeSkin === skin.id;
-
-                    return (
-                      <div key={skin.id} className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex flex-col justify-between">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <div className="w-5 h-5 rounded border border-white/20 shadow-sm" style={{ backgroundColor: skin.colorPreview }}></div>
-                            <p className="font-bold text-sm text-slate-200">{skin.name}</p>
-                          </div>
-                          <p className="text-[10px] text-slate-400">Thème personnalisé pour votre borne de jeu.</p>
-                        </div>
-                        <div className="mt-3 flex justify-between items-center bg-slate-950/80 p-2 rounded-lg border border-slate-800">
-                          <span className="text-xs text-yellow-400 font-bold">{skin.cost === 0 ? 'GRATUIT' : `${skin.cost} PX`}</span>
-                          {isActive ? (
-                            <span className="text-[10px] bg-cyan-950 text-cyan-400 px-2 py-1 rounded border border-cyan-800 font-bold">ÉQUIPÉ</span>
-                          ) : isUnlocked ? (
-                            <button onClick={() => useSkin(skin.id)} className="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded text-cyan-300 cursor-pointer font-bold">ÉQUIPER</button>
-                          ) : (
-                            <button onClick={() => buySkin(skin.id, skin.cost)} className="text-xs bg-yellow-500 hover:bg-yellow-400 text-slate-950 px-3 py-1 rounded font-bold cursor-pointer">ACHETER</button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {shopTab === 'auras' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {AURA_COSMETICS.map((aura) => {
-                    const isUnlocked = (state.profile.unlockedAuras || ['none']).includes(aura.id);
-                    const isActive = state.profile.activeAura === aura.id;
-
-                    return (
-                      <div key={aura.id} className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex flex-col justify-between">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className={`w-10 h-10 rounded-xl border flex items-center justify-center bg-slate-950 shrink-0 ${aura.glowClass}`}>
-                            <Zap size={18} className="text-white" />
-                          </div>
-                          <div>
-                            <p className="font-bold text-sm text-slate-200">{aura.name}</p>
-                            <p className="text-[10px] text-slate-400">{aura.desc}</p>
-                          </div>
-                        </div>
-                        <div className="flex justify-between items-center bg-slate-950/80 p-2 rounded-lg border border-slate-800 mt-2">
-                          <span className="text-xs text-yellow-400 font-bold">{aura.cost === 0 ? 'GRATUIT' : `${aura.cost} PX`}</span>
-                          {isActive ? (
-                            <span className="text-[10px] bg-purple-950 text-purple-400 px-2 py-1 rounded border border-purple-800 font-bold">ÉQUIPÉ</span>
-                          ) : isUnlocked ? (
-                            <button onClick={() => useAura(aura.id)} className="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded text-purple-300 cursor-pointer font-bold">ÉQUIPER</button>
-                          ) : (
-                            <button onClick={() => buyAura(aura.id, aura.cost)} className="text-xs bg-yellow-500 hover:bg-yellow-400 text-slate-950 px-3 py-1 rounded font-bold cursor-pointer">ACHETER</button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {shopTab === 'titles' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {SHOP_TITLES.map((t) => {
-                    const isUnlocked = (state.profile.unlockedTitles || ['DÉBUTANT']).includes(t.title);
-                    const isActive = state.profile.title === t.title;
-
-                    return (
-                      <div key={t.id} className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex justify-between items-center">
-                        <div>
-                          <p className="font-bold text-sm text-yellow-400">{t.title}</p>
-                          <p className="text-[10px] text-slate-400">Titre honorifique de profil</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-yellow-400 font-bold">{t.cost} PX</span>
-                          {isActive ? (
-                            <span className="text-[10px] bg-amber-950 text-amber-400 px-2 py-1 rounded border border-amber-800 font-bold">ÉQUIPÉ</span>
-                          ) : isUnlocked ? (
-                            <button onClick={() => equipTitle(t.title)} className="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded text-amber-300 cursor-pointer font-bold">ÉQUIPER</button>
-                          ) : (
-                            <button onClick={() => buyTitle(t.title, t.cost)} className="text-xs bg-yellow-500 hover:bg-yellow-400 text-slate-950 px-3 py-1 rounded font-bold cursor-pointer">ACHETER</button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {shopTab === 'banners' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {TITLE_BANNERS.map((b) => {
-                    const isUnlocked = (state.profile.unlockedBanners || ['banner_neon']).includes(b.id);
-                    const isActive = state.profile.activeBanner === b.id;
-
-                    return (
-                      <div key={b.id} className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex flex-col justify-between">
-                        <div className={`h-10 rounded-lg mb-2 ${b.gradient} flex items-center justify-center font-bold text-xs text-white shadow-md`}>
-                          {b.name}
-                        </div>
-                        <div className="flex justify-between items-center bg-slate-950/80 p-2 rounded-lg border border-slate-800">
-                          <span className="text-xs text-yellow-400 font-bold">{b.cost === 0 ? 'GRATUIT' : `${b.cost} PX`}</span>
-                          {isActive ? (
-                            <span className="text-[10px] bg-rose-950 text-rose-400 px-2 py-1 rounded border border-rose-800 font-bold">ÉQUIPÉ</span>
-                          ) : isUnlocked ? (
-                            <button onClick={() => useBanner(b.id)} className="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded text-rose-300 cursor-pointer font-bold">ÉQUIPER</button>
-                          ) : (
-                            <button onClick={() => buyBanner(b.id, b.cost)} className="text-xs bg-yellow-500 hover:bg-yellow-400 text-slate-950 px-3 py-1 rounded font-bold cursor-pointer">ACHETER</button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {shopTab === 'icons' && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {AVATAR_ICONS_SHOP.map((iconObj) => {
-                    const isUnlocked = (state.profile.unlockedAvatarIcons || ['Crown', 'Zap']).includes(iconObj.id);
-                    const isActive = state.profile.avatarIcon === iconObj.id;
-
-                    return (
-                      <div key={iconObj.id} className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex flex-col items-center text-center">
-                        <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl text-cyan-400 my-1">
-                          {renderIcon(iconObj.id, "w-6 h-6")}
-                        </div>
-                        <p className="text-xs font-bold text-slate-200 mt-1">{iconObj.name}</p>
-                        <div className="mt-2 w-full flex justify-between items-center bg-slate-950/80 p-1.5 rounded-lg border border-slate-800">
-                          <span className="text-[10px] text-yellow-400 font-bold">{iconObj.cost === 0 ? 'GRATUIT' : `${iconObj.cost} PX`}</span>
-                          {isActive ? (
-                            <span className="text-[9px] bg-cyan-950 text-cyan-400 px-2 py-0.5 rounded border border-cyan-800 font-bold">ÉQUIPÉ</span>
-                          ) : isUnlocked ? (
-                            <button onClick={() => { setState(p => ({ ...p, profile: { ...p.profile, avatarIcon: iconObj.id } })); }} className="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded text-cyan-300 cursor-pointer font-bold">ÉQUIPER</button>
-                          ) : (
-                            <button onClick={() => buyAvatarIcon(iconObj.id, iconObj.cost)} className="text-[10px] bg-yellow-500 hover:bg-yellow-400 text-slate-950 px-2 py-0.5 rounded font-bold cursor-pointer">ACHETER</button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {shopTab === 'colors' && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {AVATAR_COLORS_SHOP.map((colorObj) => {
-                    const isUnlocked = (state.profile.unlockedColors || ['cyan']).includes(colorObj.id);
-                    const isActive = state.profile.avatarColor === colorObj.id;
-
-                    return (
-                      <div key={colorObj.id} className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex flex-col items-center text-center">
-                        <div className="w-8 h-8 rounded-full border-2 border-white/30 my-1 shadow-md" style={{ backgroundColor: colorObj.hex }}></div>
-                        <p className="text-xs font-bold text-slate-200 mt-1">{colorObj.name}</p>
-                        <div className="mt-2 w-full flex justify-between items-center bg-slate-950/80 p-1.5 rounded-lg border border-slate-800">
-                          <span className="text-[10px] text-yellow-400 font-bold">{colorObj.cost === 0 ? 'GRATUIT' : `${colorObj.cost} PX`}</span>
-                          {isActive ? (
-                            <span className="text-[9px] bg-cyan-950 text-cyan-400 px-2 py-0.5 rounded border border-cyan-800 font-bold">ÉQUIPÉ</span>
-                          ) : isUnlocked ? (
-                            <button onClick={() => { setState(p => ({ ...p, profile: { ...p.profile, avatarColor: colorObj.id } })); }} className="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded text-cyan-300 cursor-pointer font-bold">ÉQUIPER</button>
-                          ) : (
-                            <button onClick={() => buyAvatarColor(colorObj.id, colorObj.cost)} className="text-[10px] bg-yellow-500 hover:bg-yellow-400 text-slate-950 px-2 py-0.5 rounded font-bold cursor-pointer">ACHETER</button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* --- GALERIE DES TROPHÉES (TROPHY GALLERY SHOWCASE) --- */}
-      {showAchievementsModal && (() => {
-        const totalCount = state.achievements.length;
-        const unlockedCount = state.achievements.filter(a => a.isUnlocked).length;
-        const percentUnlocked = Math.round((unlockedCount / (totalCount || 1)) * 100);
-        const totalPixelsFromAch = state.achievements
-          .filter(a => a.isUnlocked)
-          .reduce((sum, a) => sum + (a.pixelReward || 0), 0);
-
-        const displayedAch = state.achievements.filter(a => {
-          if (achievementsFilter === 'unlocked') return a.isUnlocked;
-          if (achievementsFilter === 'locked') return !a.isUnlocked;
-          return true;
-        });
-
-        return (
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-5 font-mono">
-            <div className="bg-slate-950 border-2 border-yellow-500/80 p-5 sm:p-6 rounded-3xl w-full max-w-5xl text-white relative max-h-[90vh] flex flex-col shadow-[0_0_50px_rgba(234,179,8,0.25)] overflow-hidden">
-              {/* Header */}
-              <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 shrink-0">
+              <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 shrink-0 relative z-10">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-yellow-500/10 border-2 border-yellow-400 text-yellow-300 rounded-2xl shadow-[0_0_20px_rgba(234,179,8,0.3)]">
-                    <Trophy size={24} className="animate-bounce" />
+                  <div className="p-3 bg-cyan-950 border-2 border-cyan-400 text-cyan-300 rounded-2xl shadow-[0_0_15px_rgba(6,182,212,0.5)]">
+                    <ShoppingBag size={24} className="animate-bounce" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-500 uppercase tracking-wider flex items-center gap-2">
-                      GALERIE DES TROPHÉES
+                    <h3 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-200 to-purple-400 uppercase tracking-widest flex items-center gap-2">
+                      BOUTIQUE D'ARCADE VERTEX 🛒
                     </h3>
-                    <p className="text-[11px] text-slate-400 font-sans font-medium">
-                      Vitrine des {totalCount} succès d'arcade • Cliquez sur une médaille pour l'examiner
+                    <p className="text-[11px] text-slate-400 font-sans">
+                      Personnalisez votre borne, votre avatar et débloquez des cosmetics légendaires !
                     </p>
                   </div>
                 </div>
 
                 <button
-                  onClick={() => { audio.playClick(); setShowAchievementsModal(false); setSelectedAchievement(null); }}
-                  className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-yellow-400 text-slate-300 hover:text-white font-bold cursor-pointer text-xs transition-all"
+                  onClick={() => { audio.playClick(); setShowShopModal(false); }}
+                  className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-white font-bold cursor-pointer text-xs transition-all"
                 >
                   ✕ FERMER
                 </button>
               </div>
 
-              {/* Progress & Stats Showcase Banner */}
-              <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-2xl mb-4 shrink-0 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div className="w-full sm:w-2/3">
-                  <div className="flex justify-between items-center text-xs font-bold mb-1.5">
-                    <span className="text-yellow-300 uppercase flex items-center gap-1.5">
-                      <Award size={14} /> PROGRESSION DES TROPHÉES
-                    </span>
-                    <span className="text-slate-300">
-                      <strong className="text-yellow-400">{unlockedCount}</strong> / {totalCount} ({percentUnlocked}%)
-                    </span>
+              {/* Shop Tabs */}
+              <div className="flex flex-wrap gap-2 mb-4 shrink-0 relative z-10">
+                <button
+                  onClick={() => { audio.playClick(); setShopTab('skins'); }}
+                  className={`px-3.5 py-2 text-xs font-black rounded-xl border cursor-pointer uppercase transition-all ${shopTab === 'skins' ? 'bg-cyan-500 text-slate-950 border-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.5)]' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'}`}
+                >
+                  🕹️ THÈMES ({CABINET_SKINS.length})
+                </button>
+                <button
+                  onClick={() => { audio.playClick(); setShopTab('auras'); }}
+                  className={`px-3.5 py-2 text-xs font-black rounded-xl border cursor-pointer uppercase transition-all ${shopTab === 'auras' ? 'bg-purple-500 text-slate-950 border-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.5)]' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'}`}
+                >
+                  ✨ AURAS ({AURA_COSMETICS.length})
+                </button>
+                <button
+                  onClick={() => { audio.playClick(); setShopTab('titles'); }}
+                  className={`px-3.5 py-2 text-xs font-black rounded-xl border cursor-pointer uppercase transition-all ${shopTab === 'titles' ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.5)]' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'}`}
+                >
+                  🎖️ TITRES ({SHOP_TITLES.length})
+                </button>
+                <button
+                  onClick={() => { audio.playClick(); setShopTab('banners'); }}
+                  className={`px-3.5 py-2 text-xs font-black rounded-xl border cursor-pointer uppercase transition-all ${shopTab === 'banners' ? 'bg-rose-500 text-slate-950 border-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.5)]' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'}`}
+                >
+                  🎨 BANNIÈRES ({TITLE_BANNERS.length})
+                </button>
+                <button
+                  onClick={() => { audio.playClick(); setShopTab('icons'); }}
+                  className={`px-3.5 py-2 text-xs font-black rounded-xl border cursor-pointer uppercase transition-all ${shopTab === 'icons' ? 'bg-emerald-500 text-slate-950 border-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'}`}
+                >
+                  🖼️ AVATARS ({AVATAR_ICONS_SHOP.length})
+                </button>
+                <button
+                  onClick={() => { audio.playClick(); setShopTab('colors'); }}
+                  className={`px-3.5 py-2 text-xs font-black rounded-xl border cursor-pointer uppercase transition-all ${shopTab === 'colors' ? 'bg-yellow-400 text-slate-950 border-yellow-300 shadow-[0_0_15px_rgba(250,204,21,0.5)]' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'}`}
+                >
+                  🎨 COULEURS ({AVATAR_COLORS_SHOP.length})
+                </button>
+              </div>
+
+              {/* Tab Content */}
+              <div className="flex-1 overflow-y-auto pr-1 space-y-3 relative z-10">
+                {shopTab === 'skins' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {CABINET_SKINS.map((skin) => {
+                      const isUnlocked = state.profile.unlockedSkins.includes(skin.id);
+                      const isActive = state.profile.activeSkin === skin.id;
+
+                      return (
+                        <motion.div
+                          key={skin.id}
+                          whileHover={{ scale: 1.02 }}
+                          className={`p-3.5 rounded-2xl border transition-all flex flex-col justify-between ${
+                            isActive
+                              ? 'bg-cyan-950/60 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.25)]'
+                              : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'
+                          }`}
+                        >
+                          <div>
+                            <div className="flex items-center gap-2.5 mb-1.5">
+                              <div className="w-6 h-6 rounded-lg border-2 border-white/30 shadow-md" style={{ backgroundColor: skin.colorPreview }}></div>
+                              <p className="font-black text-sm text-white">{skin.name}</p>
+                            </div>
+                            <p className="text-[11px] text-slate-300 font-sans">Thème visuel néon personnalisé pour votre borne de jeu d'arcade.</p>
+                          </div>
+                          <div className="mt-3 flex justify-between items-center bg-slate-950/90 p-2.5 rounded-xl border border-slate-800">
+                            <span className="text-xs text-yellow-400 font-black">{skin.cost === 0 ? 'GRATUIT' : `${skin.cost} PX`}</span>
+                            {isActive ? (
+                              <span className="text-[10px] bg-cyan-950 text-cyan-300 px-3 py-1 rounded-lg border border-cyan-700 font-black uppercase">ÉQUIPÉ</span>
+                            ) : isUnlocked ? (
+                              <button onClick={() => useSkin(skin.id)} className="text-xs bg-slate-800 hover:bg-slate-700 px-3.5 py-1.5 rounded-lg text-cyan-300 cursor-pointer font-black uppercase">ÉQUIPER</button>
+                            ) : (
+                              <button onClick={() => buySkin(skin.id, skin.cost)} className="text-xs bg-yellow-400 hover:bg-yellow-300 text-slate-950 px-3.5 py-1.5 rounded-lg font-black cursor-pointer uppercase shadow-[0_0_10px_rgba(250,204,21,0.4)]">ACHETER</button>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
                   </div>
-                  <div className="w-full h-3 bg-slate-950 border border-slate-800 rounded-full overflow-hidden p-0.5">
+                )}
+
+                {shopTab === 'auras' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {AURA_COSMETICS.map((aura) => {
+                      const isUnlocked = (state.profile.unlockedAuras || ['none']).includes(aura.id);
+                      const isActive = state.profile.activeAura === aura.id;
+
+                      return (
+                        <motion.div
+                          key={aura.id}
+                          whileHover={{ scale: 1.02 }}
+                          className={`p-3.5 rounded-2xl border transition-all flex flex-col justify-between ${
+                            isActive
+                              ? 'bg-purple-950/60 border-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.25)]'
+                              : 'bg-slate-900/80 border-slate-800 hover:border-slate-700'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className={`w-11 h-11 rounded-2xl border flex items-center justify-center bg-slate-950 shrink-0 ${aura.glowClass}`}>
+                              <Zap size={20} className="text-white animate-pulse" />
+                            </div>
+                            <div>
+                              <p className="font-black text-sm text-white">{aura.name}</p>
+                              <p className="text-[11px] text-slate-300 font-sans">{aura.desc}</p>
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center bg-slate-950/90 p-2.5 rounded-xl border border-slate-800 mt-2">
+                            <span className="text-xs text-yellow-400 font-black">{aura.cost === 0 ? 'GRATUIT' : `${aura.cost} PX`}</span>
+                            {isActive ? (
+                              <span className="text-[10px] bg-purple-950 text-purple-300 px-3 py-1 rounded-lg border border-purple-700 font-black uppercase">ÉQUIPÉ</span>
+                            ) : isUnlocked ? (
+                              <button onClick={() => useAura(aura.id)} className="text-xs bg-slate-800 hover:bg-slate-700 px-3.5 py-1.5 rounded-lg text-purple-300 cursor-pointer font-black uppercase">ÉQUIPER</button>
+                            ) : (
+                              <button onClick={() => buyAura(aura.id, aura.cost)} className="text-xs bg-yellow-400 hover:bg-yellow-300 text-slate-950 px-3.5 py-1.5 rounded-lg font-black cursor-pointer uppercase shadow-[0_0_10px_rgba(250,204,21,0.4)]">ACHETER</button>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {shopTab === 'titles' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {SHOP_TITLES.map((t) => {
+                      const isUnlocked = (state.profile.unlockedTitles || ['DÉBUTANT']).includes(t.title);
+                      const isActive = state.profile.title === t.title;
+
+                      return (
+                        <motion.div
+                          key={t.id}
+                          whileHover={{ scale: 1.02 }}
+                          className="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-800 flex justify-between items-center"
+                        >
+                          <div>
+                            <p className="font-black text-sm text-yellow-300">{t.title}</p>
+                            <p className="text-[10px] text-slate-400">Titre honorifique d'arcade</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-yellow-400 font-black">{t.cost} PX</span>
+                            {isActive ? (
+                              <span className="text-[10px] bg-amber-950 text-amber-300 px-3 py-1 rounded-lg border border-amber-700 font-black uppercase">ÉQUIPÉ</span>
+                            ) : isUnlocked ? (
+                              <button onClick={() => equipTitle(t.title)} className="text-xs bg-slate-800 hover:bg-slate-700 px-3.5 py-1.5 rounded-lg text-amber-300 cursor-pointer font-black uppercase">ÉQUIPER</button>
+                            ) : (
+                              <button onClick={() => buyTitle(t.title, t.cost)} className="text-xs bg-yellow-400 hover:bg-yellow-300 text-slate-950 px-3.5 py-1.5 rounded-lg font-black cursor-pointer uppercase shadow-[0_0_10px_rgba(250,204,21,0.4)]">ACHETER</button>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {shopTab === 'banners' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {TITLE_BANNERS.map((b) => {
+                      const isUnlocked = (state.profile.unlockedBanners || ['banner_neon']).includes(b.id);
+                      const isActive = state.profile.activeBanner === b.id;
+
+                      return (
+                        <motion.div
+                          key={b.id}
+                          whileHover={{ scale: 1.02 }}
+                          className="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-800 flex flex-col justify-between"
+                        >
+                          <div className={`h-12 rounded-xl mb-2.5 ${b.gradient} flex items-center justify-center font-black text-xs text-white shadow-lg`}>
+                            {b.name}
+                          </div>
+                          <div className="flex justify-between items-center bg-slate-950/90 p-2.5 rounded-xl border border-slate-800">
+                            <span className="text-xs text-yellow-400 font-black">{b.cost === 0 ? 'GRATUIT' : `${b.cost} PX`}</span>
+                            {isActive ? (
+                              <span className="text-[10px] bg-rose-950 text-rose-300 px-3 py-1 rounded-lg border border-rose-700 font-black uppercase">ÉQUIPÉ</span>
+                            ) : isUnlocked ? (
+                              <button onClick={() => useBanner(b.id)} className="text-xs bg-slate-800 hover:bg-slate-700 px-3.5 py-1.5 rounded-lg text-rose-300 cursor-pointer font-black uppercase">ÉQUIPER</button>
+                            ) : (
+                              <button onClick={() => buyBanner(b.id, b.cost)} className="text-xs bg-yellow-400 hover:bg-yellow-300 text-slate-950 px-3.5 py-1.5 rounded-lg font-black cursor-pointer uppercase shadow-[0_0_10px_rgba(250,204,21,0.4)]">ACHETER</button>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {shopTab === 'icons' && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
+                    {AVATAR_ICONS_SHOP.map((iconObj) => {
+                      const isUnlocked = (state.profile.unlockedAvatarIcons || ['Crown', 'Zap']).includes(iconObj.id);
+                      const isActive = state.profile.avatarIcon === iconObj.id;
+
+                      return (
+                        <motion.div
+                          key={iconObj.id}
+                          whileHover={{ scale: 1.03 }}
+                          className="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-800 flex flex-col items-center text-center"
+                        >
+                          <div className="p-3.5 bg-slate-950 border border-slate-800 rounded-2xl text-cyan-300 my-1 shadow-inner">
+                            {renderIcon(iconObj.id, "w-7 h-7")}
+                          </div>
+                          <p className="text-xs font-black text-white mt-1">{iconObj.name}</p>
+                          <div className="mt-2.5 w-full flex justify-between items-center bg-slate-950/90 p-2 rounded-xl border border-slate-800">
+                            <span className="text-[10px] text-yellow-400 font-black">{iconObj.cost === 0 ? 'GRATUIT' : `${iconObj.cost} PX`}</span>
+                            {isActive ? (
+                              <span className="text-[9px] bg-cyan-950 text-cyan-300 px-2 py-0.5 rounded-lg border border-cyan-800 font-black uppercase">ÉQUIPÉ</span>
+                            ) : isUnlocked ? (
+                              <button onClick={() => { setState(p => ({ ...p, profile: { ...p.profile, avatarIcon: iconObj.id } })); }} className="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded-lg text-cyan-300 cursor-pointer font-black uppercase">ÉQUIPER</button>
+                            ) : (
+                              <button onClick={() => buyAvatarIcon(iconObj.id, iconObj.cost)} className="text-[10px] bg-yellow-400 hover:bg-yellow-300 text-slate-950 px-2 py-0.5 rounded-lg font-black cursor-pointer uppercase shadow-[0_0_10px_rgba(250,204,21,0.4)]">ACHETER</button>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {shopTab === 'colors' && (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
+                    {AVATAR_COLORS_SHOP.map((colorObj) => {
+                      const isUnlocked = (state.profile.unlockedColors || ['cyan']).includes(colorObj.id);
+                      const isActive = state.profile.avatarColor === colorObj.id;
+
+                      return (
+                        <motion.div
+                          key={colorObj.id}
+                          whileHover={{ scale: 1.03 }}
+                          className="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-800 flex flex-col items-center text-center"
+                        >
+                          <div className="w-10 h-10 rounded-full border-2 border-white/40 my-1 shadow-lg" style={{ backgroundColor: colorObj.hex }}></div>
+                          <p className="text-xs font-black text-white mt-1">{colorObj.name}</p>
+                          <div className="mt-2.5 w-full flex justify-between items-center bg-slate-950/90 p-2 rounded-xl border border-slate-800">
+                            <span className="text-[10px] text-yellow-400 font-black">{colorObj.cost === 0 ? 'GRATUIT' : `${colorObj.cost} PX`}</span>
+                            {isActive ? (
+                              <span className="text-[9px] bg-cyan-950 text-cyan-300 px-2 py-0.5 rounded-lg border border-cyan-800 font-black uppercase">ÉQUIPÉ</span>
+                            ) : isUnlocked ? (
+                              <button onClick={() => { setState(p => ({ ...p, profile: { ...p.profile, avatarColor: colorObj.id } })); }} className="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-0.5 rounded-lg text-cyan-300 cursor-pointer font-black uppercase">ÉQUIPER</button>
+                            ) : (
+                              <button onClick={() => buyAvatarColor(colorObj.id, colorObj.cost)} className="text-[10px] bg-yellow-400 hover:bg-yellow-300 text-slate-950 px-2 py-0.5 rounded-lg font-black cursor-pointer uppercase shadow-[0_0_10px_rgba(250,204,21,0.4)]">ACHETER</button>
+                            )}
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* --- GALERIE DES TROPHÉES (TROPHY GALLERY SHOWCASE) --- */}
+      <AnimatePresence>
+        {showAchievementsModal && (() => {
+          const totalCount = state.achievements.length;
+          const unlockedCount = state.achievements.filter(a => a.isUnlocked).length;
+          const percentUnlocked = Math.round((unlockedCount / (totalCount || 1)) * 100);
+          const totalPixelsFromAch = state.achievements
+            .filter(a => a.isUnlocked)
+            .reduce((sum, a) => sum + (a.pixelReward || 0), 0);
+
+          const displayedAch = state.achievements.filter(a => {
+            if (achievementsFilter === 'unlocked') return a.isUnlocked;
+            if (achievementsFilter === 'locked') return !a.isUnlocked;
+            return true;
+          });
+
+          return (
+            <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-5 font-mono select-none">
+              <motion.div
+                initial={{ scale: 0.85, opacity: 0, y: 30 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.85, opacity: 0, y: 30 }}
+                className="bg-slate-950 border-2 border-yellow-500/80 p-5 sm:p-6 rounded-3xl w-full max-w-5xl text-white relative max-h-[90vh] flex flex-col shadow-[0_0_60px_rgba(234,179,8,0.35)] overflow-hidden"
+              >
+                {/* Background ambient neon glow */}
+                <div className="absolute -top-20 -right-20 w-72 h-72 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
+                <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
+
+                {/* Header */}
+                <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 shrink-0 relative z-10">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-yellow-500/10 border-2 border-yellow-400 text-yellow-300 rounded-2xl shadow-[0_0_20px_rgba(234,179,8,0.3)]">
+                      <Trophy size={24} className="animate-bounce" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-500 uppercase tracking-wider flex items-center gap-2">
+                        GALERIE DES TROPHÉES 🏆
+                      </h3>
+                      <p className="text-[11px] text-slate-400 font-sans font-medium">
+                        Vitrine des {totalCount} succès d'arcade • Cliquez sur une médaille pour l'examiner
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => { audio.playClick(); setShowAchievementsModal(false); setSelectedAchievement(null); }}
+                    className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-yellow-400 text-slate-300 hover:text-white font-bold cursor-pointer text-xs transition-all"
+                  >
+                    ✕ FERMER
+                  </button>
+                </div>
+
+                {/* Progress & Stats Showcase Banner */}
+                <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-2xl mb-4 shrink-0 flex flex-col sm:flex-row justify-between items-center gap-4 relative z-10">
+                  <div className="w-full sm:w-2/3">
+                    <div className="flex justify-between items-center text-xs font-bold mb-1.5">
+                      <span className="text-yellow-300 uppercase flex items-center gap-1.5">
+                        <Award size={14} /> PROGRESSION DES TROPHÉES
+                      </span>
+                      <span className="text-slate-300">
+                        <strong className="text-yellow-400">{unlockedCount}</strong> / {totalCount} ({percentUnlocked}%)
+                      </span>
+                    </div>
+                    <div className="w-full h-3 bg-slate-950 border border-slate-800 rounded-full overflow-hidden p-0.5">
+                      <div
+                        className="h-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-300 rounded-full transition-all duration-500 shadow-[0_0_10px_#facc15]"
+                        style={{ width: `${percentUnlocked}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 bg-yellow-950/40 border border-yellow-500/40 px-3.5 py-2 rounded-xl text-yellow-300 shrink-0">
+                    <Sparkles size={16} className="text-yellow-400 animate-pulse" />
+                    <div className="text-left">
+                      <span className="text-[9px] text-yellow-500 uppercase font-extrabold block leading-none">PX GAGNÉS DE TROPHÉES</span>
+                      <span className="text-xs font-black">+{totalPixelsFromAch.toLocaleString()} PX</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Category Filter Pills */}
+                <div className="flex justify-between items-center gap-2 mb-4 shrink-0 flex-wrap relative z-10">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => { audio.playClick(); setAchievementsFilter('all'); }}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase transition-all cursor-pointer border ${
+                        achievementsFilter === 'all'
+                          ? 'bg-yellow-500 text-slate-950 border-yellow-400 shadow-[0_0_12px_rgba(234,179,8,0.4)]'
+                          : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                      }`}
+                    >
+                      TOUS ({totalCount})
+                    </button>
+
+                    <button
+                      onClick={() => { audio.playClick(); setAchievementsFilter('unlocked'); }}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase transition-all cursor-pointer border flex items-center gap-1 ${
+                        achievementsFilter === 'unlocked'
+                          ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.4)]'
+                          : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                      }`}
+                    >
+                      <Check size={13} /> DÉBLOQUÉS ({unlockedCount})
+                    </button>
+
+                    <button
+                      onClick={() => { audio.playClick(); setAchievementsFilter('locked'); }}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase transition-all cursor-pointer border flex items-center gap-1 ${
+                        achievementsFilter === 'locked'
+                          ? 'bg-purple-600 text-white border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.4)]'
+                          : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                      }`}
+                    >
+                      <Lock size={13} /> VERROUILLÉS ({totalCount - unlockedCount})
+                    </button>
+                  </div>
+
+                  <p className="text-[10px] text-slate-400 italic">
+                    💡 Cliquez sur n'importe quel badge pour ouvrir sa fiche détaillée !
+                  </p>
+                </div>
+
+                {/* Vitrine / Grid of Trophy Cards */}
+                <div className="flex-1 overflow-y-auto pr-1 relative z-10">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    {displayedAch.map((ach) => {
+                      const isUnlocked = ach.isUnlocked;
+
+                      return (
+                        <motion.div
+                          key={ach.id}
+                          whileHover={{ scale: 1.05 }}
+                          onClick={() => { audio.playClick(); setSelectedAchievement(ach); }}
+                          className={`group relative p-3 rounded-2xl border transition-all cursor-pointer flex flex-col items-center text-center justify-between ${
+                            isUnlocked
+                              ? 'bg-gradient-to-b from-yellow-950/40 via-slate-900 to-slate-950 border-yellow-500/70 hover:border-yellow-300 shadow-[0_0_15px_rgba(234,179,8,0.15)] hover:shadow-[0_0_25px_rgba(234,179,8,0.35)]'
+                              : 'bg-slate-900/40 border-slate-800/90 hover:border-slate-700 text-slate-500 opacity-80 hover:opacity-100'
+                          }`}
+                        >
+                          {/* Status Pin */}
+                          <div className="absolute top-2 right-2">
+                            {isUnlocked ? (
+                              <span className="flex h-2.5 w-2.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-400 shadow-[0_0_6px_#facc15]"></span>
+                              </span>
+                            ) : (
+                              <Lock size={11} className="text-slate-600" />
+                            )}
+                          </div>
+
+                          {/* Visual Badge Circle Container */}
+                          <div className={`p-3.5 rounded-2xl border my-2 transition-transform group-hover:scale-110 ${
+                            isUnlocked
+                              ? 'bg-gradient-to-br from-yellow-500/20 via-amber-500/10 to-yellow-950/40 border-yellow-400 text-yellow-300 shadow-[0_0_15px_rgba(234,179,8,0.4)]'
+                              : 'bg-slate-950 border-slate-800 text-slate-600'
+                          }`}>
+                            {renderIcon(ach.icon || 'Award', "w-6 h-6")}
+                          </div>
+
+                          {/* Title */}
+                          <div className="w-full">
+                            <p className={`font-black text-xs leading-tight mb-1 line-clamp-2 ${
+                              isUnlocked ? 'text-white group-hover:text-yellow-300' : 'text-slate-400'
+                            }`}>
+                              {ach.frenchTitle}
+                            </p>
+
+                            <div className="mt-1 flex items-center justify-between w-full pt-1.5 border-t border-slate-800/80">
+                              <span className={`text-[10px] font-bold ${isUnlocked ? 'text-yellow-400' : 'text-slate-600'}`}>
+                                +{ach.pixelReward} PX
+                              </span>
+                              <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded ${
+                                isUnlocked ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/40' : 'bg-slate-950 text-slate-600'
+                              }`}>
+                                {isUnlocked ? 'ACCOMPLI' : 'VERROUILLÉ'}
+                              </span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* --- TROPHY INSPECTION MODAL / DRAWER --- */}
+                <AnimatePresence>
+                  {selectedAchievement && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl p-6 rounded-3xl z-20 flex flex-col items-center justify-center text-center font-mono border-2 border-yellow-400 shadow-[0_0_60px_rgba(234,179,8,0.4)]"
+                    >
+                      {/* Big Glowing Badge Icon */}
+                      <div className={`p-6 rounded-3xl border-2 mb-4 relative ${
+                        selectedAchievement.isUnlocked
+                          ? 'bg-gradient-to-br from-yellow-500/20 via-amber-500/10 to-yellow-950 border-yellow-400 text-yellow-300 shadow-[0_0_35px_rgba(234,179,8,0.6)] animate-pulse'
+                          : 'bg-slate-900 border-slate-700 text-slate-500'
+                      }`}>
+                        {renderIcon(selectedAchievement.icon || 'Award', "w-16 h-16")}
+                        <div className="absolute -bottom-2 -right-2 p-2 rounded-xl bg-slate-950 border border-yellow-400">
+                          {selectedAchievement.isUnlocked ? <Check size={18} className="text-yellow-400 font-black" /> : <Lock size={18} className="text-slate-500" />}
+                        </div>
+                      </div>
+
+                      <div className="mb-2">
+                        <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full border tracking-widest ${
+                          selectedAchievement.isUnlocked
+                            ? 'bg-yellow-950 text-yellow-300 border-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.5)]'
+                            : 'bg-slate-900 text-slate-400 border-slate-700'
+                        }`}>
+                          {selectedAchievement.isUnlocked ? '🏆 HAUT-FAIT DÉBLOQUÉ' : '🔒 TROPHÉE VERROUILLÉ'}
+                        </span>
+                      </div>
+
+                      <h2 className="text-2xl font-black text-white uppercase tracking-wider my-1">
+                        {selectedAchievement.frenchTitle}
+                      </h2>
+                      <p className="text-xs text-slate-400 font-sans italic mb-4">
+                        "{selectedAchievement.title}"
+                      </p>
+
+                      <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl max-w-md w-full mb-5">
+                        <p className="text-xs text-slate-200 font-sans leading-relaxed">
+                          {selectedAchievement.frenchDescription}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3 bg-yellow-950/60 border border-yellow-500 px-4 py-2 rounded-xl text-yellow-300 font-bold mb-6">
+                        <Sparkles size={18} className="text-yellow-400" />
+                        <span>RÉCOMPENSE DE HAUT-FAIT : +{selectedAchievement.pixelReward} PX</span>
+                      </div>
+
+                      <button
+                        onClick={() => { audio.playClick(); setSelectedAchievement(null); }}
+                        className="px-6 py-2.5 rounded-2xl bg-yellow-500 text-slate-950 font-black text-xs uppercase hover:bg-yellow-400 transition-all cursor-pointer shadow-[0_0_20px_rgba(234,179,8,0.4)] scale-105"
+                      >
+                        FERMER L'INSPECTION
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </div>
+          );
+        })()}
+      </AnimatePresence>
+
+      {/* --- Quests Modal --- */}
+      <AnimatePresence>
+        {showQuestsModal && (
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 font-mono select-none">
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.85, opacity: 0, y: 30 }}
+              className="bg-slate-950 border-2 border-emerald-500 p-6 rounded-3xl w-full max-w-2xl text-white relative max-h-[85vh] flex flex-col shadow-[0_0_50px_rgba(16,185,129,0.35)] overflow-hidden"
+            >
+              {/* Background ambient light */}
+              <div className="absolute -top-16 -right-16 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none animate-pulse" />
+
+              <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 shrink-0 relative z-10">
+                <h3 className="text-lg font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2">
+                  <Target size={20} className="animate-pulse" /> QUÊTES QUOTIDIENNES D'ARCADE 🎯
+                </h3>
+                <button
+                  onClick={() => { audio.playClick(); setShowQuestsModal(false); }}
+                  className="text-slate-400 hover:text-white font-bold cursor-pointer text-sm"
+                >
+                  ✕ FERMER
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto space-y-3 pr-1 relative z-10">
+                {(state.quests || INITIAL_QUESTS).map((quest) => (
+                  <motion.div
+                    key={quest.id}
+                    whileHover={{ scale: 1.01 }}
+                    className="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-800 flex justify-between items-center"
+                  >
+                    <div>
+                      <p className="font-black text-xs text-slate-100">{quest.title}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5 font-sans">{quest.description}</p>
+                      <div className="w-44 h-2 bg-slate-950 rounded-full mt-2.5 border border-slate-800 overflow-hidden p-0.5">
+                        <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-300 rounded-full transition-all shadow-[0_0_8px_#10b981]" style={{ width: `${Math.min(100, (quest.current / quest.target) * 100)}%` }}></div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs text-yellow-400 font-black block mb-1">+{quest.rewardPixels} PX</span>
+                      {quest.isClaimed ? (
+                        <span className="text-[9px] text-slate-500 font-bold uppercase px-2 py-0.5 bg-slate-950 rounded border border-slate-800">RÉCOMPENSÉ</span>
+                      ) : quest.isCompleted ? (
+                        <button
+                          onClick={() => {
+                            audio.playWin();
+                            setState(prev => ({
+                              ...prev,
+                              profile: { ...prev.profile, totalPixels: prev.profile.totalPixels + quest.rewardPixels },
+                              quests: prev.quests.map(q => q.id === quest.id ? { ...q, isClaimed: true } : q)
+                            }));
+                          }}
+                          className="text-[10px] bg-emerald-400 hover:bg-emerald-300 text-slate-950 px-3 py-1.5 rounded-xl font-black cursor-pointer uppercase animate-bounce shadow-[0_0_12px_rgba(16,185,129,0.5)]"
+                        >
+                          RÉCLAMER !
+                        </button>
+                      ) : (
+                        <span className="text-[9px] text-slate-400 font-bold">{quest.current}/{quest.target}</span>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* --- Pass Arcade Modal --- */}
+      <ArcadePassModal
+        show={showPassModal}
+        onClose={() => setShowPassModal(false)}
+        arcadePass={state.arcadePass || { level: 1, xp: 0, isPremium: false, claimedFreeRewards: [], claimedPremiumRewards: [] }}
+        totalPixels={state.profile.totalPixels}
+        onUnlockPremium={(cost) => {
+          if (state.profile.totalPixels >= cost) {
+            setState(prev => ({
+              ...prev,
+              profile: { ...prev.profile, totalPixels: prev.profile.totalPixels - cost },
+              arcadePass: prev.arcadePass
+                ? { ...prev.arcadePass, isPremium: true }
+                : { level: 1, xp: 0, isPremium: true, claimedFreeRewards: [], claimedPremiumRewards: [] }
+            }));
+            setActiveNotification('👑 PASS PREMIUM ACTIVÉ ! +50% XP & Piste Spéciale !');
+            setTimeout(() => setActiveNotification(null), 4000);
+          }
+        }}
+        onClaimReward={(level, isPremiumReward, reward) => {
+          setState(prev => {
+            const pass = prev.arcadePass || { level: 1, xp: 0, isPremium: false, claimedFreeRewards: [], claimedPremiumRewards: [] };
+            const newClaimedFree = isPremiumReward ? pass.claimedFreeRewards : [...pass.claimedFreeRewards, level];
+            const newClaimedPremium = isPremiumReward ? [...pass.claimedPremiumRewards, level] : pass.claimedPremiumRewards;
+
+            let updatedProfile = { ...prev.profile };
+
+            if (reward.type === 'pixels') {
+              updatedProfile.totalPixels += (reward.value as number);
+            } else if (reward.type === 'title') {
+              const titles = updatedProfile.unlockedTitles || [];
+              if (!titles.includes(reward.value as string)) {
+                updatedProfile.unlockedTitles = [...titles, reward.value as string];
+              }
+              updatedProfile.title = reward.value as string;
+            } else if (reward.type === 'skin') {
+              const skins = updatedProfile.unlockedSkins || [];
+              if (!skins.includes(reward.value as string)) {
+                updatedProfile.unlockedSkins = [...skins, reward.value as string];
+              }
+              updatedProfile.skin = reward.value as string;
+            } else if (reward.type === 'aura') {
+              const auras = updatedProfile.unlockedAuras || [];
+              if (!auras.includes(reward.value as string)) {
+                updatedProfile.unlockedAuras = [...auras, reward.value as string];
+              }
+              updatedProfile.aura = reward.value as string;
+            } else if (reward.type === 'color') {
+              const colors = updatedProfile.unlockedColors || [];
+              if (!colors.includes(reward.value as string)) {
+                updatedProfile.unlockedColors = [...colors, reward.value as string];
+              }
+              updatedProfile.avatarColor = reward.value as string;
+            }
+
+            return {
+              ...prev,
+              profile: updatedProfile,
+              arcadePass: {
+                ...pass,
+                claimedFreeRewards: newClaimedFree,
+                claimedPremiumRewards: newClaimedPremium
+              }
+            };
+          });
+          setActiveNotification(`🎁 PASS ARCADE : Réclamation de ${reward.label} !`);
+          setTimeout(() => setActiveNotification(null), 4000);
+        }}
+      />
+
+      {/* --- Tournois (Tournaments) Modal --- */}
+      <AnimatePresence>
+        {showTournamentsModal && (
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 font-mono select-none">
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.85, opacity: 0, y: 30 }}
+              className="bg-slate-950 border-2 border-amber-500 p-6 rounded-3xl w-full max-w-3xl text-white relative max-h-[88vh] flex flex-col shadow-[0_0_50px_rgba(245,158,11,0.35)] overflow-hidden"
+            >
+              {/* Animated neon ambient glow */}
+              <div className="absolute -top-16 -right-16 w-56 h-56 bg-amber-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
+              <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-yellow-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
+
+              <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 shrink-0 relative z-10">
+                <div>
+                  <h3 className="text-xl font-black text-amber-400 uppercase tracking-widest flex items-center gap-2">
+                    <Trophy size={22} className="text-amber-400 animate-bounce" /> TOURNOIS & COMPÉTITIONS NÉON 🏆
+                  </h3>
+                  <p className="text-[11px] text-slate-400 mt-0.5 font-sans">
+                    Dépassez les objectifs de score en direct et décrochez jusqu'à 15 000 PX !
+                  </p>
+                </div>
+                <button
+                  onClick={() => { audio.playClick(); setShowTournamentsModal(false); }}
+                  className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white font-bold cursor-pointer text-xs"
+                >
+                  ✕ FERMER
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto space-y-3 pr-1 relative z-10">
+                {INITIAL_TOURNAMENTS.map((t) => (
+                  <motion.div
+                    key={t.id}
+                    whileHover={{ scale: 1.01 }}
+                    className="p-4 bg-slate-900/80 rounded-2xl border border-slate-800 space-y-2 hover:border-amber-500/60 transition-all"
+                  >
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-black text-sm text-amber-300 uppercase">{t.frenchTitle}</h4>
+                      <span className="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-500/60 font-black px-2 py-0.5 rounded-full uppercase flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" /> ● EN DIRECT
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-300 font-sans">{t.description}</p>
+                    <div className="flex justify-between items-center bg-slate-950 p-2.5 rounded-xl border border-slate-800 mt-2">
+                      <span className="text-xs text-yellow-400 font-bold">CAGNOTTE: {t.prizePool} PX</span>
+                      <button
+                        onClick={() => {
+                          audio.playClick();
+                          setShowTournamentsModal(false);
+                          handleLaunchGame(t.gameId);
+                        }}
+                        className="text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-3.5 py-1.5 rounded-xl cursor-pointer uppercase shadow-[0_0_12px_rgba(245,158,11,0.4)]"
+                      >
+                        REJOINDRE L'ÉPREUVE 🎮
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* --- Competitive Ranks Modal --- */}
+      <AnimatePresence>
+        {showRanksModal && (
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 font-mono select-none">
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.85, opacity: 0, y: 30 }}
+              className="bg-slate-950 border-2 border-fuchsia-500 p-6 rounded-3xl w-full max-w-4xl text-white relative max-h-[90vh] flex flex-col shadow-[0_0_60px_rgba(217,70,239,0.4)] overflow-hidden"
+            >
+              {/* Neon background ambient rays */}
+              <div className="absolute -top-20 -right-20 w-72 h-72 bg-fuchsia-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
+              <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
+
+              {/* Modal Header */}
+              <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 shrink-0 relative z-10">
+                <div>
+                  <h3 className="text-xl font-black text-fuchsia-400 uppercase tracking-widest flex items-center gap-2">
+                    <Trophy size={24} className="text-fuchsia-400 animate-pulse" /> SYSTÈME DE RANG & QUÊTES DE CLASSE 🥇
+                  </h3>
+                  <p className="text-[11px] text-slate-400 mt-0.5 font-sans">
+                    Démarrez à 0 PTS de Rang ! Accomplissez des Quêtes de Rang pour cumuler des points, débloquer des divisions et gagner des bonus.
+                  </p>
+                </div>
+                <button
+                  onClick={() => { audio.playClick(); setShowRanksModal(false); }}
+                  className="text-slate-400 hover:text-white font-bold cursor-pointer text-sm bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl"
+                >
+                  ✕ FERMER
+                </button>
+              </div>
+
+              {/* Current Rank Showcase & Progress Bar */}
+              <div className={`p-4 rounded-2xl border mb-4 ${currentRank.badgeColor} ${currentRank.glowColor} shrink-0 relative z-10`}>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl border border-white/30 bg-slate-950/80 flex items-center justify-center shrink-0 shadow-lg">
+                      {renderIcon(currentRank.icon, "w-7 h-7 text-yellow-400")}
+                    </div>
+                    <div>
+                      <span className="text-[10px] uppercase font-black tracking-widest text-slate-300 block">RANG ACTUEL</span>
+                      <h4 className="text-lg font-black text-white flex items-center gap-2">
+                        {currentRank.frenchName}
+                        <span className="text-xs bg-black/40 border border-white/20 px-2 py-0.5 rounded-lg text-yellow-300 font-bold">
+                          {currentRank.perkText}
+                        </span>
+                      </h4>
+                    </div>
+                  </div>
+
+                  <div className="text-left sm:text-right">
+                    <span className="text-[10px] text-slate-300 font-bold uppercase block">SCORE DE RANG CUMULÉ</span>
+                    <p className="text-2xl font-black text-yellow-300 font-sans tracking-wide">
+                      {rankPoints.toLocaleString()} <span className="text-xs font-mono text-slate-300">PTS DE RANG</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Progress Bar Gauge */}
+                <div className="space-y-1">
+                  <div className="flex justify-between text-[11px] font-bold text-slate-200">
+                    <span>Progression vers {nextRank ? nextRank.frenchName : 'RANG MAX'}</span>
+                    <span>{rankProgressPercent}% ({rankPoints.toLocaleString()} / {nextRank ? nextRank.minScore.toLocaleString() : 'MAX'} PTS)</span>
+                  </div>
+                  <div className="w-full bg-slate-950/80 rounded-full h-3.5 border border-white/20 overflow-hidden p-0.5">
                     <div
-                      className="h-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-300 rounded-full transition-all duration-500 shadow-[0_0_10px_#facc15]"
-                      style={{ width: `${percentUnlocked}%` }}
+                      className="bg-gradient-to-r from-amber-400 via-yellow-400 to-fuchsia-500 h-full rounded-full transition-all duration-500 shadow-[0_0_12px_rgba(250,204,21,0.8)]"
+                      style={{ width: `${rankProgressPercent}%` }}
                     ></div>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-2 bg-yellow-950/40 border border-yellow-500/40 px-3.5 py-2 rounded-xl text-yellow-300 shrink-0">
-                  <Sparkles size={16} className="text-yellow-400 animate-pulse" />
-                  <div className="text-left">
-                    <span className="text-[9px] text-yellow-500 uppercase font-extrabold block leading-none">PX GAGNÉS DE TROPHÉES</span>
-                    <span className="text-xs font-black">+{totalPixelsFromAch.toLocaleString()} PX</span>
-                  </div>
-                </div>
               </div>
 
-              {/* Category Filter Pills */}
-              <div className="flex justify-between items-center gap-2 mb-4 shrink-0 flex-wrap">
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => { audio.playClick(); setAchievementsFilter('all'); }}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase transition-all cursor-pointer border ${
-                      achievementsFilter === 'all'
-                        ? 'bg-yellow-500 text-slate-950 border-yellow-400 shadow-[0_0_12px_rgba(234,179,8,0.4)]'
-                        : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
-                    }`}
-                  >
-                    TOUS ({totalCount})
-                  </button>
-
-                  <button
-                    onClick={() => { audio.playClick(); setAchievementsFilter('unlocked'); }}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase transition-all cursor-pointer border flex items-center gap-1 ${
-                      achievementsFilter === 'unlocked'
-                        ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.4)]'
-                        : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
-                    }`}
-                  >
-                    <Check size={13} /> DÉBLOQUÉS ({unlockedCount})
-                  </button>
-
-                  <button
-                    onClick={() => { audio.playClick(); setAchievementsFilter('locked'); }}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase transition-all cursor-pointer border flex items-center gap-1 ${
-                      achievementsFilter === 'locked'
-                        ? 'bg-purple-600 text-white border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.4)]'
-                        : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
-                    }`}
-                  >
-                    <Lock size={13} /> VERROUILLÉS ({totalCount - unlockedCount})
-                  </button>
-                </div>
-
-                <p className="text-[10px] text-slate-400 italic">
-                  💡 Cliquez sur n'importe quel badge pour ouvrir sa fiche détaillée !
-                </p>
+              {/* Tab Navigation */}
+              <div className="flex border-b border-slate-800 mb-4 gap-2 shrink-0 relative z-10">
+                <button
+                  onClick={() => { audio.playClick(); setRankedModalTab('progress'); }}
+                  className={`px-4 py-2 text-xs font-bold rounded-t-xl transition-all cursor-pointer flex items-center gap-2 ${
+                    rankedModalTab === 'progress'
+                      ? 'bg-fuchsia-950/80 border-t-2 border-x border-fuchsia-500 text-fuchsia-300 font-black'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
+                  }`}
+                >
+                  🏅 PALIER DE RANG
+                  {hasUnclaimedRankRewards && (
+                    <span className="w-2 h-2 rounded-full bg-yellow-400 animate-ping"></span>
+                  )}
+                </button>
+                <button
+                  onClick={() => { audio.playClick(); setRankedModalTab('quests'); }}
+                  className={`px-4 py-2 text-xs font-bold rounded-t-xl transition-all cursor-pointer flex items-center gap-2 ${
+                    rankedModalTab === 'quests'
+                      ? 'bg-fuchsia-950/80 border-t-2 border-x border-fuchsia-500 text-fuchsia-300 font-black'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
+                  }`}
+                >
+                  🎯 QUÊTES DE RANG ({unclaimedRankQuestsCount})
+                  {unclaimedRankQuestsCount > 0 && (
+                    <span className="px-1.5 py-0.2 bg-yellow-400 text-slate-950 rounded-full text-[10px] font-black animate-bounce">
+                      {unclaimedRankQuestsCount}
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => { audio.playClick(); setRankedModalTab('perks'); }}
+                  className={`px-4 py-2 text-xs font-bold rounded-t-xl transition-all cursor-pointer flex items-center gap-2 ${
+                    rankedModalTab === 'perks'
+                      ? 'bg-fuchsia-950/80 border-t-2 border-x border-fuchsia-500 text-fuchsia-300 font-black'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
+                  }`}
+                >
+                  ⚡ BONUS & PERKS
+                </button>
               </div>
 
-              {/* Vitrine / Grid of Trophy Cards */}
-              <div className="flex-1 overflow-y-auto pr-1">
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                  {displayedAch.map((ach) => {
-                    const isUnlocked = ach.isUnlocked;
+              {/* Tab Content 1: Palier de Rang */}
+              {rankedModalTab === 'progress' && (
+                <div className="flex-1 overflow-y-auto space-y-3 pr-1 relative z-10">
+                  {COMPETITIVE_RANKS.map((rank) => {
+                    const isUnlocked = rankPoints >= rank.minScore;
+                    const isClaimed = (state.claimedRankRewards || []).includes(rank.id);
+                    const isCurrent = currentRank.id === rank.id;
 
                     return (
-                      <div
-                        key={ach.id}
-                        onClick={() => { audio.playClick(); setSelectedAchievement(ach); }}
-                        className={`group relative p-3 rounded-2xl border transition-all cursor-pointer flex flex-col items-center text-center justify-between ${
-                          isUnlocked
-                            ? 'bg-gradient-to-b from-yellow-950/40 via-slate-900 to-slate-950 border-yellow-500/70 hover:border-yellow-300 shadow-[0_0_15px_rgba(234,179,8,0.15)] hover:shadow-[0_0_25px_rgba(234,179,8,0.35)] hover:scale-105'
-                            : 'bg-slate-900/40 border-slate-800/90 hover:border-slate-700 text-slate-500 opacity-80 hover:opacity-100 hover:scale-102'
+                      <motion.div
+                        key={rank.id}
+                        whileHover={{ scale: 1.01 }}
+                        className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                          isCurrent
+                            ? `${rank.badgeColor} ${rank.glowColor} ring-2 ring-yellow-400/50`
+                            : isUnlocked
+                            ? 'bg-slate-900/80 border-slate-700 text-slate-200'
+                            : 'bg-slate-950/60 border-slate-900 text-slate-500 opacity-70'
                         }`}
                       >
-                        {/* Status Pin */}
-                        <div className="absolute top-2 right-2">
-                          {isUnlocked ? (
-                            <span className="flex h-2.5 w-2.5">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-400 shadow-[0_0_6px_#facc15]"></span>
-                            </span>
-                          ) : (
-                            <Lock size={11} className="text-slate-600" />
-                          )}
-                        </div>
-
-                        {/* Visual Badge Circle Container */}
-                        <div className={`p-3.5 rounded-2xl border my-2 transition-transform group-hover:scale-110 ${
-                          isUnlocked
-                            ? 'bg-gradient-to-br from-yellow-500/20 via-amber-500/10 to-yellow-950/40 border-yellow-400 text-yellow-300 shadow-[0_0_15px_rgba(234,179,8,0.4)]'
-                            : 'bg-slate-950 border-slate-800 text-slate-600'
-                        }`}>
-                          {renderIcon(ach.icon || 'Award', "w-6 h-6")}
-                        </div>
-
-                        {/* Title */}
-                        <div className="w-full">
-                          <p className={`font-black text-xs leading-tight mb-1 line-clamp-2 ${
-                            isUnlocked ? 'text-white group-hover:text-yellow-300' : 'text-slate-400'
-                          }`}>
-                            {ach.frenchTitle}
-                          </p>
-
-                          <div className="mt-1 flex items-center justify-between w-full pt-1.5 border-t border-slate-800/80">
-                            <span className={`text-[10px] font-bold ${isUnlocked ? 'text-yellow-400' : 'text-slate-600'}`}>
-                              +{ach.pixelReward} PX
-                            </span>
-                            <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded ${
-                              isUnlocked ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/40' : 'bg-slate-950 text-slate-600'
-                            }`}>
-                              {isUnlocked ? 'ACCOMPLI' : 'VERROUILLÉ'}
-                            </span>
+                        <div className="flex items-center gap-3.5">
+                          <div className="w-12 h-12 rounded-xl border border-white/20 bg-slate-950/80 flex items-center justify-center shrink-0 shadow-inner">
+                            {renderIcon(rank.icon, `w-6 h-6 ${isUnlocked ? 'text-yellow-400' : 'text-slate-600'}`)}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-black text-sm uppercase text-white tracking-wide">{rank.frenchName}</h4>
+                              {isCurrent && (
+                                <span className="text-[9px] bg-yellow-400 text-slate-950 font-black px-2 py-0.5 rounded uppercase">
+                                  ACTUEL
+                                </span>
+                              )}
+                              <span className="text-[10px] bg-cyan-950 border border-cyan-800 text-cyan-300 font-bold px-2 py-0.5 rounded">
+                                {rank.perkText}
+                              </span>
+                            </div>
+                            <p className="text-xs mt-0.5 opacity-90">{rank.description}</p>
+                            <p className="text-[10px] text-cyan-300 font-bold mt-1">
+                              Score Requis : {rank.minScore.toLocaleString()} PTS DE RANG
+                              {rank.titleReward && <span className="ml-2 text-yellow-300 font-bold">• Titre : {rank.titleReward}</span>}
+                            </p>
                           </div>
                         </div>
-                      </div>
+
+                        <div className="text-right shrink-0 flex sm:flex-col items-center sm:items-end justify-between gap-2">
+                          <span className="text-xs font-black text-yellow-400">+{rank.pixelReward} PX</span>
+                          {isClaimed ? (
+                            <span className="text-[10px] bg-slate-900 text-slate-400 font-bold px-3 py-1 rounded-xl border border-slate-800 uppercase">
+                              ✅ RÉCLAMÉ
+                            </span>
+                          ) : isUnlocked ? (
+                            <button
+                              onClick={() => claimRankReward(rank.id)}
+                              className="text-xs bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl cursor-pointer uppercase shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce"
+                            >
+                              RÉCLAMER !
+                            </button>
+                          ) : (
+                            <span className="text-[10px] bg-slate-950 text-slate-600 font-bold px-3 py-1 rounded-xl border border-slate-900 uppercase">
+                              🔒 VERROUILLÉ
+                            </span>
+                          )}
+                        </div>
+                      </motion.div>
                     );
                   })}
                 </div>
-              </div>
+              )}
 
-              {/* --- TROPHY INSPECTION MODAL / DRAWER --- */}
-              <AnimatePresence>
-                {selectedAchievement && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl p-6 rounded-3xl z-20 flex flex-col items-center justify-center text-center font-mono border-2 border-yellow-400 shadow-[0_0_60px_rgba(234,179,8,0.4)]"
-                  >
-                    {/* Big Glowing Badge Icon */}
-                    <div className={`p-6 rounded-3xl border-2 mb-4 relative ${
-                      selectedAchievement.isUnlocked
-                        ? 'bg-gradient-to-br from-yellow-500/20 via-amber-500/10 to-yellow-950 border-yellow-400 text-yellow-300 shadow-[0_0_35px_rgba(234,179,8,0.6)] animate-pulse'
-                        : 'bg-slate-900 border-slate-700 text-slate-500'
-                    }`}>
-                      {renderIcon(selectedAchievement.icon || 'Award', "w-16 h-16")}
-                      <div className="absolute -bottom-2 -right-2 p-2 rounded-xl bg-slate-950 border border-yellow-400">
-                        {selectedAchievement.isUnlocked ? <Check size={18} className="text-yellow-400 font-black" /> : <Lock size={18} className="text-slate-500" />}
-                      </div>
-                    </div>
-
-                    <div className="mb-2">
-                      <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full border tracking-widest ${
-                        selectedAchievement.isUnlocked
-                          ? 'bg-yellow-950 text-yellow-300 border-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.5)]'
-                          : 'bg-slate-900 text-slate-400 border-slate-700'
-                      }`}>
-                        {selectedAchievement.isUnlocked ? '🏆 HAUT-FAIT DÉBLOQUÉ' : '🔒 TROPHÉE VERROUILLÉ'}
-                      </span>
-                    </div>
-
-                    <h2 className="text-2xl font-black text-white uppercase tracking-wider my-1">
-                      {selectedAchievement.frenchTitle}
-                    </h2>
-                    <p className="text-xs text-slate-400 font-sans italic mb-4">
-                      "{selectedAchievement.title}"
-                    </p>
-
-                    <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl max-w-md w-full mb-5">
-                      <p className="text-xs text-slate-200 font-sans leading-relaxed">
-                        {selectedAchievement.frenchDescription}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-3 bg-yellow-950/60 border border-yellow-500 px-4 py-2 rounded-xl text-yellow-300 font-bold mb-6">
-                      <Sparkles size={18} className="text-yellow-400" />
-                      <span>RÉCOMPENSE DE HAUT-FAIT : +{selectedAchievement.pixelReward} PX</span>
-                    </div>
-
-                    <button
-                      onClick={() => { audio.playClick(); setSelectedAchievement(null); }}
-                      className="px-6 py-2.5 rounded-2xl bg-yellow-500 text-slate-950 font-black text-xs uppercase hover:bg-yellow-400 transition-all cursor-pointer shadow-[0_0_20px_rgba(234,179,8,0.4)] scale-105"
-                    >
-                      FERMER L'INSPECTION
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* --- Quests Modal --- */}
-      {showQuestsModal && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-mono">
-          <div className="bg-slate-950 border-2 border-emerald-500 p-6 rounded-2xl w-full max-w-2xl text-white relative max-h-[85vh] flex flex-col shadow-[0_0_40px_rgba(16,185,129,0.25)]">
-            <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-black text-emerald-400 uppercase tracking-widest flex items-center gap-2">
-                <Target size={20} /> QUÊTES QUOTIDIENNES D'ARCADE
-              </h3>
-              <button
-                onClick={() => setShowQuestsModal(false)}
-                className="text-slate-400 hover:text-white font-bold cursor-pointer text-sm"
-              >
-                ✕ FERMER
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-              {(state.quests || INITIAL_QUESTS).map((quest) => (
-                <div key={quest.id} className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex justify-between items-center">
-                  <div>
-                    <p className="font-bold text-xs text-slate-200">{quest.title}</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">{quest.description}</p>
-                    <div className="w-36 h-1.5 bg-slate-950 rounded-full mt-2 border border-slate-800 overflow-hidden">
-                      <div className="h-full bg-emerald-400 transition-all" style={{ width: `${Math.min(100, (quest.current / quest.target) * 100)}%` }}></div>
-                    </div>
+              {/* Tab Content 2: Quêtes de Rang */}
+              {rankedModalTab === 'quests' && (
+                <div className="flex-1 overflow-y-auto space-y-3 pr-1 relative z-10">
+                  <div className="bg-fuchsia-950/40 border border-fuchsia-800/60 p-3 rounded-xl mb-3 text-xs text-fuchsia-200 flex items-center justify-between font-sans">
+                    <span>🎯 Accomplissez ces quêtes pour accumuler des <strong>PTS DE RANG</strong> et débloquer les divisions de rang !</span>
+                    <span className="font-black text-yellow-300 font-mono">{unclaimedRankQuestsCount} PRÊTE(S)</span>
                   </div>
-                  <div className="text-right">
-                    <span className="text-xs text-yellow-400 font-bold block">+{quest.rewardPixels} PX</span>
-                    {quest.isClaimed ? (
-                      <span className="text-[9px] text-slate-500 font-bold uppercase">RÉCOMPENSÉ</span>
-                    ) : quest.isCompleted ? (
-                      <button
-                        onClick={() => {
-                          audio.playWin();
-                          setState(prev => ({
-                            ...prev,
-                            profile: { ...prev.profile, totalPixels: prev.profile.totalPixels + quest.rewardPixels },
-                            quests: prev.quests.map(q => q.id === quest.id ? { ...q, isClaimed: true } : q)
-                          }));
-                        }}
-                        className="text-[10px] bg-emerald-500 text-slate-950 px-2.5 py-1 rounded font-black cursor-pointer uppercase animate-bounce"
+
+                  {RANK_QUESTS.map((q) => {
+                    const isClaimed = (state.claimedRankQuests || []).includes(q.id);
+                    const progress = getRankQuestProgress(q);
+                    const isCompleted = progress >= q.target;
+                    const percent = Math.min(100, Math.floor((progress / q.target) * 100));
+
+                    return (
+                      <motion.div
+                        key={q.id}
+                        whileHover={{ scale: 1.01 }}
+                        className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                          isClaimed
+                            ? 'bg-slate-950/60 border-slate-900 text-slate-500 opacity-70'
+                            : isCompleted
+                            ? 'bg-fuchsia-950/80 border-fuchsia-500 text-white shadow-[0_0_20px_rgba(217,70,239,0.3)]'
+                            : 'bg-slate-900/80 border-slate-800 text-slate-200'
+                        }`}
                       >
-                        RÉCLAMER !
-                      </button>
-                    ) : (
-                      <span className="text-[9px] text-slate-400 font-bold">{quest.current}/{quest.target}</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* --- Pass Arcade Modal --- */}
-      {showPassModal && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-mono">
-          <div className="bg-slate-950 border-2 border-rose-500 p-6 rounded-2xl w-full max-w-3xl text-white relative max-h-[85vh] flex flex-col shadow-[0_0_40px_rgba(244,63,94,0.25)]">
-            <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-black text-rose-400 uppercase tracking-widest flex items-center gap-2">
-                <Flame size={22} /> PASS ARCADE SAISON 2 (100 NIVEAUX)
-              </h3>
-              <button
-                onClick={() => setShowPassModal(false)}
-                className="text-slate-400 hover:text-white font-bold cursor-pointer text-sm"
-              >
-                ✕ FERMER
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
-              {PASS_LEVELS.map((lvl) => (
-                <div key={lvl.level} className="p-3 bg-slate-900/60 rounded-xl border border-slate-800 flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <span className="w-8 h-8 rounded-lg bg-rose-950 text-rose-300 border border-rose-800 flex items-center justify-center font-black text-xs">
-                      {lvl.level}
-                    </span>
-                    <div>
-                      <p className="text-xs font-bold text-slate-200">Niveau {lvl.level}</p>
-                      <p className="text-[10px] text-yellow-400 font-bold">{lvl.freeReward.label}</p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] bg-slate-950 px-2.5 py-1 rounded border border-slate-800 text-slate-400 font-bold">
-                    {state.arcadePass?.level >= lvl.level ? 'DÉBLOQUÉ' : 'VERROUILLÉ'}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* --- Tournois (Tournaments) Modal --- */}
-      {showTournamentsModal && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-mono">
-          <div className="bg-slate-950 border-2 border-amber-500 p-6 rounded-2xl w-full max-w-3xl text-white relative max-h-[88vh] flex flex-col shadow-[0_0_40px_rgba(245,158,11,0.25)]">
-            <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-              <div>
-                <h3 className="text-xl font-black text-amber-400 uppercase tracking-widest flex items-center gap-2">
-                  <Trophy size={22} className="text-amber-400 animate-bounce" /> TOURNOIS & COMPÉTITIONS NÉON
-                </h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  Dépassez les objectifs de score en direct et décrochez jusqu'à 15 000 PX !
-                </p>
-              </div>
-              <button
-                onClick={() => setShowTournamentsModal(false)}
-                className="text-slate-400 hover:text-white font-bold cursor-pointer text-sm"
-              >
-                ✕ FERMER
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-              {INITIAL_TOURNAMENTS.map((t) => (
-                <div key={t.id} className="p-4 bg-slate-900/80 rounded-2xl border border-slate-800 space-y-2">
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-black text-sm text-amber-300 uppercase">{t.frenchTitle}</h4>
-                    <span className="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-500/60 font-black px-2 py-0.5 rounded-full uppercase">
-                      ● EN DIRECT
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-300">{t.description}</p>
-                  <div className="flex justify-between items-center bg-slate-950 p-2.5 rounded-xl border border-slate-800 mt-2">
-                    <span className="text-xs text-yellow-400 font-bold">CAGNOTTE: {t.prizePool} PX</span>
-                    <button
-                      onClick={() => {
-                        setShowTournamentsModal(false);
-                        handleLaunchGame(t.gameId);
-                      }}
-                      className="text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-3 py-1.5 rounded-lg cursor-pointer uppercase"
-                    >
-                      REJOINDRE L'ÉPREUVE 🎮
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-      {/* --- Competitive Ranks Modal --- */}
-      {showRanksModal && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-mono">
-          <div className="bg-slate-950 border-2 border-fuchsia-500 p-6 rounded-2xl w-full max-w-4xl text-white relative max-h-[90vh] flex flex-col shadow-[0_0_50px_rgba(217,70,239,0.35)]">
-            
-            {/* Modal Header */}
-            <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 shrink-0">
-              <div>
-                <h3 className="text-xl font-black text-fuchsia-400 uppercase tracking-widest flex items-center gap-2">
-                  <Trophy size={24} className="text-fuchsia-400 animate-pulse" /> SYSTÈME DE RANG & QUÊTES DE CLASSE
-                </h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  Démarrez à 0 PTS de Rang ! Accomplissez des Quêtes de Rang pour cumuler des points, débloquer des divisions et gagner des bonus.
-                </p>
-              </div>
-              <button
-                onClick={() => setShowRanksModal(false)}
-                className="text-slate-400 hover:text-white font-bold cursor-pointer text-sm bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl"
-              >
-                ✕ FERMER
-              </button>
-            </div>
-
-            {/* Current Rank Showcase & Progress Bar */}
-            <div className={`p-4 rounded-xl border mb-4 ${currentRank.badgeColor} ${currentRank.glowColor} shrink-0`}>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl border border-white/30 bg-slate-950/80 flex items-center justify-center shrink-0 shadow-lg">
-                    {renderIcon(currentRank.icon, "w-7 h-7 text-yellow-400")}
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-black tracking-widest text-slate-300 block">RANG ACTUEL</span>
-                    <h4 className="text-lg font-black text-white flex items-center gap-2">
-                      {currentRank.frenchName}
-                      <span className="text-xs bg-black/40 border border-white/20 px-2 py-0.5 rounded text-yellow-300">
-                        {currentRank.perkText}
-                      </span>
-                    </h4>
-                  </div>
-                </div>
-
-                <div className="text-left sm:text-right">
-                  <span className="text-[10px] text-slate-300 font-bold uppercase block">SCORE DE RANG CUMULÉ</span>
-                  <p className="text-2xl font-black text-yellow-300 font-sans tracking-wide">
-                    {rankPoints.toLocaleString()} <span className="text-xs font-mono text-slate-300">PTS DE RANG</span>
-                  </p>
-                </div>
-              </div>
-
-              {/* Progress Bar Gauge */}
-              <div className="space-y-1">
-                <div className="flex justify-between text-[11px] font-bold text-slate-200">
-                  <span>Progression vers {nextRank ? nextRank.frenchName : 'RANG MAX'}</span>
-                  <span>{rankProgressPercent}% ({rankPoints.toLocaleString()} / {nextRank ? nextRank.minScore.toLocaleString() : 'MAX'} PTS)</span>
-                </div>
-                <div className="w-full bg-slate-950/80 rounded-full h-3.5 border border-white/20 overflow-hidden p-0.5">
-                  <div
-                    className="bg-gradient-to-r from-amber-400 via-yellow-400 to-fuchsia-500 h-full rounded-full transition-all duration-500 shadow-[0_0_12px_rgba(250,204,21,0.8)]"
-                    style={{ width: `${rankProgressPercent}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Tab Navigation */}
-            <div className="flex border-b border-slate-800 mb-4 gap-2 shrink-0">
-              <button
-                onClick={() => { audio.playClick(); setRankedModalTab('progress'); }}
-                className={`px-4 py-2 text-xs font-bold rounded-t-xl transition-all cursor-pointer flex items-center gap-2 ${
-                  rankedModalTab === 'progress'
-                    ? 'bg-fuchsia-950/80 border-t-2 border-x border-fuchsia-500 text-fuchsia-300 font-black'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
-                }`}
-              >
-                🏅 PALIER DE RANG
-                {hasUnclaimedRankRewards && (
-                  <span className="w-2 h-2 rounded-full bg-yellow-400 animate-ping"></span>
-                )}
-              </button>
-              <button
-                onClick={() => { audio.playClick(); setRankedModalTab('quests'); }}
-                className={`px-4 py-2 text-xs font-bold rounded-t-xl transition-all cursor-pointer flex items-center gap-2 ${
-                  rankedModalTab === 'quests'
-                    ? 'bg-fuchsia-950/80 border-t-2 border-x border-fuchsia-500 text-fuchsia-300 font-black'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
-                }`}
-              >
-                🎯 QUÊTES DE RANG ({unclaimedRankQuestsCount})
-                {unclaimedRankQuestsCount > 0 && (
-                  <span className="px-1.5 py-0.2 bg-yellow-400 text-slate-950 rounded-full text-[10px] font-black animate-bounce">
-                    {unclaimedRankQuestsCount}
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={() => { audio.playClick(); setRankedModalTab('perks'); }}
-                className={`px-4 py-2 text-xs font-bold rounded-t-xl transition-all cursor-pointer flex items-center gap-2 ${
-                  rankedModalTab === 'perks'
-                    ? 'bg-fuchsia-950/80 border-t-2 border-x border-fuchsia-500 text-fuchsia-300 font-black'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'
-                }`}
-              >
-                ⚡ BONUS & PERKS
-              </button>
-            </div>
-
-            {/* Tab Content 1: Palier de Rang */}
-            {rankedModalTab === 'progress' && (
-              <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-                {COMPETITIVE_RANKS.map((rank) => {
-                  const isUnlocked = rankPoints >= rank.minScore;
-                  const isClaimed = (state.claimedRankRewards || []).includes(rank.id);
-                  const isCurrent = currentRank.id === rank.id;
-
-                  return (
-                    <div
-                      key={rank.id}
-                      className={`p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                        isCurrent
-                          ? `${rank.badgeColor} ${rank.glowColor} ring-2 ring-yellow-400/50`
-                          : isUnlocked
-                          ? 'bg-slate-900/80 border-slate-700 text-slate-200'
-                          : 'bg-slate-950/60 border-slate-900 text-slate-500 opacity-70'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3.5">
-                        <div className="w-12 h-12 rounded-xl border border-white/20 bg-slate-950/80 flex items-center justify-center shrink-0 shadow-inner">
-                          {renderIcon(rank.icon, `w-6 h-6 ${isUnlocked ? 'text-yellow-400' : 'text-slate-600'}`)}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-black text-sm uppercase text-white tracking-wide">{rank.frenchName}</h4>
-                            {isCurrent && (
-                              <span className="text-[9px] bg-yellow-400 text-slate-950 font-black px-2 py-0.5 rounded uppercase">
-                                ACTUEL
-                              </span>
-                            )}
-                            <span className="text-[10px] bg-cyan-950 border border-cyan-800 text-cyan-300 font-bold px-2 py-0.5 rounded">
-                              {rank.perkText}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-black text-sm uppercase text-white tracking-wide">{q.title}</h4>
+                            <span className="text-[10px] bg-yellow-400/20 text-yellow-300 border border-yellow-400/40 font-bold px-2 py-0.5 rounded">
+                              +{q.rewardRankPts} PTS RANG
+                            </span>
+                            <span className="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold px-2 py-0.5 rounded">
+                              +{q.rewardPixels} PX
                             </span>
                           </div>
-                          <p className="text-xs mt-0.5 opacity-90">{rank.description}</p>
-                          <p className="text-[10px] text-cyan-300 font-bold mt-1">
-                            Score Requis : {rank.minScore.toLocaleString()} PTS DE RANG
-                            {rank.titleReward && <span className="ml-2 text-yellow-300 font-bold">• Titre : {rank.titleReward}</span>}
-                          </p>
-                        </div>
-                      </div>
+                          <p className="text-xs text-slate-300 font-sans">{q.description}</p>
 
-                      <div className="text-right shrink-0 flex sm:flex-col items-center sm:items-end justify-between gap-2">
-                        <span className="text-xs font-black text-yellow-400">+{rank.pixelReward} PX</span>
-                        {isClaimed ? (
-                          <span className="text-[10px] bg-slate-900 text-slate-400 font-bold px-3 py-1 rounded border border-slate-800 uppercase">
-                            ✅ RÉCLAMÉ
-                          </span>
-                        ) : isUnlocked ? (
-                          <button
-                            onClick={() => claimRankReward(rank.id)}
-                            className="text-xs bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl cursor-pointer uppercase shadow-[0_0_15px_rgba(234,179,8,0.5)] animate-bounce"
-                          >
-                            RÉCLAMER !
-                          </button>
-                        ) : (
-                          <span className="text-[10px] bg-slate-950 text-slate-600 font-bold px-3 py-1 rounded border border-slate-900 uppercase">
-                            🔒 VERROUILLÉ
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Tab Content 2: Quêtes de Rang */}
-            {rankedModalTab === 'quests' && (
-              <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-                <div className="bg-fuchsia-950/40 border border-fuchsia-800/60 p-3 rounded-xl mb-3 text-xs text-fuchsia-200 flex items-center justify-between">
-                  <span>🎯 Accomplissez ces quêtes pour accumuler des <strong>PTS DE RANG</strong> et débloquer les divisions de rang !</span>
-                  <span className="font-black text-yellow-300">{unclaimedRankQuestsCount} PRÊTE(S)</span>
-                </div>
-
-                {RANK_QUESTS.map((q) => {
-                  const isClaimed = (state.claimedRankQuests || []).includes(q.id);
-                  const progress = getRankQuestProgress(q);
-                  const isCompleted = progress >= q.target;
-                  const percent = Math.min(100, Math.floor((progress / q.target) * 100));
-
-                  return (
-                    <div
-                      key={q.id}
-                      className={`p-4 rounded-xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                        isClaimed
-                          ? 'bg-slate-950/60 border-slate-900 text-slate-500 opacity-70'
-                          : isCompleted
-                          ? 'bg-fuchsia-950/80 border-fuchsia-500 text-white shadow-[0_0_20px_rgba(217,70,239,0.3)]'
-                          : 'bg-slate-900/80 border-slate-800 text-slate-200'
-                      }`}
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-black text-sm uppercase text-white tracking-wide">{q.title}</h4>
-                          <span className="text-[10px] bg-yellow-400/20 text-yellow-300 border border-yellow-400/40 font-bold px-2 py-0.5 rounded">
-                            +{q.rewardRankPts} PTS RANG
-                          </span>
-                          <span className="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-800 font-bold px-2 py-0.5 rounded">
-                            +{q.rewardPixels} PX
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-300">{q.description}</p>
-
-                        {/* Progress Bar */}
-                        <div className="mt-2 space-y-1 max-w-md">
-                          <div className="flex justify-between text-[10px] text-slate-400 font-bold">
-                            <span>Progression</span>
-                            <span>{progress} / {q.target} ({percent}%)</span>
-                          </div>
-                          <div className="w-full bg-slate-950 rounded-full h-2 border border-slate-800 overflow-hidden">
-                            <div
-                              className="bg-gradient-to-r from-fuchsia-500 to-yellow-400 h-full rounded-full transition-all duration-300"
-                              style={{ width: `${percent}%` }}
-                            ></div>
+                          {/* Progress Bar */}
+                          <div className="mt-2 space-y-1 max-w-md">
+                            <div className="flex justify-between text-[10px] text-slate-400 font-bold">
+                              <span>Progression</span>
+                              <span>{progress} / {q.target} ({percent}%)</span>
+                            </div>
+                            <div className="w-full bg-slate-950 rounded-full h-2 border border-slate-800 overflow-hidden">
+                              <div
+                                className="bg-gradient-to-r from-fuchsia-500 to-yellow-400 h-full rounded-full transition-all duration-300"
+                                style={{ width: `${percent}%` }}
+                              ></div>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="text-right shrink-0">
-                        {isClaimed ? (
-                          <span className="text-[10px] bg-slate-900 text-slate-500 font-bold px-3 py-1.5 rounded border border-slate-800 uppercase block">
-                            ✅ VALIDÉE
-                          </span>
-                        ) : isCompleted ? (
-                          <button
-                            onClick={() => claimRankQuest(q.id)}
-                            className="text-xs bg-gradient-to-r from-yellow-400 to-fuchsia-500 hover:from-yellow-300 hover:to-fuchsia-400 text-slate-950 font-black px-4 py-2 rounded-xl cursor-pointer uppercase shadow-[0_0_15px_rgba(250,204,21,0.6)] animate-bounce"
-                          >
-                            RÉCLAMER +{q.rewardRankPts} PTS !
-                          </button>
-                        ) : (
-                          <span className="text-[10px] bg-slate-950 text-slate-500 font-bold px-3 py-1.5 rounded border border-slate-900 uppercase block">
-                            🔒 {progress} / {q.target}
-                          </span>
-                        )}
-                      </div>
+                        <div className="text-right shrink-0">
+                          {isClaimed ? (
+                            <span className="text-[10px] bg-slate-900 text-slate-500 font-bold px-3 py-1.5 rounded-xl border border-slate-800 uppercase block">
+                              ✅ VALIDÉE
+                            </span>
+                          ) : isCompleted ? (
+                            <button
+                              onClick={() => claimRankQuest(q.id)}
+                              className="text-xs bg-gradient-to-r from-yellow-400 to-fuchsia-500 hover:from-yellow-300 hover:to-fuchsia-400 text-slate-950 font-black px-4 py-2 rounded-xl cursor-pointer uppercase shadow-[0_0_15px_rgba(250,204,21,0.6)] animate-bounce"
+                            >
+                              RÉCLAMER +{q.rewardRankPts} PTS !
+                            </button>
+                          ) : (
+                            <span className="text-[10px] bg-slate-950 text-slate-500 font-bold px-3 py-1.5 rounded-xl border border-slate-900 uppercase block">
+                              🔒 {progress} / {q.target}
+                            </span>
+                          )}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Tab Content 3: Bonus & Perks */}
+              {rankedModalTab === 'perks' && (
+                <div className="flex-1 overflow-y-auto space-y-4 pr-1 relative z-10">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase block mb-1">MULTIPLICATEUR DE GAIN ACTIF</span>
+                      <p className="text-2xl font-black text-emerald-400">{currentRank.perkText}</p>
+                      <p className="text-[11px] text-slate-400 mt-1 font-sans">S'applique automatiquement sur tous les gains de Pixels d'arcade.</p>
                     </div>
-                  );
-                })}
-              </div>
-            )}
 
-            {/* Tab Content 3: Bonus & Perks */}
-            {rankedModalTab === 'perks' && (
-              <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block mb-1">MULTIPLICATEUR DE GAIN ACTIF</span>
-                    <p className="text-2xl font-black text-emerald-400">{currentRank.perkText}</p>
-                    <p className="text-[11px] text-slate-400 mt-1">S'applique automatiquement sur tous les gains de Pixels d'arcade.</p>
+                    <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase block mb-1">TOTAL PTS DE RANG CUMULÉS</span>
+                      <p className="text-2xl font-black text-cyan-400">{rankPoints} PTS</p>
+                      <p className="text-[11px] text-slate-400 mt-1 font-sans">Cumulez vos points en accomplissant des Quêtes de Rang.</p>
+                    </div>
                   </div>
 
-                  <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block mb-1">TOTAL PTS DE RANG CUMULÉS</span>
-                    <p className="text-2xl font-black text-cyan-400">{rankPoints} PTS</p>
-                    <p className="text-[11px] text-slate-400 mt-1">Cumulez vos points en accomplissant des Quêtes de Rang.</p>
+                  <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+                    <h4 className="font-black text-sm text-yellow-300 mb-2 uppercase">💡 COMMENT FONCTIONNE LA PROGRESSION DE RANG ?</h4>
+                    <ul className="text-xs text-slate-300 space-y-2 list-disc list-inside font-sans">
+                      <li>Vous commencez au rang <strong>Bronze III avec 0 PTS</strong>.</li>
+                      <li>Rendez-vous dans l'onglet <strong>🎯 QUÊTES DE RANG</strong> et accomplissez les objectifs pour gagner des <strong>PTS DE RANG</strong>.</li>
+                      <li>Chaque quête validée vous accorde des Points de Rang et des Pixels immédiatement.</li>
+                      <li>Dès que vous atteignez le seuil d'une nouvelle division (ex. 100 PTS pour Bronze II, 250 PTS pour Bronze I, 450 PTS pour Argent III...), vous pouvez réclamer la récompense de palier !</li>
+                    </ul>
                   </div>
                 </div>
+              )}
 
-                <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-xl">
-                  <h4 className="font-black text-sm text-yellow-300 mb-2 uppercase">💡 COMMENT FONCTIONNE LA PROGRESSION DE RANG ?</h4>
-                  <ul className="text-xs text-slate-300 space-y-2 list-disc list-inside font-sans">
-                    <li>Vous commencez au rang <strong>Bronze III avec 0 PTS</strong>.</li>
-                    <li>Rendez-vous dans l'onglet <strong>🎯 QUÊTES DE RANG</strong> et accomplissez les objectifs pour gagner des <strong>PTS DE RANG</strong>.</li>
-                    <li>Chaque quête validée vous accorde des Points de Rang et des Pixels immédiatement.</li>
-                    <li>Dès que vous atteignez le seuil d'une nouvelle division (ex. 100 PTS pour Bronze II, 250 PTS pour Bronze I, 450 PTS pour Argent III...), vous pouvez réclamer la récompense de palier !</li>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* --- Prestige Modal --- */}
+      <AnimatePresence>
+        {showPrestigeModal && (
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 font-mono select-none">
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.85, opacity: 0, y: 30 }}
+              className="bg-slate-950 border-2 border-purple-500 p-6 rounded-3xl w-full max-w-xl text-white relative shadow-[0_0_60px_rgba(168,85,247,0.5)] overflow-hidden"
+            >
+              {/* Background ambient light */}
+              <div className="absolute -top-16 -right-16 w-56 h-56 bg-purple-500/15 rounded-full blur-3xl pointer-events-none animate-pulse" />
+
+              <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 relative z-10">
+                <h3 className="text-lg font-black text-purple-400 uppercase tracking-widest flex items-center gap-2">
+                  <Sparkles size={20} className="animate-spin-slow" /> SYSTÈME DE PRESTIGE 🌀
+                </h3>
+                <button
+                  onClick={() => { audio.playClick(); setShowPrestigeModal(false); }}
+                  className="text-slate-400 hover:text-white font-bold cursor-pointer text-sm"
+                >
+                  ✕ FERMER
+                </button>
+              </div>
+
+              <div className="text-center space-y-4 my-4 relative z-10">
+                <div className="w-20 h-20 mx-auto rounded-3xl bg-purple-950/80 border-2 border-purple-400 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.6)] animate-pulse">
+                  <Crown size={40} className="text-purple-300" />
+                </div>
+
+                <div>
+                  <h4 className="text-xl font-black text-white uppercase">PRESTIGE ACTUEL : LEVEL {state.profile.prestigeLevel || 0}</h4>
+                  <p className="text-xs text-purple-300 font-bold mt-1">MULTIPLICATEUR DE GAIN : +{(state.profile.prestigeLevel || 0) * 15}% PX</p>
+                </div>
+
+                <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-2xl text-left space-y-2 text-xs text-slate-300 font-sans">
+                  <p className="font-bold text-yellow-300 uppercase font-mono">⚡ AVANTAGES DU PRESTIGE :</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li>Augmente de façon permanente tous vos gains de Pixels de <strong>+15% par niveau de Prestige</strong> !</li>
+                    <li>Débloque un titre exclusif de Prestige (ex: PRESTIGE {(state.profile.prestigeLevel || 0) + 1} 🌀)</li>
+                    <li>Accorde un bonus immédiat de <strong>+5 000 PX</strong> !</li>
+                    <li>Réinitialise vos points de rang à 0 pour vous permettre de refaire les quêtes de rang !</li>
                   </ul>
                 </div>
               </div>
-            )}
 
+              <div className="flex gap-3 mt-6 relative z-10">
+                <button
+                  onClick={() => { audio.playWin(); handlePrestige(); }}
+                  className="flex-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-slate-950 font-black py-3 rounded-2xl text-xs uppercase cursor-pointer shadow-[0_0_20px_rgba(168,85,247,0.6)]"
+                >
+                  🌀 PASSER AU PRESTIGE {(state.profile.prestigeLevel || 0) + 1} (+5 000 PX)
+                </button>
+                <button
+                  onClick={() => { audio.playClick(); setShowPrestigeModal(false); }}
+                  className="px-4 bg-slate-900 text-slate-400 font-bold py-3 rounded-2xl text-xs uppercase cursor-pointer border border-slate-800"
+                >
+                  FERMER
+                </button>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
-
-      {/* --- Prestige Modal --- */}
-      {showPrestigeModal && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-mono">
-          <div className="bg-slate-950 border-2 border-purple-500 p-6 rounded-2xl w-full max-w-xl text-white relative shadow-[0_0_50px_rgba(168,85,247,0.4)]">
-            <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-black text-purple-400 uppercase tracking-widest flex items-center gap-2">
-                <Sparkles size={20} className="animate-spin-slow" /> SYSTÈME DE PRESTIGE
-              </h3>
-              <button
-                onClick={() => setShowPrestigeModal(false)}
-                className="text-slate-400 hover:text-white font-bold cursor-pointer text-sm"
-              >
-                ✕ FERMER
-              </button>
-            </div>
-
-            <div className="text-center space-y-4 my-4">
-              <div className="w-20 h-20 mx-auto rounded-3xl bg-purple-950/80 border-2 border-purple-400 flex items-center justify-center shadow-[0_0_30px_rgba(168,85,247,0.6)] animate-pulse">
-                <Crown size={40} className="text-purple-300" />
-              </div>
-
-              <div>
-                <h4 className="text-xl font-black text-white uppercase">PRESTIGE ACTUEL : LEVEL {state.profile.prestigeLevel || 0}</h4>
-                <p className="text-xs text-purple-300 font-bold mt-1">MULTIPLICATEUR DE GAIN : +{(state.profile.prestigeLevel || 0) * 15}% PX</p>
-              </div>
-
-              <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-xl text-left space-y-2 text-xs text-slate-300">
-                <p className="font-bold text-yellow-300 uppercase">⚡ AVANTAGES DU PRESTIGE :</p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>Augmente de façon permanente tous vos gains de Pixels de <strong>+15% par niveau de Prestige</strong> !</li>
-                  <li>Débloque un titre exclusif de Prestige (ex: PRESTIGE {(state.profile.prestigeLevel || 0) + 1} 🌀)</li>
-                  <li>Accorde un bonus immédiat de <strong>+5 000 PX</strong> !</li>
-                  <li>Réinitialise vos points de rang à 0 pour vous permettre de refaire les quêtes de rang !</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={handlePrestige}
-                className="flex-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-slate-950 font-black py-3 rounded-xl text-xs uppercase cursor-pointer shadow-[0_0_20px_rgba(168,85,247,0.6)]"
-              >
-                🌀 PASSER AU PRESTIGE {(state.profile.prestigeLevel || 0) + 1} (+5 000 PX)
-              </button>
-              <button
-                onClick={() => setShowPrestigeModal(false)}
-                className="px-4 bg-slate-900 text-slate-400 font-bold py-3 rounded-xl text-xs uppercase cursor-pointer border border-slate-800"
-              >
-                FERMER
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* --- Roue de la Fortune Modal --- */}
-      {showWheelModal && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-mono">
-          <div className="bg-slate-950 border-2 border-yellow-500 p-6 rounded-2xl w-full max-w-md text-white relative shadow-[0_0_50px_rgba(234,179,8,0.4)] text-center">
-            <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-black text-yellow-400 uppercase tracking-widest flex items-center gap-2">
-                <Disc size={20} className="animate-spin-slow" /> ROUE DE LA FORTUNE NÉON
-              </h3>
-              <button
-                onClick={() => setShowWheelModal(false)}
-                className="text-slate-400 hover:text-white font-bold cursor-pointer text-sm"
-              >
-                ✕ FERMER
-              </button>
-            </div>
-
-            <div className="my-6 relative flex flex-col items-center justify-center">
-              <div className={`w-48 h-48 rounded-full border-4 border-yellow-400 bg-gradient-to-tr from-yellow-950 via-slate-900 to-amber-900 flex items-center justify-center shadow-[0_0_30px_rgba(234,179,8,0.6)] relative overflow-hidden transition-transform duration-[2000ms] ${isSpinningWheel ? 'animate-spin' : ''}`}>
-                <div className="text-center p-4">
-                  <Disc size={48} className="text-yellow-400 mx-auto mb-2" />
-                  <span className="text-xs font-black text-yellow-300">GAGNEZ JUSQU'À 5 000 PX !</span>
-                </div>
-              </div>
-
-              {wheelResult && (
-                <div className="mt-4 p-3 bg-yellow-950/80 border border-yellow-400 rounded-xl text-yellow-300 font-black text-sm animate-bounce">
-                  🎉 RÉCOMPENSE : {wheelResult} !
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={handleSpinWheel}
-              disabled={isSpinningWheel}
-              className="w-full bg-gradient-to-r from-yellow-400 via-amber-500 to-yellow-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-3.5 rounded-xl text-xs uppercase cursor-pointer shadow-[0_0_20px_rgba(234,179,8,0.6)] disabled:opacity-50"
-            >
-              {isSpinningWheel ? 'TOURNOIEMENT EN COURS...' : '🎰 TOURNER LA ROUE !'}
-            </button>
-          </div>
-        </div>
-      )}
+      <WheelOfFortuneModal
+        show={showWheelModal}
+        onClose={() => setShowWheelModal(false)}
+        totalPixels={state.profile.totalPixels}
+        onReward={(chosen) => {
+          if (chosen.type === 'px') {
+            setState(prev => ({
+              ...prev,
+              profile: { ...prev.profile, totalPixels: prev.profile.totalPixels + (chosen.val as number) }
+            }));
+          } else if (chosen.type === 'pass') {
+            setState(prev => ({
+              ...prev,
+              arcadePass: prev.arcadePass
+                ? { ...prev.arcadePass, level: prev.arcadePass.level + 1 }
+                : { level: 2, xp: 0, isPremium: false, claimedFreeRewards: [], claimedPremiumRewards: [] }
+            }));
+          } else if (chosen.type === 'title') {
+            setState(prev => ({
+              ...prev,
+              profile: {
+                ...prev.profile,
+                unlockedTitles: [...(prev.profile.unlockedTitles || []), chosen.val as string],
+                title: chosen.val as string
+              }
+            }));
+          }
+          setActiveNotification(`🎰 ROUE DE LA FORTUNE : Gagné ${chosen.label} !`);
+          setTimeout(() => setActiveNotification(null), 4000);
+        }}
+      />
 
       {/* --- Coffres de Chance Modal --- */}
-      {showBoxesModal && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-mono">
-          <div className="bg-slate-950 border-2 border-rose-500 p-6 rounded-2xl w-full max-w-2xl text-white relative shadow-[0_0_50px_rgba(244,63,94,0.4)]">
-            <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-black text-rose-400 uppercase tracking-widest flex items-center gap-2">
-                <Key size={20} /> COFFRES MYSTÈRES ARCADE
-              </h3>
-              <button
-                onClick={() => setShowBoxesModal(false)}
-                className="text-slate-400 hover:text-white font-bold cursor-pointer text-sm"
-              >
-                ✕ FERMER
-              </button>
-            </div>
-
-            {boxResult && (
-              <div className="mb-4 p-3 bg-rose-950/80 border border-rose-400 rounded-xl text-rose-300 font-black text-xs text-center animate-pulse">
-                {boxResult}
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 my-4">
-              {/* Box 1: Bronze */}
-              <div className="p-4 bg-slate-900/80 border border-slate-700 rounded-xl flex flex-col justify-between text-center">
-                <div>
-                  <div className="text-3xl mb-2">📦</div>
-                  <h4 className="font-black text-sm text-amber-400 uppercase">COFFRE BRONZE</h4>
-                  <p className="text-[10px] text-slate-400 mt-1">Contient entre 50 et 300 PX</p>
-                </div>
-                <button
-                  onClick={() => handleOpenBox(100, 'COFFRE BRONZE')}
-                  className="mt-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs cursor-pointer uppercase"
-                >
-                  OUVRIR (100 PX)
-                </button>
-              </div>
-
-              {/* Box 2: Épique */}
-              <div className="p-4 bg-purple-950/40 border border-purple-500 rounded-xl flex flex-col justify-between text-center shadow-[0_0_15px_rgba(168,85,247,0.3)]">
-                <div>
-                  <div className="text-3xl mb-2">🎁</div>
-                  <h4 className="font-black text-sm text-purple-300 uppercase">COFFRE ÉPIQUE</h4>
-                  <p className="text-[10px] text-purple-200 mt-1">Contient entre 300 et 1 500 PX</p>
-                </div>
-                <button
-                  onClick={() => handleOpenBox(500, 'COFFRE ÉPIQUE')}
-                  className="mt-4 bg-purple-500 hover:bg-purple-400 text-slate-950 font-black py-2 rounded-lg text-xs cursor-pointer uppercase shadow-[0_0_10px_rgba(168,85,247,0.5)]"
-                >
-                  OUVRIR (500 PX)
-                </button>
-              </div>
-
-              {/* Box 3: Mythique */}
-              <div className="p-4 bg-rose-950/40 border-2 border-rose-500 rounded-xl flex flex-col justify-between text-center shadow-[0_0_20px_rgba(244,63,94,0.4)]">
-                <div>
-                  <div className="text-3xl mb-2">💎</div>
-                  <h4 className="font-black text-sm text-rose-300 uppercase">COFFRE MYTHIQUE</h4>
-                  <p className="text-[10px] text-rose-200 mt-1">Contient entre 1 000 et 5 000 PX</p>
-                </div>
-                <button
-                  onClick={() => handleOpenBox(1500, 'COFFRE MYTHIQUE')}
-                  className="mt-4 bg-gradient-to-r from-rose-500 to-amber-400 hover:from-rose-400 hover:to-amber-300 text-slate-950 font-black py-2 rounded-lg text-xs cursor-pointer uppercase shadow-[0_0_15px_rgba(244,63,94,0.6)]"
-                >
-                  OUVRIR (1 500 PX)
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <LootBoxesModal
+        show={showBoxesModal}
+        onClose={() => setShowBoxesModal(false)}
+        totalPixels={state.profile.totalPixels}
+        onOpenBox={handleOpenBox}
+      />
 
       {/* --- DÉFIS FLASH ⚡ (MAJOR NEW FEATURE: FLASH ARENA & MULTIPLIERS) --- */}
-      {showFlashModal && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 font-mono">
-          <div className="bg-slate-950 border-2 border-cyan-400 p-5 sm:p-6 rounded-3xl w-full max-w-4xl text-white relative max-h-[90vh] flex flex-col shadow-[0_0_50px_rgba(6,182,212,0.35)] overflow-hidden">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-cyan-950 border-2 border-cyan-400 text-cyan-300 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.4)]">
-                  <Zap size={26} className="animate-bounce" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-purple-300 to-rose-400 uppercase tracking-wider flex items-center gap-2">
-                    ARENA DÉFIS FLASH ⚡
-                  </h3>
-                  <p className="text-[11px] text-slate-400 font-sans">
-                    Défis chronométrés à hauts enjeux • Boosts de Pixels de x2 à x5 en direct !
-                  </p>
-                </div>
-              </div>
+      <AnimatePresence>
+        {showFlashModal && (
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 font-mono select-none">
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.85, opacity: 0, y: 30 }}
+              className="bg-slate-950 border-2 border-cyan-400 p-5 sm:p-6 rounded-3xl w-full max-w-4xl text-white relative max-h-[90vh] flex flex-col shadow-[0_0_60px_rgba(6,182,212,0.4)] overflow-hidden"
+            >
+              {/* Animated cyan background rays */}
+              <div className="absolute -top-20 -right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
+              <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl pointer-events-none animate-pulse" />
 
-              <button
-                onClick={() => { audio.playClick(); setShowFlashModal(false); }}
-                className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-white font-bold cursor-pointer text-xs transition-all"
-              >
-                ✕ FERMER
-              </button>
-            </div>
-
-            {/* Flash Challenge Generator Box */}
-            <div className="bg-gradient-to-r from-cyan-950/60 via-slate-900 to-purple-950/60 border border-cyan-500/50 p-4 rounded-2xl mb-4 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
-              <div className="flex items-center gap-3">
-                <div className="p-3 bg-cyan-500/20 border border-cyan-400 rounded-2xl text-cyan-300">
-                  <Sparkles size={24} className="animate-spin-slow" />
-                </div>
-                <div>
-                  <h4 className="font-black text-sm text-white uppercase tracking-wide">
-                    GÉNÉRATEUR DE DÉFI MATRICIEL
-                  </h4>
-                  <p className="text-xs text-slate-300 font-sans">
-                    Tirez au sort une épreuve surprise sur n'importe quel jeu avec un multiplicateur géant !
-                  </p>
-                </div>
-              </div>
-
-              <button
-                disabled={isRollingFlash}
-                onClick={() => {
-                  audio.playClick();
-                  setIsRollingFlash(true);
-                  setTimeout(() => {
-                    audio.playWin();
-                    const randomGame = GAMES_LIST[Math.floor(Math.random() * GAMES_LIST.length)];
-                    const randomMultiplier = [2, 3, 4, 5][Math.floor(Math.random() * 4)];
-                    const targetScore = Math.floor(Math.random() * 20) * 10 + 50;
-                    const rewardPx = targetScore * randomMultiplier * 2;
-                    setFlashRollResult({
-                      id: `fc_roll_${Date.now()}`,
-                      gameId: randomGame.id,
-                      gameName: randomGame.frenchName || randomGame.name,
-                      title: `Surtension ${randomGame.frenchName || randomGame.name}`,
-                      targetScore,
-                      multiplier: randomMultiplier,
-                      rewardPx,
-                      icon: randomGame.icon
-                    });
-                    setIsRollingFlash(false);
-                  }, 800);
-                }}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs uppercase cursor-pointer transition-all shadow-[0_0_20px_rgba(6,182,212,0.5)] shrink-0 flex items-center gap-2 scale-105"
-              >
-                <Zap size={16} /> {isRollingFlash ? 'GÉNÉRATION...' : '🎲 GENERER UN DÉFI SPÉCIAL'}
-              </button>
-            </div>
-
-            {/* Roll Result Showcase */}
-            {flashRollResult && (
-              <div className="bg-slate-900 border-2 border-yellow-400 p-4 rounded-2xl mb-4 shrink-0 flex flex-col sm:flex-row justify-between items-center gap-3 animate-pulse">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 shrink-0 relative z-10">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-yellow-500/20 border border-yellow-400 text-yellow-300 rounded-xl">
-                    {renderIcon(flashRollResult.icon || 'Zap', "w-6 h-6")}
+                  <div className="p-3 bg-cyan-950 border-2 border-cyan-400 text-cyan-300 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+                    <Zap size={26} className="animate-bounce" />
                   </div>
                   <div>
-                    <span className="text-[9px] bg-yellow-500 text-slate-950 font-black px-2 py-0.5 rounded uppercase">
-                      DÉFI GÉNÉRÉ : {flashRollResult.multiplier}X PX !
-                    </span>
-                    <h4 className="font-black text-sm text-white mt-1">{flashRollResult.title}</h4>
-                    <p className="text-xs text-slate-300">Objectif : <strong>{flashRollResult.targetScore} points</strong> • Gain : <strong>+{flashRollResult.rewardPx} PX</strong></p>
+                    <h3 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-purple-300 to-rose-400 uppercase tracking-wider flex items-center gap-2">
+                      ARENA DÉFIS FLASH ⚡
+                    </h3>
+                    <p className="text-[11px] text-slate-400 font-sans">
+                      Défis chronométrés à hauts enjeux • Boosts de Pixels de x2 à x5 en direct !
+                    </p>
                   </div>
                 </div>
 
                 <button
-                  onClick={() => {
-                    audio.playClick();
-                    setActiveFlashChallenge(flashRollResult);
-                    setShowFlashModal(false);
-                    handleLaunchGame(flashRollResult.gameId);
-                  }}
-                  className="px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black text-xs uppercase rounded-xl cursor-pointer shadow-[0_0_15px_rgba(234,179,8,0.5)] shrink-0"
+                  onClick={() => { audio.playClick(); setShowFlashModal(false); }}
+                  className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-white font-bold cursor-pointer text-xs transition-all"
                 >
-                  RELEVER LE DÉFI 🎮
+                  ✕ FERMER
                 </button>
               </div>
-            )}
 
-            {/* Daily Flash Challenges List */}
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-              <h4 className="text-xs font-black text-cyan-300 uppercase tracking-widest flex items-center gap-1.5 mb-2">
-                <Flame size={16} className="text-orange-400" /> DÉFIS FLASH EN DIRECT DU JOUR
-              </h4>
-
-              {[
-                { id: 'fc_1', gameId: 'clicker', gameName: 'Néon Clicker', title: 'Surtension Hyperdrive Express', targetScore: 300, multiplier: 2, rewardPx: 500, icon: 'Zap' },
-                { id: 'fc_2', gameId: 'reflex', gameName: 'Vitesse Réflexe', title: 'Reflexes Quantiques 100%', targetScore: 25, multiplier: 3, rewardPx: 750, icon: 'Target' },
-                { id: 'fc_3', gameId: 'simon', gameName: 'Simon Mémorisation', title: 'Mémoire de Titane', targetScore: 7, multiplier: 4, rewardPx: 1000, icon: 'Brain' },
-                { id: 'fc_4', gameId: 'snake', gameName: 'Néon Snake', title: 'Défi Serpent Solaire', targetScore: 15, multiplier: 3, rewardPx: 800, icon: 'Play' },
-                { id: 'fc_5', gameId: 'brick', gameName: 'Casse-Briques', title: 'Briques Explosives', targetScore: 50, multiplier: 2, rewardPx: 600, icon: 'Grid' },
-              ].map((chal) => (
-                <div key={chal.id} className="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-800 flex justify-between items-center hover:border-cyan-500/60 transition-all">
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 bg-cyan-950 border border-cyan-800 text-cyan-300 rounded-xl">
-                      {renderIcon(chal.icon, "w-5 h-5")}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-black text-xs text-white">{chal.title}</span>
-                        <span className="text-[9px] bg-rose-950 text-rose-300 border border-rose-800 px-1.5 py-0.5 rounded font-black">
-                          {chal.multiplier}X PX
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-400 mt-0.5">
-                        Jeu : {chal.gameName} • Objectif : <strong className="text-cyan-300">{chal.targetScore} pts</strong>
-                      </p>
-                    </div>
+              {/* Flash Challenge Generator Box */}
+              <div className="bg-gradient-to-r from-cyan-950/60 via-slate-900 to-purple-950/60 border border-cyan-500/50 p-4 rounded-2xl mb-4 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_0_20px_rgba(6,182,212,0.15)] relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-cyan-500/20 border border-cyan-400 rounded-2xl text-cyan-300">
+                    <Sparkles size={24} className="animate-spin-slow" />
                   </div>
-
-                  <div className="text-right shrink-0">
-                    <span className="text-xs font-black text-yellow-400 block mb-1">+{chal.rewardPx} PX</span>
-                    <button
-                      onClick={() => {
-                        audio.playClick();
-                        setActiveFlashChallenge(chal);
-                        setShowFlashModal(false);
-                        handleLaunchGame(chal.gameId);
-                      }}
-                      className="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-[10px] uppercase rounded-xl cursor-pointer shadow-[0_0_10px_rgba(6,182,212,0.3)]"
-                    >
-                      JOUER DÉFI 🎮
-                    </button>
+                  <div>
+                    <h4 className="font-black text-sm text-white uppercase tracking-wide">
+                      GÉNÉRATEUR DE DÉFI MATRICIEL
+                    </h4>
+                    <p className="text-xs text-slate-300 font-sans">
+                      Tirez au sort une épreuve surprise sur n'importe quel jeu avec un multiplicateur géant !
+                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
+
+                <button
+                  disabled={isRollingFlash}
+                  onClick={() => {
+                    audio.playClick();
+                    setIsRollingFlash(true);
+                    setTimeout(() => {
+                      audio.playWin();
+                      const randomGame = GAMES_LIST[Math.floor(Math.random() * GAMES_LIST.length)];
+                      const randomMultiplier = [2, 3, 4, 5][Math.floor(Math.random() * 4)];
+                      const targetScore = Math.floor(Math.random() * 20) * 10 + 50;
+                      const rewardPx = targetScore * randomMultiplier * 2;
+                      setFlashRollResult({
+                        id: `fc_roll_${Date.now()}`,
+                        gameId: randomGame.id,
+                        gameName: randomGame.frenchName || randomGame.name,
+                        title: `Surtension ${randomGame.frenchName || randomGame.name}`,
+                        targetScore,
+                        multiplier: randomMultiplier,
+                        rewardPx,
+                        icon: randomGame.icon
+                      });
+                      setIsRollingFlash(false);
+                    }, 800);
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs uppercase cursor-pointer transition-all shadow-[0_0_20px_rgba(6,182,212,0.5)] shrink-0 flex items-center gap-2 scale-105"
+                >
+                  <Zap size={16} /> {isRollingFlash ? 'GÉNÉRATION...' : '🎲 GENERER UN DÉFI SPÉCIAL'}
+                </button>
+              </div>
+
+              {/* Roll Result Showcase */}
+              {flashRollResult && (
+                <div className="bg-slate-900 border-2 border-yellow-400 p-4 rounded-2xl mb-4 shrink-0 flex flex-col sm:flex-row justify-between items-center gap-3 animate-pulse relative z-10">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-yellow-500/20 border border-yellow-400 text-yellow-300 rounded-xl">
+                      {renderIcon(flashRollResult.icon || 'Zap', "w-6 h-6")}
+                    </div>
+                    <div>
+                      <span className="text-[9px] bg-yellow-500 text-slate-950 font-black px-2 py-0.5 rounded uppercase">
+                        DÉFI GÉNÉRÉ : {flashRollResult.multiplier}X PX !
+                      </span>
+                      <h4 className="font-black text-sm text-white mt-1">{flashRollResult.title}</h4>
+                      <p className="text-xs text-slate-300 font-sans">Objectif : <strong>{flashRollResult.targetScore} points</strong> • Gain : <strong>+{flashRollResult.rewardPx} PX</strong></p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      audio.playClick();
+                      setActiveFlashChallenge(flashRollResult);
+                      setShowFlashModal(false);
+                      handleLaunchGame(flashRollResult.gameId);
+                    }}
+                    className="px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black text-xs uppercase rounded-xl cursor-pointer shadow-[0_0_15px_rgba(234,179,8,0.5)] shrink-0"
+                  >
+                    RELEVER LE DÉFI 🎮
+                  </button>
+                </div>
+              )}
+
+              {/* Daily Flash Challenges List */}
+              <div className="flex-1 overflow-y-auto space-y-3 pr-1 relative z-10">
+                <h4 className="text-xs font-black text-cyan-300 uppercase tracking-widest flex items-center gap-1.5 mb-2">
+                  <Flame size={16} className="text-orange-400 animate-pulse" /> DÉFIS FLASH EN DIRECT DU JOUR
+                </h4>
+
+                {[
+                  { id: 'fc_1', gameId: 'clicker', gameName: 'Néon Clicker', title: 'Surtension Hyperdrive Express', targetScore: 300, multiplier: 2, rewardPx: 500, icon: 'Zap' },
+                  { id: 'fc_2', gameId: 'reflex', gameName: 'Vitesse Réflexe', title: 'Reflexes Quantiques 100%', targetScore: 25, multiplier: 3, rewardPx: 750, icon: 'Target' },
+                  { id: 'fc_3', gameId: 'simon', gameName: 'Simon Mémorisation', title: 'Mémoire de Titane', targetScore: 7, multiplier: 4, rewardPx: 1000, icon: 'Brain' },
+                  { id: 'fc_4', gameId: 'snake', gameName: 'Néon Snake', title: 'Défi Serpent Solaire', targetScore: 15, multiplier: 3, rewardPx: 800, icon: 'Play' },
+                  { id: 'fc_5', gameId: 'brick', gameName: 'Casse-Briques', title: 'Briques Explosives', targetScore: 50, multiplier: 2, rewardPx: 600, icon: 'Grid' },
+                ].map((chal) => (
+                  <motion.div
+                    key={chal.id}
+                    whileHover={{ scale: 1.01 }}
+                    className="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-800 flex justify-between items-center hover:border-cyan-500/60 transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 bg-cyan-950 border border-cyan-800 text-cyan-300 rounded-xl">
+                        {renderIcon(chal.icon, "w-5 h-5")}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-black text-xs text-white">{chal.title}</span>
+                          <span className="text-[9px] bg-rose-950 text-rose-300 border border-rose-800 px-1.5 py-0.5 rounded font-black">
+                            {chal.multiplier}X PX
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 mt-0.5 font-sans">
+                          Jeu : {chal.gameName} • Objectif : <strong className="text-cyan-300">{chal.targetScore} pts</strong>
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className="text-xs font-black text-yellow-400 block mb-1">+{chal.rewardPx} PX</span>
+                      <button
+                        onClick={() => {
+                          audio.playClick();
+                          setActiveFlashChallenge(chal);
+                          setShowFlashModal(false);
+                          handleLaunchGame(chal.gameId);
+                        }}
+                        className="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-[10px] uppercase rounded-xl cursor-pointer shadow-[0_0_10px_rgba(6,182,212,0.3)]"
+                      >
+                        JOUER DÉFI 🎮
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
 
       {/* Achievement / Trophy Unlock Particles Toast */}
       <AchievementToast notification={activeNotification} onClose={() => setActiveNotification(null)} />
