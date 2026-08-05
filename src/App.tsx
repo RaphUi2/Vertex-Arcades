@@ -23,6 +23,9 @@ import {
   RANK_QUESTS
 } from './gamesData';
 
+import { Avatar3DViewer } from './components/Avatar3DViewer';
+import { AchievementToast } from './components/AchievementToast';
+
 // Mini games imports
 import NeonClicker from './games/NeonClicker';
 import SimonMemory from './games/SimonMemory';
@@ -174,6 +177,21 @@ export default function App() {
   const [showPrestigeModal, setShowPrestigeModal] = useState(false);
   const [showWheelModal, setShowWheelModal] = useState(false);
   const [showBoxesModal, setShowBoxesModal] = useState(false);
+  const [showFlashModal, setShowFlashModal] = useState(false);
+  const [activeFlashChallenge, setActiveFlashChallenge] = useState<{
+    id: string;
+    gameId: string;
+    gameName: string;
+    title: string;
+    targetScore: number;
+    multiplier: number;
+    rewardPx: number;
+    icon: string;
+  } | null>(null);
+  const [flashRollResult, setFlashRollResult] = useState<any>(null);
+  const [isRollingFlash, setIsRollingFlash] = useState(false);
+  const [achievementsFilter, setAchievementsFilter] = useState<'all' | 'unlocked' | 'locked'>('all');
+  const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSpinningWheel, setIsSpinningWheel] = useState(false);
   const [wheelResult, setWheelResult] = useState<string | null>(null);
@@ -809,31 +827,10 @@ export default function App() {
       {/* Top Header Bar */}
       <header className="border-b-2 border-cyan-500/30 bg-slate-950/95 backdrop-blur-xl sticky top-0 z-40 shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-3">
-          {/* Top Row: Brand Logo, Sound, User Card & PX Balance */}
-          <div className="flex flex-col md:flex-row justify-between items-center gap-3 border-b border-slate-800/80 pb-2.5">
-            <div className="flex items-center gap-3">
-              <div className="relative cursor-pointer" onClick={() => { audio.playClick(); setActiveGameId(null); }}>
-                <div className="absolute inset-0 bg-cyan-500 rounded-xl blur-md opacity-60 animate-pulse"></div>
-                <div className="relative bg-gradient-to-br from-cyan-950 via-slate-900 to-slate-950 border-2 border-cyan-400 p-2.5 rounded-xl shadow-[0_0_20px_rgba(6,182,212,0.5)]">
-                  <Zap className="text-cyan-400 animate-bounce-slow" size={24} />
-                </div>
-              </div>
-              <div>
-                <h1
-                  onClick={() => { audio.playClick(); setActiveGameId(null); }}
-                  className="text-2xl font-black font-sans tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-rose-400 uppercase drop-shadow-[0_0_15px_rgba(6,182,212,0.8)] cursor-pointer hover:opacity-90 transition-opacity"
-                >
-                  Vertex Arcades
-                </h1>
-                <p className="text-[10px] font-mono font-extrabold text-cyan-300/90 uppercase tracking-wider">
-                  CENTRE D'ARCADE FUTURISTE NÉON • 34 JEUX MULTI-UNIVERS
-                </p>
-              </div>
-            </div>
-
-            {/* Right Profile & Balance Bar */}
-            <div className="flex flex-wrap items-center gap-2.5">
-              {/* Sounds Toggle */}
+          {/* Top Row: Left Actions, CENTERED Brand & Logo, Right PX Balance */}
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 border-b border-slate-800/80 pb-2.5">
+            {/* Left: Sound & Profile */}
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={toggleSound}
                 className="p-2 rounded-xl border border-slate-700 bg-slate-900/90 text-slate-300 hover:text-white hover:border-cyan-400 transition-all cursor-pointer shadow-md"
@@ -842,7 +839,6 @@ export default function App() {
                 {soundOn ? <Volume2 size={16} className="text-cyan-400" /> : <VolumeX size={16} className="text-red-400" />}
               </button>
 
-              {/* User Profile Button */}
               {(() => {
                 const userColorHex = AVATAR_COLORS.find(c => c.id === state.profile.avatarColor)?.hex || '#06b6d4';
                 const userAuraObj = AURA_COSMETICS.find(a => a.id === state.profile.activeAura) || AURA_COSMETICS[0];
@@ -857,20 +853,37 @@ export default function App() {
                     >
                       {renderIcon(state.profile.avatarIcon || 'Crown', "w-4 h-4 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]")}
                     </div>
-                    <div className="text-left">
+                    <div className="text-left hidden md:block">
                       <p className="font-sans font-black text-[11px] leading-tight text-white group-hover:text-cyan-300 transition-colors">{state.profile.username}</p>
                       <p className="text-[7px] text-yellow-400 font-bold tracking-wider uppercase mt-0.5">{state.profile.title || 'DÉBUTANT'}</p>
                     </div>
                   </button>
                 );
               })()}
+            </div>
 
-              {/* Golden PX Counter */}
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-950/90 via-yellow-950/90 to-amber-950/90 border-2 border-yellow-400/90 text-yellow-300 font-mono text-xs font-black shadow-[0_0_20px_rgba(234,179,8,0.4)] relative overflow-hidden">
-                <Sparkles size={16} className="text-yellow-400 animate-pulse" />
-                <span className="tracking-wider text-sm text-yellow-200">{state.profile.totalPixels.toLocaleString()}</span>
-                <span className="text-[10px] text-amber-400 font-sans font-black">PX</span>
+            {/* CENTER: Modern Brand Logo & Centered Title "VERTEX ARCADES" (No phrase d'accroche) */}
+            <div
+              onClick={() => { audio.playClick(); setActiveGameId(null); }}
+              className="flex items-center justify-center gap-3 cursor-pointer group py-1 mx-auto"
+            >
+              <div className="relative">
+                <div className="absolute -inset-1.5 bg-gradient-to-r from-cyan-500 via-purple-500 to-rose-500 rounded-2xl blur-md opacity-80 group-hover:opacity-100 transition-opacity animate-pulse"></div>
+                <div className="relative bg-slate-950 border-2 border-cyan-400 p-2.5 rounded-2xl flex items-center justify-center shadow-[0_0_25px_rgba(6,182,212,0.6)] group-hover:scale-105 transition-transform">
+                  <Zap className="text-cyan-400 animate-bounce-slow" size={26} />
+                  <Crown className="text-yellow-400 absolute -top-2 -right-2 transform rotate-12 drop-shadow-[0_0_8px_#facc15]" size={15} />
+                </div>
               </div>
+              <h1 className="text-2xl sm:text-3xl font-black font-sans tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-purple-300 to-rose-400 uppercase drop-shadow-[0_0_20px_rgba(6,182,212,0.8)] group-hover:brightness-110 transition-all">
+                VERTEX ARCADES
+              </h1>
+            </div>
+
+            {/* Right PX Balance */}
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-950/90 via-yellow-950/90 to-amber-950/90 border-2 border-yellow-400/90 text-yellow-300 font-mono text-xs font-black shadow-[0_0_20px_rgba(234,179,8,0.4)] relative overflow-hidden shrink-0">
+              <Sparkles size={16} className="text-yellow-400 animate-pulse" />
+              <span className="tracking-wider text-sm text-yellow-200">{state.profile.totalPixels.toLocaleString()}</span>
+              <span className="text-[10px] text-amber-400 font-sans font-black">PX</span>
             </div>
           </div>
 
@@ -904,13 +917,20 @@ export default function App() {
                 onClick={() => { audio.playClick(); setShowPassModal(true); }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-orange-500/80 bg-orange-950/60 text-orange-300 hover:bg-orange-900/80 hover:border-orange-400 transition-all cursor-pointer font-black text-[11px] shadow-[0_0_12px_rgba(249,115,22,0.25)]"
               >
-                <Flame size={14} className="text-orange-400 animate-pulse" /> PASS <span className="text-[9px] bg-orange-500/30 px-1 rounded">SAISON 1 (50 NIV.)</span>
+                <Flame size={14} className="text-orange-400 animate-pulse" /> PASS <span className="text-[9px] bg-orange-500/30 px-1 rounded">SAISON 2 (100 NIV.)</span>
               </button>
             </div>
 
             {/* GROUP 2: COMPETITION & PROGRES */}
             <div className="flex items-center gap-1.5 flex-wrap bg-slate-900/70 p-1 rounded-2xl border border-slate-800">
-              <span className="text-[9px] text-slate-500 font-black uppercase px-2">LIGUE & QUÊTES :</span>
+              <span className="text-[9px] text-slate-500 font-black uppercase px-2">ARENA & QUÊTES :</span>
+              <button
+                onClick={() => { audio.playClick(); setShowFlashModal(true); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-cyan-400 bg-cyan-950/80 text-cyan-200 hover:bg-cyan-900 hover:border-cyan-300 transition-all cursor-pointer font-black text-[11px] shadow-[0_0_15px_rgba(6,182,212,0.35)] relative animate-pulse"
+              >
+                <Zap size={14} className="text-cyan-300 animate-bounce" /> DÉFIS FLASH ⚡
+              </button>
+
               <button
                 onClick={() => { audio.playClick(); setShowPrestigeModal(true); }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-purple-500/80 bg-purple-950/60 text-purple-300 hover:bg-purple-900/80 hover:border-purple-400 transition-all cursor-pointer font-black text-[11px] shadow-[0_0_12px_rgba(168,85,247,0.25)]"
@@ -928,6 +948,13 @@ export default function App() {
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-400 shadow-[0_0_8px_#facc15] animate-ping"></span>
                   </span>
                 )}
+              </button>
+
+              <button
+                onClick={() => { audio.playClick(); setShowAchievementsModal(true); }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-yellow-500/80 bg-yellow-950/60 text-yellow-300 hover:bg-yellow-900/80 hover:border-yellow-400 transition-all cursor-pointer font-black text-[11px] shadow-[0_0_12px_rgba(234,179,8,0.25)] relative"
+              >
+                <Award size={14} className="text-yellow-400" /> TROPHÉES
               </button>
 
               <button
@@ -953,6 +980,26 @@ export default function App() {
             const activeStats = state.stats[activeGameId] || { plays: 0, highScore: 0 };
             return (
               <div className="w-full max-w-4xl flex flex-col items-center gap-4 py-2 font-mono">
+                {/* --- BANNIÈRE DÉFI FLASH ACTIF --- */}
+                {activeFlashChallenge && activeFlashChallenge.gameId === activeGameId && (
+                  <div className="w-full bg-gradient-to-r from-cyan-950 via-slate-900 to-purple-950 border-2 border-yellow-400 rounded-2xl p-3 shadow-[0_0_20px_rgba(234,179,8,0.4)] flex justify-between items-center gap-2 animate-pulse font-mono">
+                    <div className="flex items-center gap-3">
+                      <Zap size={22} className="text-yellow-400 animate-bounce" />
+                      <div>
+                        <span className="text-[9px] bg-yellow-400 text-slate-950 font-black px-2 py-0.5 rounded uppercase">
+                          DÉFI FLASH ACTIF ({activeFlashChallenge.multiplier}X PX)
+                        </span>
+                        <p className="text-xs font-black text-white mt-0.5">
+                          {activeFlashChallenge.title} • Objectif : <strong className="text-yellow-300">{activeFlashChallenge.targetScore} points</strong>
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-xs font-black text-yellow-300 bg-black/50 px-3 py-1 rounded-xl border border-yellow-500/50">
+                      +{activeFlashChallenge.rewardPx} PX À GAGNER
+                    </span>
+                  </div>
+                )}
+
                 {/* --- BARRE DE PRÉSENTATION DU JEU NÉON (Marquee Header Bar) --- */}
                 <div className="w-full bg-slate-950 border-2 border-cyan-500 rounded-2xl p-4 shadow-[0_0_30px_rgba(6,182,212,0.3)] backdrop-blur-xl relative overflow-hidden flex flex-col md:flex-row justify-between items-center gap-4">
                   {/* Left: Icon, Name & Tags */}
@@ -1293,6 +1340,16 @@ export default function App() {
               >
                 ✕ FERMER
               </button>
+            </div>
+
+            {/* 3D Holographic Avatar Showcase */}
+            <div className="mb-4">
+              <Avatar3DViewer
+                avatarColor={selectedAvatarColorInput}
+                avatarIcon={selectedAvatarIconInput}
+                activeAura={selectedAuraInput}
+                username={usernameInput || state.profile.username}
+              />
             </div>
 
             {/* Profile Navigation Tabs */}
@@ -1711,51 +1768,242 @@ export default function App() {
         </div>
       )}
 
-      {/* --- Achievements Modal (100) --- */}
-      {showAchievementsModal && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4 font-mono">
-          <div className="bg-slate-950 border-2 border-purple-500 p-6 rounded-2xl w-full max-w-3xl text-white relative max-h-[85vh] flex flex-col shadow-[0_0_40px_rgba(168,85,247,0.25)]">
-            <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-black text-purple-400 uppercase tracking-widest flex items-center gap-2">
-                <Medal size={22} /> TABLEAU DES SUCCÈS (100 SUCCÈS)
-              </h3>
-              <button
-                onClick={() => setShowAchievementsModal(false)}
-                className="text-slate-400 hover:text-white font-bold cursor-pointer text-sm"
-              >
-                ✕ FERMER
-              </button>
-            </div>
+      {/* --- GALERIE DES TROPHÉES (TROPHY GALLERY SHOWCASE) --- */}
+      {showAchievementsModal && (() => {
+        const totalCount = state.achievements.length;
+        const unlockedCount = state.achievements.filter(a => a.isUnlocked).length;
+        const percentUnlocked = Math.round((unlockedCount / (totalCount || 1)) * 100);
+        const totalPixelsFromAch = state.achievements
+          .filter(a => a.isUnlocked)
+          .reduce((sum, a) => sum + (a.pixelReward || 0), 0);
 
-            <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-              {state.achievements.map((ach) => (
-                <div
-                  key={ach.id}
-                  className={`p-3 rounded-xl border flex items-center justify-between ${
-                    ach.isUnlocked
-                      ? 'bg-purple-950/30 border-purple-500/60 text-purple-200'
-                      : 'bg-slate-900/40 border-slate-800/80 text-slate-500'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2.5 rounded-xl border ${ach.isUnlocked ? 'bg-purple-950 border-purple-400 text-purple-300' : 'bg-slate-950 border-slate-800 text-slate-600'}`}>
-                      {renderIcon(ach.icon || 'Award', "w-5 h-5")}
-                    </div>
-                    <div>
-                      <p className={`font-bold text-xs ${ach.isUnlocked ? 'text-white' : 'text-slate-400'}`}>{ach.frenchTitle}</p>
-                      <p className="text-[10px] text-slate-400 mt-0.5">{ach.frenchDescription}</p>
-                    </div>
+        const displayedAch = state.achievements.filter(a => {
+          if (achievementsFilter === 'unlocked') return a.isUnlocked;
+          if (achievementsFilter === 'locked') return !a.isUnlocked;
+          return true;
+        });
+
+        return (
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-5 font-mono">
+            <div className="bg-slate-950 border-2 border-yellow-500/80 p-5 sm:p-6 rounded-3xl w-full max-w-5xl text-white relative max-h-[90vh] flex flex-col shadow-[0_0_50px_rgba(234,179,8,0.25)] overflow-hidden">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-yellow-500/10 border-2 border-yellow-400 text-yellow-300 rounded-2xl shadow-[0_0_20px_rgba(234,179,8,0.3)]">
+                    <Trophy size={24} className="animate-bounce" />
                   </div>
-                  <div className="text-right shrink-0">
-                    <span className={`text-xs font-bold ${ach.isUnlocked ? 'text-yellow-400' : 'text-slate-600'}`}>+{ach.pixelReward} PX</span>
-                    <span className="block text-[8px] font-black uppercase mt-0.5">{ach.isUnlocked ? '✅ DÉBLOQUÉ' : '🔒 VERROUILLÉ'}</span>
+                  <div>
+                    <h3 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-500 uppercase tracking-wider flex items-center gap-2">
+                      GALERIE DES TROPHÉES
+                    </h3>
+                    <p className="text-[11px] text-slate-400 font-sans font-medium">
+                      Vitrine des {totalCount} succès d'arcade • Cliquez sur une médaille pour l'examiner
+                    </p>
                   </div>
                 </div>
-              ))}
+
+                <button
+                  onClick={() => { audio.playClick(); setShowAchievementsModal(false); setSelectedAchievement(null); }}
+                  className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-yellow-400 text-slate-300 hover:text-white font-bold cursor-pointer text-xs transition-all"
+                >
+                  ✕ FERMER
+                </button>
+              </div>
+
+              {/* Progress & Stats Showcase Banner */}
+              <div className="bg-slate-900/80 border border-slate-800 p-3.5 rounded-2xl mb-4 shrink-0 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="w-full sm:w-2/3">
+                  <div className="flex justify-between items-center text-xs font-bold mb-1.5">
+                    <span className="text-yellow-300 uppercase flex items-center gap-1.5">
+                      <Award size={14} /> PROGRESSION DES TROPHÉES
+                    </span>
+                    <span className="text-slate-300">
+                      <strong className="text-yellow-400">{unlockedCount}</strong> / {totalCount} ({percentUnlocked}%)
+                    </span>
+                  </div>
+                  <div className="w-full h-3 bg-slate-950 border border-slate-800 rounded-full overflow-hidden p-0.5">
+                    <div
+                      className="h-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-300 rounded-full transition-all duration-500 shadow-[0_0_10px_#facc15]"
+                      style={{ width: `${percentUnlocked}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 bg-yellow-950/40 border border-yellow-500/40 px-3.5 py-2 rounded-xl text-yellow-300 shrink-0">
+                  <Sparkles size={16} className="text-yellow-400 animate-pulse" />
+                  <div className="text-left">
+                    <span className="text-[9px] text-yellow-500 uppercase font-extrabold block leading-none">PX GAGNÉS DE TROPHÉES</span>
+                    <span className="text-xs font-black">+{totalPixelsFromAch.toLocaleString()} PX</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Category Filter Pills */}
+              <div className="flex justify-between items-center gap-2 mb-4 shrink-0 flex-wrap">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => { audio.playClick(); setAchievementsFilter('all'); }}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase transition-all cursor-pointer border ${
+                      achievementsFilter === 'all'
+                        ? 'bg-yellow-500 text-slate-950 border-yellow-400 shadow-[0_0_12px_rgba(234,179,8,0.4)]'
+                        : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                    }`}
+                  >
+                    TOUS ({totalCount})
+                  </button>
+
+                  <button
+                    onClick={() => { audio.playClick(); setAchievementsFilter('unlocked'); }}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase transition-all cursor-pointer border flex items-center gap-1 ${
+                      achievementsFilter === 'unlocked'
+                        ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.4)]'
+                        : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                    }`}
+                  >
+                    <Check size={13} /> DÉBLOQUÉS ({unlockedCount})
+                  </button>
+
+                  <button
+                    onClick={() => { audio.playClick(); setAchievementsFilter('locked'); }}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-black uppercase transition-all cursor-pointer border flex items-center gap-1 ${
+                      achievementsFilter === 'locked'
+                        ? 'bg-purple-600 text-white border-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.4)]'
+                        : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
+                    }`}
+                  >
+                    <Lock size={13} /> VERROUILLÉS ({totalCount - unlockedCount})
+                  </button>
+                </div>
+
+                <p className="text-[10px] text-slate-400 italic">
+                  💡 Cliquez sur n'importe quel badge pour ouvrir sa fiche détaillée !
+                </p>
+              </div>
+
+              {/* Vitrine / Grid of Trophy Cards */}
+              <div className="flex-1 overflow-y-auto pr-1">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                  {displayedAch.map((ach) => {
+                    const isUnlocked = ach.isUnlocked;
+
+                    return (
+                      <div
+                        key={ach.id}
+                        onClick={() => { audio.playClick(); setSelectedAchievement(ach); }}
+                        className={`group relative p-3 rounded-2xl border transition-all cursor-pointer flex flex-col items-center text-center justify-between ${
+                          isUnlocked
+                            ? 'bg-gradient-to-b from-yellow-950/40 via-slate-900 to-slate-950 border-yellow-500/70 hover:border-yellow-300 shadow-[0_0_15px_rgba(234,179,8,0.15)] hover:shadow-[0_0_25px_rgba(234,179,8,0.35)] hover:scale-105'
+                            : 'bg-slate-900/40 border-slate-800/90 hover:border-slate-700 text-slate-500 opacity-80 hover:opacity-100 hover:scale-102'
+                        }`}
+                      >
+                        {/* Status Pin */}
+                        <div className="absolute top-2 right-2">
+                          {isUnlocked ? (
+                            <span className="flex h-2.5 w-2.5">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-400 shadow-[0_0_6px_#facc15]"></span>
+                            </span>
+                          ) : (
+                            <Lock size={11} className="text-slate-600" />
+                          )}
+                        </div>
+
+                        {/* Visual Badge Circle Container */}
+                        <div className={`p-3.5 rounded-2xl border my-2 transition-transform group-hover:scale-110 ${
+                          isUnlocked
+                            ? 'bg-gradient-to-br from-yellow-500/20 via-amber-500/10 to-yellow-950/40 border-yellow-400 text-yellow-300 shadow-[0_0_15px_rgba(234,179,8,0.4)]'
+                            : 'bg-slate-950 border-slate-800 text-slate-600'
+                        }`}>
+                          {renderIcon(ach.icon || 'Award', "w-6 h-6")}
+                        </div>
+
+                        {/* Title */}
+                        <div className="w-full">
+                          <p className={`font-black text-xs leading-tight mb-1 line-clamp-2 ${
+                            isUnlocked ? 'text-white group-hover:text-yellow-300' : 'text-slate-400'
+                          }`}>
+                            {ach.frenchTitle}
+                          </p>
+
+                          <div className="mt-1 flex items-center justify-between w-full pt-1.5 border-t border-slate-800/80">
+                            <span className={`text-[10px] font-bold ${isUnlocked ? 'text-yellow-400' : 'text-slate-600'}`}>
+                              +{ach.pixelReward} PX
+                            </span>
+                            <span className={`text-[8px] font-black uppercase px-1.5 py-0.5 rounded ${
+                              isUnlocked ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/40' : 'bg-slate-950 text-slate-600'
+                            }`}>
+                              {isUnlocked ? 'ACCOMPLI' : 'VERROUILLÉ'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* --- TROPHY INSPECTION MODAL / DRAWER --- */}
+              <AnimatePresence>
+                {selectedAchievement && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="absolute inset-0 bg-slate-950/95 backdrop-blur-xl p-6 rounded-3xl z-20 flex flex-col items-center justify-center text-center font-mono border-2 border-yellow-400 shadow-[0_0_60px_rgba(234,179,8,0.4)]"
+                  >
+                    {/* Big Glowing Badge Icon */}
+                    <div className={`p-6 rounded-3xl border-2 mb-4 relative ${
+                      selectedAchievement.isUnlocked
+                        ? 'bg-gradient-to-br from-yellow-500/20 via-amber-500/10 to-yellow-950 border-yellow-400 text-yellow-300 shadow-[0_0_35px_rgba(234,179,8,0.6)] animate-pulse'
+                        : 'bg-slate-900 border-slate-700 text-slate-500'
+                    }`}>
+                      {renderIcon(selectedAchievement.icon || 'Award', "w-16 h-16")}
+                      <div className="absolute -bottom-2 -right-2 p-2 rounded-xl bg-slate-950 border border-yellow-400">
+                        {selectedAchievement.isUnlocked ? <Check size={18} className="text-yellow-400 font-black" /> : <Lock size={18} className="text-slate-500" />}
+                      </div>
+                    </div>
+
+                    <div className="mb-2">
+                      <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full border tracking-widest ${
+                        selectedAchievement.isUnlocked
+                          ? 'bg-yellow-950 text-yellow-300 border-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.5)]'
+                          : 'bg-slate-900 text-slate-400 border-slate-700'
+                      }`}>
+                        {selectedAchievement.isUnlocked ? '🏆 HAUT-FAIT DÉBLOQUÉ' : '🔒 TROPHÉE VERROUILLÉ'}
+                      </span>
+                    </div>
+
+                    <h2 className="text-2xl font-black text-white uppercase tracking-wider my-1">
+                      {selectedAchievement.frenchTitle}
+                    </h2>
+                    <p className="text-xs text-slate-400 font-sans italic mb-4">
+                      "{selectedAchievement.title}"
+                    </p>
+
+                    <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl max-w-md w-full mb-5">
+                      <p className="text-xs text-slate-200 font-sans leading-relaxed">
+                        {selectedAchievement.frenchDescription}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-yellow-950/60 border border-yellow-500 px-4 py-2 rounded-xl text-yellow-300 font-bold mb-6">
+                      <Sparkles size={18} className="text-yellow-400" />
+                      <span>RÉCOMPENSE DE HAUT-FAIT : +{selectedAchievement.pixelReward} PX</span>
+                    </div>
+
+                    <button
+                      onClick={() => { audio.playClick(); setSelectedAchievement(null); }}
+                      className="px-6 py-2.5 rounded-2xl bg-yellow-500 text-slate-950 font-black text-xs uppercase hover:bg-yellow-400 transition-all cursor-pointer shadow-[0_0_20px_rgba(234,179,8,0.4)] scale-105"
+                    >
+                      FERMER L'INSPECTION
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* --- Quests Modal --- */}
       {showQuestsModal && (
@@ -1818,7 +2066,7 @@ export default function App() {
           <div className="bg-slate-950 border-2 border-rose-500 p-6 rounded-2xl w-full max-w-3xl text-white relative max-h-[85vh] flex flex-col shadow-[0_0_40px_rgba(244,63,94,0.25)]">
             <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
               <h3 className="text-lg font-black text-rose-400 uppercase tracking-widest flex items-center gap-2">
-                <Flame size={22} /> PASS ARCADE SAISON 1 (50 NIVEAUX)
+                <Flame size={22} /> PASS ARCADE SAISON 2 (100 NIVEAUX)
               </h3>
               <button
                 onClick={() => setShowPassModal(false)}
@@ -2350,6 +2598,165 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* --- DÉFIS FLASH ⚡ (MAJOR NEW FEATURE: FLASH ARENA & MULTIPLIERS) --- */}
+      {showFlashModal && (
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 font-mono">
+          <div className="bg-slate-950 border-2 border-cyan-400 p-5 sm:p-6 rounded-3xl w-full max-w-4xl text-white relative max-h-[90vh] flex flex-col shadow-[0_0_50px_rgba(6,182,212,0.35)] overflow-hidden">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-cyan-950 border-2 border-cyan-400 text-cyan-300 rounded-2xl shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+                  <Zap size={26} className="animate-bounce" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-purple-300 to-rose-400 uppercase tracking-wider flex items-center gap-2">
+                    ARENA DÉFIS FLASH ⚡
+                  </h3>
+                  <p className="text-[11px] text-slate-400 font-sans">
+                    Défis chronométrés à hauts enjeux • Boosts de Pixels de x2 à x5 en direct !
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => { audio.playClick(); setShowFlashModal(false); }}
+                className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-white font-bold cursor-pointer text-xs transition-all"
+              >
+                ✕ FERMER
+              </button>
+            </div>
+
+            {/* Flash Challenge Generator Box */}
+            <div className="bg-gradient-to-r from-cyan-950/60 via-slate-900 to-purple-950/60 border border-cyan-500/50 p-4 rounded-2xl mb-4 shrink-0 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-cyan-500/20 border border-cyan-400 rounded-2xl text-cyan-300">
+                  <Sparkles size={24} className="animate-spin-slow" />
+                </div>
+                <div>
+                  <h4 className="font-black text-sm text-white uppercase tracking-wide">
+                    GÉNÉRATEUR DE DÉFI MATRICIEL
+                  </h4>
+                  <p className="text-xs text-slate-300 font-sans">
+                    Tirez au sort une épreuve surprise sur n'importe quel jeu avec un multiplicateur géant !
+                  </p>
+                </div>
+              </div>
+
+              <button
+                disabled={isRollingFlash}
+                onClick={() => {
+                  audio.playClick();
+                  setIsRollingFlash(true);
+                  setTimeout(() => {
+                    audio.playWin();
+                    const randomGame = GAMES_LIST[Math.floor(Math.random() * GAMES_LIST.length)];
+                    const randomMultiplier = [2, 3, 4, 5][Math.floor(Math.random() * 4)];
+                    const targetScore = Math.floor(Math.random() * 20) * 10 + 50;
+                    const rewardPx = targetScore * randomMultiplier * 2;
+                    setFlashRollResult({
+                      id: `fc_roll_${Date.now()}`,
+                      gameId: randomGame.id,
+                      gameName: randomGame.frenchName || randomGame.name,
+                      title: `Surtension ${randomGame.frenchName || randomGame.name}`,
+                      targetScore,
+                      multiplier: randomMultiplier,
+                      rewardPx,
+                      icon: randomGame.icon
+                    });
+                    setIsRollingFlash(false);
+                  }, 800);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs uppercase cursor-pointer transition-all shadow-[0_0_20px_rgba(6,182,212,0.5)] shrink-0 flex items-center gap-2 scale-105"
+              >
+                <Zap size={16} /> {isRollingFlash ? 'GÉNÉRATION...' : '🎲 GENERER UN DÉFI SPÉCIAL'}
+              </button>
+            </div>
+
+            {/* Roll Result Showcase */}
+            {flashRollResult && (
+              <div className="bg-slate-900 border-2 border-yellow-400 p-4 rounded-2xl mb-4 shrink-0 flex flex-col sm:flex-row justify-between items-center gap-3 animate-pulse">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-yellow-500/20 border border-yellow-400 text-yellow-300 rounded-xl">
+                    {renderIcon(flashRollResult.icon || 'Zap', "w-6 h-6")}
+                  </div>
+                  <div>
+                    <span className="text-[9px] bg-yellow-500 text-slate-950 font-black px-2 py-0.5 rounded uppercase">
+                      DÉFI GÉNÉRÉ : {flashRollResult.multiplier}X PX !
+                    </span>
+                    <h4 className="font-black text-sm text-white mt-1">{flashRollResult.title}</h4>
+                    <p className="text-xs text-slate-300">Objectif : <strong>{flashRollResult.targetScore} points</strong> • Gain : <strong>+{flashRollResult.rewardPx} PX</strong></p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    audio.playClick();
+                    setActiveFlashChallenge(flashRollResult);
+                    setShowFlashModal(false);
+                    handleLaunchGame(flashRollResult.gameId);
+                  }}
+                  className="px-4 py-2 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black text-xs uppercase rounded-xl cursor-pointer shadow-[0_0_15px_rgba(234,179,8,0.5)] shrink-0"
+                >
+                  RELEVER LE DÉFI 🎮
+                </button>
+              </div>
+            )}
+
+            {/* Daily Flash Challenges List */}
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+              <h4 className="text-xs font-black text-cyan-300 uppercase tracking-widest flex items-center gap-1.5 mb-2">
+                <Flame size={16} className="text-orange-400" /> DÉFIS FLASH EN DIRECT DU JOUR
+              </h4>
+
+              {[
+                { id: 'fc_1', gameId: 'clicker', gameName: 'Néon Clicker', title: 'Surtension Hyperdrive Express', targetScore: 300, multiplier: 2, rewardPx: 500, icon: 'Zap' },
+                { id: 'fc_2', gameId: 'reflex', gameName: 'Vitesse Réflexe', title: 'Reflexes Quantiques 100%', targetScore: 25, multiplier: 3, rewardPx: 750, icon: 'Target' },
+                { id: 'fc_3', gameId: 'simon', gameName: 'Simon Mémorisation', title: 'Mémoire de Titane', targetScore: 7, multiplier: 4, rewardPx: 1000, icon: 'Brain' },
+                { id: 'fc_4', gameId: 'snake', gameName: 'Néon Snake', title: 'Défi Serpent Solaire', targetScore: 15, multiplier: 3, rewardPx: 800, icon: 'Play' },
+                { id: 'fc_5', gameId: 'brick', gameName: 'Casse-Briques', title: 'Briques Explosives', targetScore: 50, multiplier: 2, rewardPx: 600, icon: 'Grid' },
+              ].map((chal) => (
+                <div key={chal.id} className="p-3.5 bg-slate-900/80 rounded-2xl border border-slate-800 flex justify-between items-center hover:border-cyan-500/60 transition-all">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-cyan-950 border border-cyan-800 text-cyan-300 rounded-xl">
+                      {renderIcon(chal.icon, "w-5 h-5")}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-black text-xs text-white">{chal.title}</span>
+                        <span className="text-[9px] bg-rose-950 text-rose-300 border border-rose-800 px-1.5 py-0.5 rounded font-black">
+                          {chal.multiplier}X PX
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        Jeu : {chal.gameName} • Objectif : <strong className="text-cyan-300">{chal.targetScore} pts</strong>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <span className="text-xs font-black text-yellow-400 block mb-1">+{chal.rewardPx} PX</span>
+                    <button
+                      onClick={() => {
+                        audio.playClick();
+                        setActiveFlashChallenge(chal);
+                        setShowFlashModal(false);
+                        handleLaunchGame(chal.gameId);
+                      }}
+                      className="px-3 py-1.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-[10px] uppercase rounded-xl cursor-pointer shadow-[0_0_10px_rgba(6,182,212,0.3)]"
+                    >
+                      JOUER DÉFI 🎮
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Achievement / Trophy Unlock Particles Toast */}
+      <AchievementToast notification={activeNotification} onClose={() => setActiveNotification(null)} />
     </div>
   );
 }

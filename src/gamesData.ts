@@ -354,17 +354,6 @@ export const GAMES_LIST: GameData[] = [
     rarity: 'epique'
   },
   {
-    id: 'colorswitch',
-    name: 'Neon Color Switch',
-    frenchName: 'Color Switch Néon',
-    description: 'Faites reboondir la bille à travers des anneaux rotatifs en respectant scrupuleusement la couleur actuelle !',
-    icon: 'Shield',
-    category: 'reflex',
-    difficulty: 'hard',
-    color: 'text-yellow-400 border-yellow-500 shadow-[0_0_20px_rgba(234,179,8,0.5)] bg-yellow-950/30 hover:border-yellow-400',
-    rarity: 'epique'
-  },
-  {
     id: 'galaga',
     name: 'Star Fighter 1980',
     frenchName: 'Chasseur d\'Étoiles',
@@ -922,9 +911,9 @@ export const INITIAL_ACHIEVEMENTS: Achievement[] = Array.from({ length: 100 }, (
   else if (i === 26) { frenchTitle = 'Squelette Néon'; frenchDescription = 'Débloquez un nouvel icône d\'avatar'; pixelReward = 60; icon = 'Crown'; }
   else if (i === 27) { frenchTitle = 'Caméléon'; frenchDescription = 'Changez la couleur de votre avatar'; pixelReward = 40; icon = 'Award'; }
   else if (i === 28) { frenchTitle = 'Champion des Tournois'; frenchDescription = 'Participez à au moins 2 tournois officiels'; pixelReward = 100; icon = 'Trophy'; }
-  else if (i === 29) { frenchTitle = 'Pass Niveau 10'; frenchDescription = 'Atteignez le niveau 10 dans le Pass Arcade'; pixelReward = 100; icon = 'Flame'; }
-  else if (i === 30) { frenchTitle = 'Pass Niveau 25'; frenchDescription = 'Atteignez le niveau 25 dans le Pass Arcade'; pixelReward = 200; icon = 'Flame'; }
-  else if (i === 31) { frenchTitle = 'Pass Niveau 50'; frenchDescription = 'Atteignez le niveau 50 max dans le Pass Arcade'; pixelReward = 500; icon = 'Flame'; }
+  else if (i === 29) { frenchTitle = 'Pass Niveau 10'; frenchDescription = 'Atteignez le niveau 10 dans le Pass Arcade Saison 2'; pixelReward = 100; icon = 'Flame'; }
+  else if (i === 30) { frenchTitle = 'Pass Niveau 50'; frenchDescription = 'Atteignez le niveau 50 dans le Pass Arcade Saison 2'; pixelReward = 250; icon = 'Flame'; }
+  else if (i === 31) { frenchTitle = 'Pass Niveau 100 (MAX)'; frenchDescription = 'Atteignez le niveau 100 max dans le Pass Arcade Saison 2'; pixelReward = 500; icon = 'Flame'; }
   else if (i === 32) { frenchTitle = 'Chasseur de Quêtes'; frenchDescription = 'Accomplissez 5 quêtes quotidiennes'; pixelReward = 80; icon = 'Award'; }
   else if (i === 33) { frenchTitle = 'Maître des Quêtes'; frenchDescription = 'Accomplissez 15 quêtes quotidiennes'; pixelReward = 150; icon = 'Award'; }
   else if (i === 34) { frenchTitle = 'Surtension Maximale'; frenchDescription = 'Déclenchez la surtension Hyperdrive dans Clicker'; pixelReward = 80; icon = 'Zap'; }
