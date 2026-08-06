@@ -1,3 +1,14 @@
+export type CosmeticRarity = 'commun' | 'rare' | 'epique' | 'legendaire' | 'mythique' | 'divin';
+
+export interface AppSettings {
+  sfxEnabled: boolean;
+  musicEnabled: boolean;
+  particleDensity: 'faible' | 'normal' | 'extreme';
+  bgAnimationOverride?: string;
+  crtFilter: boolean;
+  autoSave: boolean;
+}
+
 export interface UserProfile {
   username: string;
   avatarColor: string;
@@ -13,10 +24,15 @@ export interface UserProfile {
   activeBanner?: string;
   unlockedBanners?: string[];
   unlockedColors?: string[];
+  unlockedFrames?: string[];
+  activeFrame?: string;
+  unlockedFx?: string[];
+  activeFx?: string;
   prestigeLevel?: number;
   dailyStreak?: number;
   lastDailyClaimTimestamp?: number;
   lastWheelSpinTimestamp?: number;
+  goldenKeys?: number;
 }
 
 export interface GameStats {
@@ -33,7 +49,7 @@ export interface GameData {
   category: 'clicker' | 'memory' | 'reflex' | 'arcade' | 'puzzle' | 'rhythm';
   difficulty: 'easy' | 'medium' | 'hard' | 'mythic';
   color: string; // Tailwind glow/text color
-  rarity?: 'commun' | 'rare' | 'epique' | 'legendaire' | 'mythique' | 'divin';
+  rarity?: CosmeticRarity;
 }
 
 export interface Achievement {
@@ -59,10 +75,12 @@ export interface Quest {
   isCompleted: boolean;
   isClaimed: boolean;
   gameId?: string;
+  isFlash?: boolean;
+  multiplier?: number;
 }
 
 export interface PassLevelReward {
-  type: 'pixels' | 'title' | 'skin' | 'color' | 'aura' | 'banner';
+  type: 'pixels' | 'title' | 'skin' | 'color' | 'aura' | 'banner' | 'frame' | 'key' | 'rp';
   value: number | string;
   label: string;
 }
@@ -81,6 +99,14 @@ export interface ArcadePass {
   claimedPremiumRewards: number[];
 }
 
+export interface ProPassState {
+  level: number;
+  xp: number;
+  isPro: boolean;
+  claimedFreeRewards: number[];
+  claimedProRewards: number[];
+}
+
 export interface TournamentLeaderboardEntry {
   rank: number;
   username: string;
@@ -97,8 +123,8 @@ export interface Tournament {
   gameId: string;
   gameName: string;
   description: string;
-  targetScore: number; // Score raisonnable à battre pour gagner le tournoi
-  unit?: string; // e.g. "pts", "clics", "séquence"
+  targetScore: number;
+  unit?: string;
   prizePool: number;
   titleReward: string;
   endsInDays: number;
@@ -108,24 +134,12 @@ export interface Tournament {
   userBestScore?: number;
 }
 
-export interface RankQuest {
-  id: string;
-  title: string;
-  description: string;
-  target: number;
-  rewardRankPts: number;
-  rewardPixels: number;
-  type: 'plays_total' | 'plays_game' | 'highscore' | 'shop_buy' | 'quests_complete' | 'pass_level';
-  gameId?: string;
-  category?: string;
-}
-
 export interface CompetitiveRank {
   id: string;
   name: string;
   frenchName: string;
-  tier: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'master';
-  division: string; // e.g. "III", "II", "I", "APEX"
+  tier: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'master' | 'celestial';
+  division: string;
   minScore: number;
   pixelReward: number;
   titleReward?: string;
@@ -133,8 +147,12 @@ export interface CompetitiveRank {
   glowColor: string;
   icon: string;
   description: string;
-  perkText: string;
-  bonusMultiplier: number; // e.g. 1.05 = +5% PX
+}
+
+export interface RankedGameScores {
+  sprintReflex: number;
+  laserBlitz: number;
+  quantumTarget: number;
 }
 
 export interface GlobalState {
@@ -143,11 +161,14 @@ export interface GlobalState {
   achievements: Achievement[];
   quests?: Quest[];
   arcadePass?: ArcadePass;
-  tournamentScores?: Record<string, number>; // tournamentId -> score
-  claimedTournaments?: string[]; // IDs of tournaments where prize was claimed
-  claimedRankRewards?: string[]; // IDs of claimed rank tiers
-  rankPoints?: number; // Rank PTS starting at 0
-  claimedRankQuests?: string[]; // IDs of completed/claimed rank quests
-  favorites?: string[]; // Array of favorited game IDs
-  recentGames?: string[]; // Array of up to 3 recent game IDs (most recent first)
+  proPass?: ProPassState;
+  settings?: AppSettings;
+  rankedScores?: RankedGameScores;
+  tournamentScores?: Record<string, number>;
+  claimedTournaments?: string[];
+  claimedRankRewards?: string[];
+  rankPoints?: number;
+  favorites?: string[];
+  recentGames?: string[];
 }
+

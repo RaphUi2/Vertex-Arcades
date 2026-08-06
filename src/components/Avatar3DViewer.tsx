@@ -25,7 +25,7 @@ export const Avatar3DViewer: React.FC<Avatar3DViewerProps> = ({
 
   // Find color hex
   const colorObj = AVATAR_COLORS_SHOP.find(c => c.id === avatarColor);
-  const hexColor = colorObj ? colorObj.hex : '#06b6d4';
+  const hexColor = colorObj ? ((colorObj as any).colorHex || (colorObj as any).hex || '#06b6d4') : '#06b6d4';
   const threeColor = new THREE.Color(hexColor);
 
   useEffect(() => {
