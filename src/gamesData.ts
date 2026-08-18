@@ -458,6 +458,39 @@ export const GAMES_LIST: GameData[] = [
     difficulty: 'hard',
     color: 'text-amber-400 border-amber-500 shadow-[0_0_25px_rgba(245,158,11,0.5)] bg-amber-950/30 hover:border-amber-400',
     rarity: 'divin'
+  },
+  {
+    id: 'dino_dash',
+    name: 'Jurassic Dino Dash',
+    frenchName: 'Course Dino Jurassique 🦖',
+    description: 'Nouveau Jeu 2.2 : Courez, sautez et glissez avec votre Cyber T-Rex ! Récoltez l\'ambre et esquivez les météores !',
+    icon: 'Flame',
+    category: 'arcade',
+    difficulty: 'medium',
+    color: 'text-amber-400 border-amber-500 shadow-[0_0_25px_rgba(245,158,11,0.6)] bg-amber-950/40 hover:border-amber-400',
+    rarity: 'divin'
+  },
+  {
+    id: 'pinball_jurassic',
+    name: 'Jurassic Cyber Pinball',
+    frenchName: 'Flipper Cyber Jurassique 🦕',
+    description: 'Nouveau Jeu 2.2 : Flipper arcade préhistorique avec bumpers T-Rex, bobines d\'ambre et jackpots volcaniques !',
+    icon: 'Disc',
+    category: 'arcade',
+    difficulty: 'hard',
+    color: 'text-orange-400 border-orange-500 shadow-[0_0_25px_rgba(249,115,22,0.6)] bg-orange-950/40 hover:border-orange-400',
+    rarity: 'divin'
+  },
+  {
+    id: 'dino_hunter',
+    name: 'Jurassic Dino Hunter',
+    frenchName: 'Chasseur de Dinos Cyber 🎯',
+    description: 'Nouveau Jeu 2.2 : Visez et pulvérisez les vagues de raptors et le Boss Spinosaurus au pistolet laser !',
+    icon: 'Crosshair',
+    category: 'reflex',
+    difficulty: 'hard',
+    color: 'text-rose-400 border-rose-500 shadow-[0_0_25px_rgba(244,63,94,0.6)] bg-rose-950/40 hover:border-rose-400',
+    rarity: 'divin'
   }
 ];
 

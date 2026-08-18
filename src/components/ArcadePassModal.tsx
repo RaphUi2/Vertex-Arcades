@@ -85,15 +85,15 @@ export const ArcadePassModal: React.FC<ArcadePassModalProps> = ({
           {/* Top Header Banner */}
           <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-3 shrink-0">
             <div className="flex items-center gap-3">
-              <div className="p-3 bg-gradient-to-br from-rose-600 to-amber-600 border-2 border-yellow-400 rounded-2xl text-slate-950 shadow-[0_0_20px_rgba(244,63,94,0.6)]">
-                <Flame size={26} className="animate-bounce" />
+              <div className="p-3 bg-gradient-to-br from-amber-600 via-orange-600 to-rose-600 border-2 border-yellow-400 rounded-2xl text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.6)]">
+                <span className="text-2xl">🦖</span>
               </div>
               <div>
-                <h3 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-300 via-amber-200 to-yellow-400 uppercase tracking-widest flex items-center gap-2">
-                  PASS ARCADE S2: CYBER MATRIX
+                <h3 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-300 to-yellow-400 uppercase tracking-widest flex items-center gap-2">
+                  PASS ARCADE S2 : APEX JURASSIQUE 🦖
                 </h3>
                 <p className="text-[11px] text-slate-400 font-sans">
-                  Saison 2 • 100 Niveaux de récompenses exclusives & titres de prestige !
+                  Saison 2 Jurassique • Récompenses préhistoriques, skins de Dino & Pièces d'Ambre légendaires !
                 </p>
               </div>
             </div>

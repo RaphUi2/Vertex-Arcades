@@ -108,9 +108,9 @@ export const ShopBoutiqueModal: React.FC<ShopBoutiqueModalProps> = ({
               </div>
               <div>
                 <h2 className="text-2xl font-black text-white tracking-wider flex items-center gap-2">
-                  BOUTIQUE DE COSMÉTIQUES <span className="text-xs bg-purple-500 text-white font-bold px-2 py-0.5 rounded-full">+300 ARTICLES V2.0</span>
+                  BOUTIQUE DE COSMÉTIQUES <span className="text-xs bg-gradient-to-r from-purple-500 to-amber-500 text-white font-bold px-2.5 py-0.5 rounded-full">+400 ARTICLES V2.2 JURASSIQUE</span>
                 </h2>
-                <p className="text-xs text-slate-400">Personnalisez votre profil, thèmes animés & avatar 3D !</p>
+                <p className="text-xs text-slate-400">Personnalisez votre profil, thèmes animés, auras préhistoriques & avatar 3D !</p>
               </div>
             </div>
             <div className="flex items-center gap-3">

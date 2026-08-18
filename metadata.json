@@ -1,6 +1,6 @@
 {
   "name": "Vertex Arcades",
-  "description": "Une suite de 12 mini-jeux d'arcade rétro-néon incluant des jeux de clicker, de mémorisation, de réflexes, de casse-brique, de snake et bien d'autres, avec un design rétro moderne et fluide.",
+  "description": "Plateforme arcade néon rétro-futuriste V2.2 : 36+ mini-jeux dont 3 jeux Jurassiques, Classé Saison 2 Apex, +100 cosmétiques, Boutique animée, Système d'amis, Tchat en direct et Duels 1v1 avec paris de Pixels.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

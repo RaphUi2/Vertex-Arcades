@@ -50,9 +50,9 @@ export const RankedSeasonModal: React.FC<RankedSeasonModalProps> = ({
               </div>
               <div>
                 <h2 className="text-2xl font-black text-white tracking-wider flex items-center gap-2">
-                  MODE CLASSÉ SAISON 1 <span className="text-xs bg-rose-500 text-white font-bold px-2 py-0.5 rounded-full">3 ÉPREUVES 60S</span>
+                  MODE CLASSÉ SAISON 2 <span className="text-xs bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded-full">🦖 APEX JURASSIQUE</span>
                 </h2>
-                <p className="text-xs text-slate-400">Affrontez le chrono de 60s et débloquez le Pro Pass</p>
+                <p className="text-xs text-slate-400">Affrontez les épreuves préhistoriques et hissez-vous au rang Apex Predator !</p>
               </div>
             </div>
             <button

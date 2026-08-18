@@ -7,12 +7,66 @@ export interface AppSettings {
   bgAnimationOverride?: string;
   crtFilter: boolean;
   autoSave: boolean;
+  scanlines: boolean;
+  retroGlow: boolean;
+}
+
+export interface Friend {
+  id: string;
+  username: string;
+  avatarColor: string;
+  avatarIcon: string;
+  activeBanner?: string;
+  activeAura?: string;
+  activeFrame?: string;
+  status: 'online' | 'in-game' | 'offline';
+  currentGame?: string;
+  rankPoints: number;
+  rankTier: string;
+  totalPixels: number;
+  duelWins: number;
+  duelLosses: number;
+  isFavorite?: boolean;
+}
+
+export interface ChatMessage {
+  id: string;
+  senderId: string;
+  senderName: string;
+  senderColor: string;
+  senderIcon: string;
+  senderRank?: string;
+  message: string;
+  timestamp: number;
+  channel: 'general' | 'jurassic' | 'duels' | 'dm';
+  recipientId?: string;
+  isSystem?: boolean;
+  scoreFlex?: { gameName: string; score: number };
+}
+
+export interface DuelChallenge {
+  id: string;
+  challengerId: string;
+  challengerName: string;
+  challengerAvatar: { color: string; icon: string };
+  challengedId: string;
+  challengedName: string;
+  challengedAvatar: { color: string; icon: string };
+  gameId: string;
+  gameName: string;
+  wagerPx: number;
+  status: 'pending' | 'active' | 'completed' | 'declined';
+  challengerScore?: number;
+  challengedScore?: number;
+  winnerId?: string;
+  timestamp: number;
 }
 
 export interface UserProfile {
   username: string;
   avatarColor: string;
   totalPixels: number;
+  amberTokens?: number;
   unlockedSkins: string[];
   activeSkin: string;
   title?: string;
@@ -28,11 +82,20 @@ export interface UserProfile {
   activeFrame?: string;
   unlockedFx?: string[];
   activeFx?: string;
+  bio?: string;
   prestigeLevel?: number;
   dailyStreak?: number;
   lastDailyClaimTimestamp?: number;
   lastWheelSpinTimestamp?: number;
   goldenKeys?: number;
+  equippedCompanionId?: string;
+  unlockedCompanionIds?: string[];
+  companionLevels?: Record<string, number>;
+  duelWins?: number;
+  duelLosses?: number;
+  duelWinStreak?: number;
+  friends?: Friend[];
+  customBadges?: string[];
 }
 
 export interface GameStats {
@@ -46,10 +109,12 @@ export interface GameData {
   frenchName: string;
   description: string;
   icon: string;
-  category: 'clicker' | 'memory' | 'reflex' | 'arcade' | 'puzzle' | 'rhythm';
+  category: 'clicker' | 'memory' | 'reflex' | 'arcade' | 'puzzle' | 'rhythm' | 'jurassic';
   difficulty: 'easy' | 'medium' | 'hard' | 'mythic';
   color: string; // Tailwind glow/text color
   rarity?: CosmeticRarity;
+  isNew?: boolean;
+  tag?: string;
 }
 
 export interface Achievement {
@@ -80,7 +145,7 @@ export interface Quest {
 }
 
 export interface PassLevelReward {
-  type: 'pixels' | 'title' | 'skin' | 'color' | 'aura' | 'banner' | 'frame' | 'key' | 'rp';
+  type: 'pixels' | 'title' | 'skin' | 'color' | 'aura' | 'banner' | 'frame' | 'key' | 'rp' | 'amber' | 'pet';
   value: number | string;
   label: string;
 }
@@ -95,6 +160,8 @@ export interface ArcadePass {
   level: number;
   xp: number;
   isPremium: boolean;
+  season: number;
+  seasonName?: string;
   claimedFreeRewards: number[];
   claimedPremiumRewards: number[];
 }
@@ -138,7 +205,7 @@ export interface CompetitiveRank {
   id: string;
   name: string;
   frenchName: string;
-  tier: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'master' | 'celestial';
+  tier: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'master' | 'celestial' | 'apex_primal';
   division: string;
   minScore: number;
   pixelReward: number;
@@ -153,6 +220,7 @@ export interface RankedGameScores {
   sprintReflex: number;
   laserBlitz: number;
   quantumTarget: number;
+  dinoTrial?: number;
 }
 
 export interface GlobalState {
@@ -170,5 +238,9 @@ export interface GlobalState {
   rankPoints?: number;
   favorites?: string[];
   recentGames?: string[];
+  friends?: Friend[];
+  chatMessages?: ChatMessage[];
+  activeDuels?: DuelChallenge[];
+  duelHistory?: DuelChallenge[];
 }
 

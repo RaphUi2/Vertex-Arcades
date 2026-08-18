@@ -77,9 +77,16 @@ import Neon2048 from './games/Neon2048';
 import CyberDrift from './games/CyberDrift';
 import NeonAirHockey from './games/NeonAirHockey';
 import CyberDefender from './games/CyberDefender';
+import JurassicDinoDash from './games/JurassicDinoDash';
+import JurassicPinball from './games/JurassicPinball';
+import JurassicDinoHunter from './games/JurassicDinoHunter';
 
 import { CyberCompanionsModal } from './components/CyberCompanionsModal';
 import { BossRaidArenaModal } from './components/BossRaidArenaModal';
+import { FriendsModal } from './components/FriendsModal';
+import { ArcadeChatModal } from './components/ArcadeChatModal';
+import { DuelArenaModal } from './components/DuelArenaModal';
+import { Friend, ChatMessage, DuelChallenge } from './types';
 
 export default function App() {
   const [state, setState] = useState<GlobalState>(() => {
@@ -146,7 +153,112 @@ export default function App() {
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
   const [showCompanionsModal, setShowCompanionsModal] = useState(false);
   const [showBossRaidModal, setShowBossRaidModal] = useState(false);
+  const [showFriendsModal, setShowFriendsModal] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
+  const [showDuelModal, setShowDuelModal] = useState(false);
+  const [selectedDuelOpponent, setSelectedDuelOpponent] = useState<Friend | null>(null);
   const [activeNotification, setActiveNotification] = useState<string | null>(null);
+
+  // Social & Duel State with default seeds
+  const [friendsList, setFriendsList] = useState<Friend[]>(() => {
+    return state.friends || [
+      {
+        id: 'f_rex',
+        username: 'RexHunter_99 🦖',
+        avatarColor: '#f59e0b',
+        avatarIcon: 'Flame',
+        status: 'online',
+        currentGame: 'Jurassic Dino Dash',
+        rankPoints: 4800,
+        rankTier: 'master',
+        totalPixels: 34200,
+        duelWins: 42,
+        duelLosses: 11
+      },
+      {
+        id: 'f_raptor',
+        username: 'CyberRaptor 🦕',
+        avatarColor: '#06b6d4',
+        avatarIcon: 'Zap',
+        status: 'in-game',
+        currentGame: 'Jurassic Pinball',
+        rankPoints: 6100,
+        rankTier: 'celestial',
+        totalPixels: 51000,
+        duelWins: 68,
+        duelLosses: 19
+      },
+      {
+        id: 'f_queen',
+        username: 'AmberQueen 💎',
+        avatarColor: '#ec4899',
+        avatarIcon: 'Crown',
+        status: 'online',
+        currentGame: 'Neon 2048 Fusion',
+        rankPoints: 3900,
+        rankTier: 'diamond',
+        totalPixels: 28900,
+        duelWins: 31,
+        duelLosses: 14
+      }
+    ];
+  });
+
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(() => {
+    return state.chatMessages || [
+      {
+        id: 'msg_1',
+        senderId: 'f_rex',
+        senderName: 'RexHunter_99 🦖',
+        senderColor: '#f59e0b',
+        senderIcon: 'Flame',
+        senderRank: 'APEX MASTER',
+        message: 'Bienvenue sur la mise à jour 2.2 ! Les épreuves jurassiques sont folles ! 🔥',
+        timestamp: Date.now() - 300000,
+        channel: 'jurassic'
+      },
+      {
+        id: 'msg_2',
+        senderId: 'f_raptor',
+        senderName: 'CyberRaptor 🦕',
+        senderColor: '#06b6d4',
+        senderIcon: 'Zap',
+        senderRank: 'CELESTIAL',
+        message: 'Qui veut un duel 1v1 sur Jurassic Pinball ? Mise de 250 PX prête ! ⚔️',
+        timestamp: Date.now() - 120000,
+        channel: 'duels'
+      },
+      {
+        id: 'msg_3',
+        senderId: 'f_queen',
+        senderName: 'AmberQueen 💎',
+        senderColor: '#ec4899',
+        senderIcon: 'Crown',
+        senderRank: 'DIAMANT APEX',
+        message: 'GG pour vos scores en Classé Saison 2 ! 👑',
+        timestamp: Date.now() - 45000,
+        channel: 'general'
+      }
+    ];
+  });
+
+  const [duelHistory, setDuelHistory] = useState<DuelChallenge[]>(() => {
+    return state.duelHistory || [
+      {
+        id: 'duel_seed_1',
+        challengerId: 'user',
+        challengerName: state.profile.username,
+        challengedId: 'f_rex',
+        challengedName: 'RexHunter_99 🦖',
+        gameId: 'dino_dash',
+        gameName: 'Course Dino Jurassique 🦖',
+        wagerPx: 200,
+        status: 'completed',
+        winnerId: 'user',
+        timestamp: Date.now() - 86400000
+      }
+    ];
+  });
 
   // Active Skin theme finding
   const activeSkinData = CABINET_SKINS.find(s => s.id === (state.profile.activeSkin || 'neon')) || CABINET_SKINS[0];
@@ -315,9 +427,30 @@ export default function App() {
 
             <button
               onClick={() => { audio.playClick(); setShowPassModal(true); }}
-              className="px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition cursor-pointer"
+              className="px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition cursor-pointer shadow-[0_0_12px_rgba(168,85,247,0.3)]"
             >
-              <Award size={16} /> Pass S3
+              <Award size={16} /> Pass S2 Jurassique
+            </button>
+
+            <button
+              onClick={() => { audio.playClick(); setShowFriendsModal(true); }}
+              className="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition cursor-pointer shadow-[0_0_12px_rgba(6,182,212,0.3)]"
+            >
+              <User size={16} /> Amis ({friendsList.length})
+            </button>
+
+            <button
+              onClick={() => { audio.playClick(); setShowChatModal(true); }}
+              className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/40 text-blue-300 rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition cursor-pointer shadow-[0_0_12px_rgba(59,130,246,0.3)]"
+            >
+              <Navigation size={16} /> Tchat Live
+            </button>
+
+            <button
+              onClick={() => { audio.playClick(); setShowDuelModal(true); }}
+              className="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition cursor-pointer shadow-[0_0_12px_rgba(244,63,94,0.3)]"
+            >
+              <Sword size={16} /> Duels 1v1
             </button>
 
             <button
@@ -442,6 +575,9 @@ export default function App() {
               {activeGameId === 'drift' && <CyberDrift onScore={() => {}} onGameOver={(score) => handleFinishGame('drift', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['drift']?.highScore || 0} />}
               {activeGameId === 'airhockey' && <NeonAirHockey onScore={() => {}} onGameOver={(score) => handleFinishGame('airhockey', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['airhockey']?.highScore || 0} />}
               {activeGameId === 'defender' && <CyberDefender onScore={() => {}} onGameOver={(score) => handleFinishGame('defender', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['defender']?.highScore || 0} />}
+              {activeGameId === 'dino_dash' && <JurassicDinoDash onScore={() => {}} onGameOver={(score) => handleFinishGame('dino_dash', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['dino_dash']?.highScore || 0} />}
+              {activeGameId === 'pinball_jurassic' && <JurassicPinball onScore={() => {}} onGameOver={(score) => handleFinishGame('pinball_jurassic', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['pinball_jurassic']?.highScore || 0} />}
+              {activeGameId === 'dino_hunter' && <JurassicDinoHunter onScore={() => {}} onGameOver={(score) => handleFinishGame('dino_hunter', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['dino_hunter']?.highScore || 0} />}
             </div>
           </main>
         ) : (
@@ -998,6 +1134,151 @@ export default function App() {
           }));
           setActiveNotification(`⚔️ VICTOIRE BOSS RAID : +${rewardPx} PX RÉCOLTÉS !`);
           setTimeout(() => setActiveNotification(null), 4000);
+        }}
+      />
+
+      {/* Friends Modal V2.2 */}
+      <FriendsModal
+        show={showFriendsModal}
+        onClose={() => setShowFriendsModal(false)}
+        friends={friendsList}
+        userPixels={state.profile.totalPixels}
+        onAddFriend={(friend) => {
+          setFriendsList(prev => [...prev, friend]);
+          setActiveNotification(`👥 NOUVEL AMI AJOUTÉ : ${friend.username} !`);
+          setTimeout(() => setActiveNotification(null), 3000);
+        }}
+        onRemoveFriend={(friendId) => {
+          setFriendsList(prev => prev.filter(f => f.id !== friendId));
+          setActiveNotification(`Ami retiré.`);
+          setTimeout(() => setActiveNotification(null), 2000);
+        }}
+        onChallengeFriend={(friend) => {
+          setSelectedDuelOpponent(friend);
+          setShowFriendsModal(false);
+          setShowDuelModal(true);
+        }}
+        onOpenChat={(friend) => {
+          setShowFriendsModal(false);
+          setShowChatModal(true);
+        }}
+        onSendGift={(friendId, giftPx) => {
+          if (state.profile.totalPixels < giftPx) return;
+          audio.playWin();
+          setState(prev => ({
+            ...prev,
+            profile: { ...prev.profile, totalPixels: prev.profile.totalPixels - giftPx }
+          }));
+          setActiveNotification(`🎁 CADEAU DE ${giftPx} PX ENVOYÉ !`);
+          setTimeout(() => setActiveNotification(null), 3000);
+        }}
+      />
+
+      {/* Arcade Chat Live Modal V2.2 */}
+      <ArcadeChatModal
+        show={showChatModal}
+        onClose={() => setShowChatModal(false)}
+        profile={state.profile}
+        friends={friendsList}
+        messages={chatMessages}
+        onSendMessage={(msg) => {
+          setChatMessages(prev => [...prev, msg]);
+        }}
+        onChallengeUser={(targetUsername, targetId) => {
+          const friendMatch = friendsList.find(f => f.id === targetId) || {
+            id: targetId,
+            username: targetUsername,
+            avatarColor: '#06b6d4',
+            avatarIcon: 'Zap',
+            status: 'online',
+            rankPoints: 3500,
+            rankTier: 'diamond',
+            totalPixels: 25000,
+            duelWins: 10,
+            duelLosses: 5
+          };
+          setSelectedDuelOpponent(friendMatch);
+          setShowChatModal(false);
+          setShowDuelModal(true);
+        }}
+      />
+
+      {/* Duel Arena 1v1 Modal V2.2 */}
+      <DuelArenaModal
+        show={showDuelModal}
+        onClose={() => {
+          setShowDuelModal(false);
+          setSelectedDuelOpponent(null);
+        }}
+        profile={state.profile}
+        friends={friendsList}
+        duelHistory={duelHistory}
+        initialOpponent={selectedDuelOpponent}
+        onStartDuelGame={(gameId, opp, wager) => {
+          setShowDuelModal(false);
+          setActiveGameId(gameId);
+          setActiveNotification(`⚔️ DUEL 1v1 LANCÉ SUR ${gameId.toUpperCase()} ! MISE : ${wager} PX !`);
+          setTimeout(() => setActiveNotification(null), 4000);
+        }}
+        onClaimDuelWin={(wager, oppName, gameTitle) => {
+          audio.playWin();
+          setState(prev => ({
+            ...prev,
+            profile: {
+              ...prev.profile,
+              totalPixels: prev.profile.totalPixels + wager,
+              duelWins: (prev.profile.duelWins || 0) + 1,
+              duelStreak: (prev.profile.duelStreak || 0) + 1
+            }
+          }));
+          setDuelHistory(prev => [
+            {
+              id: `duel_${Date.now()}`,
+              challengerId: 'user',
+              challengerName: state.profile.username,
+              challengedId: selectedDuelOpponent?.id || 'opp',
+              challengedName: oppName,
+              gameId: 'duel',
+              gameName: gameTitle,
+              wagerPx: wager,
+              status: 'completed',
+              winnerId: 'user',
+              timestamp: Date.now()
+            },
+            ...prev
+          ]);
+          setActiveNotification(`🏆 VICTOIRE EN DUEL CONTRE ${oppName} (+${wager * 2} PX) !`);
+          setTimeout(() => setActiveNotification(null), 4500);
+        }}
+        onClaimDuelLoss={(wager, oppName, gameTitle) => {
+          audio.playLoss();
+          setState(prev => ({
+            ...prev,
+            profile: {
+              ...prev.profile,
+              totalPixels: Math.max(0, prev.profile.totalPixels - wager),
+              duelLosses: (prev.profile.duelLosses || 0) + 1,
+              duelStreak: 0
+            }
+          }));
+          setDuelHistory(prev => [
+            {
+              id: `duel_${Date.now()}`,
+              challengerId: 'user',
+              challengerName: state.profile.username,
+              challengedId: selectedDuelOpponent?.id || 'opp',
+              challengedName: oppName,
+              gameId: 'duel',
+              gameName: gameTitle,
+              wagerPx: wager,
+              status: 'completed',
+              winnerId: 'opponent',
+              timestamp: Date.now()
+            },
+            ...prev
+          ]);
+          setActiveNotification(`💀 DÉFAITE EN DUEL CONTRE ${oppName} (-${wager} PX)...`);
+          setTimeout(() => setActiveNotification(null), 4500);
         }}
       />
     </div>

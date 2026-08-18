@@ -139,15 +139,22 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({
 
         {/* Right Stats & Shop Customize Shortcut */}
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 border-slate-800 pt-3 sm:pt-0">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <div className="px-3 py-1.5 bg-slate-900/90 border border-yellow-500/40 rounded-xl text-yellow-400 font-black text-xs flex flex-col items-center">
               <span className="text-[9px] text-slate-400 font-bold uppercase">Solde Pixels</span>
               <span className="text-sm flex items-center gap-1"><Sparkles size={13} /> {profile.totalPixels} PX</span>
             </div>
 
+            <div className="px-3 py-1.5 bg-slate-900/90 border border-rose-500/40 rounded-xl text-rose-300 font-black text-xs flex flex-col items-center">
+              <span className="text-[9px] text-slate-400 font-bold uppercase">Duels 1v1</span>
+              <span className="text-sm font-black flex items-center gap-1 text-emerald-400">
+                {profile.duelWins || 0}V <span className="text-slate-500">/</span> <span className="text-rose-400">{profile.duelLosses || 0}D</span>
+              </span>
+            </div>
+
             <div className="px-3 py-1.5 bg-slate-900/90 border border-purple-500/40 rounded-xl text-purple-300 font-black text-xs flex flex-col items-center">
               <span className="text-[9px] text-slate-400 font-bold uppercase">Succès</span>
-              <span className="text-sm flex items-center gap-1"><Trophy size={13} /> {unlockedAchievementsCount} / 100</span>
+              <span className="text-sm flex items-center gap-1"><Trophy size={13} /> {unlockedAchievementsCount}</span>
             </div>
           </div>
 

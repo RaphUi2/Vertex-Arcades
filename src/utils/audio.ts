@@ -117,6 +117,22 @@ class AudioManager {
   playLose() {
     this.playGameOver();
   }
+
+  playLoss() {
+    this.playGameOver();
+  }
+
+  playStart() {
+    this.playTone([440, 554.37, 659.25, 880], [0.08, 0.08, 0.08, 0.2], 'triangle', undefined, 0.1);
+  }
+
+  playSwoosh() {
+    this.playTone([300, 200, 150], [0.04, 0.04, 0.06], 'sine', 80, 0.12);
+  }
+
+  playPixelScore() {
+    this.playTone([783.99, 1046.50], [0.06, 0.12], 'sine', undefined, 0.09);
+  }
 }
 
 export const audio = new AudioManager();
