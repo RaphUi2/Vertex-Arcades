@@ -414,6 +414,50 @@ export const GAMES_LIST: GameData[] = [
     difficulty: 'mythic',
     color: 'text-pink-400 border-pink-500 shadow-[0_0_25px_rgba(236,72,153,0.6)] bg-pink-950/30 hover:border-pink-400',
     rarity: 'divin'
+  },
+  {
+    id: '2048',
+    name: 'Neon 2048 Fusion',
+    frenchName: 'Néon 2048 Fusion',
+    description: 'Combinez les tuiles numériques identiques dans la grille 4x4 pour former le noyau 2048 ultime !',
+    icon: 'Grid',
+    category: 'puzzle',
+    difficulty: 'medium',
+    color: 'text-cyan-400 border-cyan-500 shadow-[0_0_25px_rgba(6,182,212,0.5)] bg-cyan-950/30 hover:border-cyan-400',
+    rarity: 'legendaire'
+  },
+  {
+    id: 'drift',
+    name: 'Cyber Drift Racer',
+    frenchName: 'Cyber Drift Racer',
+    description: 'Pilotez votre bolide néon sur un circuit rapide, réalisez des dérapages contrôlés et évitez les pièges !',
+    icon: 'Compass',
+    category: 'reflex',
+    difficulty: 'hard',
+    color: 'text-rose-400 border-rose-500 shadow-[0_0_25px_rgba(244,63,94,0.5)] bg-rose-950/30 hover:border-rose-400',
+    rarity: 'mythique'
+  },
+  {
+    id: 'airhockey',
+    name: 'Neon Air Hockey 1v1',
+    frenchName: 'Néon Air Hockey 1v1',
+    description: 'Affrontez l\'IA CPU-ALPHA dans un duel palpitant sur une table d\'air hockey néon survoltée !',
+    icon: 'Shield',
+    category: 'arcade',
+    difficulty: 'medium',
+    color: 'text-fuchsia-400 border-fuchsia-500 shadow-[0_0_25px_rgba(217,70,239,0.5)] bg-fuchsia-950/30 hover:border-fuchsia-400',
+    rarity: 'legendaire'
+  },
+  {
+    id: 'defender',
+    name: 'Cyber Defender 2099',
+    frenchName: 'Cyber Defender 2099',
+    description: 'Défense de cité spatiale : déclenchez des tirs d\'interception plasma contre les ogives ennemies !',
+    icon: 'Target',
+    category: 'reflex',
+    difficulty: 'hard',
+    color: 'text-amber-400 border-amber-500 shadow-[0_0_25px_rgba(245,158,11,0.5)] bg-amber-950/30 hover:border-amber-400',
+    rarity: 'divin'
   }
 ];
 
@@ -631,9 +675,9 @@ export const CABINET_SKINS: CabinetSkin[] = [
 ];
 
 // GENERATING EXPANSIVE COSMETICS FOR 300+ TOTAL ITEMS
-export const AURA_COSMETICS: CosmeticItem[] = Array.from({ length: 40 }, (_, i) => {
+export const AURA_COSMETICS: CosmeticItem[] = Array.from({ length: 60 }, (_, i) => {
   const rarities: CosmeticRarity[] = ['commun', 'rare', 'epique', 'legendaire', 'mythique', 'divin'];
-  const rarity = rarities[Math.floor(i / 7)] || 'divin';
+  const rarity = rarities[Math.floor(i / 10)] || 'divin';
   const names = [
     'Aucune Aura 📭', 'Aura Solaire 🔥', 'Aura Hologramme 💎', 'Aura Shifting 🌀', 'Aura Royale 👑',
     'Aura Matrix Émeraude 💻', 'Aura Rose Néon 💖', 'Aura Nébuleuse 🌌', 'Aura Bouclier Glacial ❄️', 'Aura Magmatique 🌋',
@@ -642,7 +686,9 @@ export const AURA_COSMETICS: CosmeticItem[] = Array.from({ length: 40 }, (_, i) 
     'Aura Étoile du Matin 🌟', 'Aura Noyau Oméga 🔮', 'Aura Plasma Céleste 🌠', 'Aura Supernova Arpège 💥', 'Aura Cyber Vador 🖤',
     'Aura Prisme Spectral 🌈', 'Aura Vortex Éther 🌌', 'Aura Couronne Stellaire 👑', 'Aura Lumina Pro 💡', 'Aura Rayon Gamma ☢️',
     'Aura Laser Rouge 🛑', 'Aura Cristal de Glace 💎', 'Aura Spectre Blanc 👻', 'Aura Pulsation Temporelle ⏳', 'Aura Cœur Synthétique 💖',
-    'Aura Tempête Ionique ⚡', 'Aura Flamme Bleue 🟦', 'Aura Ténèbres Absolues 🌑', 'Aura Nova de Diamant 💎', 'Aura Singularité 🌌'
+    'Aura Tempête Ionique ⚡', 'Aura Flamme Bleue 🟦', 'Aura Ténèbres Absolues 🌑', 'Aura Nova de Diamant 💎', 'Aura Singularité 🌌',
+    'Aura Companion Spirit 🐉', 'Aura Boss Slayer ⚔️', 'Aura Cyber Drift 🏎️', 'Aura Air Hockey Champion 🏒', 'Aura 2048 Master 🧩',
+    'Aura Planetary Defender 🎯', 'Aura Golden Galaxy 🌟', 'Aura Infinite Loop ♾️', 'Aura V2.1 Sovereign 👑', 'Aura Hyper Space Gate 🌌'
   ];
   const glowClasses = [
     'border-slate-800',
@@ -656,7 +702,7 @@ export const AURA_COSMETICS: CosmeticItem[] = Array.from({ length: 40 }, (_, i) 
   ];
   return {
     id: i === 0 ? 'none' : `aura_${i}`,
-    name: names[i] || `Aura Néon Ultra #${i}`,
+    name: names[i] || `Aura Néon V2.1 #${i}`,
     category: 'aura',
     cost: i === 0 ? 0 : 80 + i * 25,
     rarity,
@@ -665,9 +711,9 @@ export const AURA_COSMETICS: CosmeticItem[] = Array.from({ length: 40 }, (_, i) 
   };
 });
 
-export const TITLE_BANNERS: CosmeticItem[] = Array.from({ length: 40 }, (_, i) => {
+export const TITLE_BANNERS: CosmeticItem[] = Array.from({ length: 60 }, (_, i) => {
   const rarities: CosmeticRarity[] = ['commun', 'rare', 'epique', 'legendaire', 'mythique', 'divin'];
-  const rarity = rarities[Math.floor(i / 7)] || 'divin';
+  const rarity = rarities[Math.floor(i / 10)] || 'divin';
   const names = [
     'Bannière Néon Cyber', 'Bannière Coucher Retrowave 🌅', 'Bannière Pluie Matrix 💻', 'Bannière Éruption Solaire ☀️',
     'Bannière Nébuleuse Quantique 🌌', 'Bannière Impériale d\'Or 👑', 'Bannière Cyberpunk 2099 ⚡', 'Bannière Glacier Céleste ❄️',
@@ -678,7 +724,9 @@ export const TITLE_BANNERS: CosmeticItem[] = Array.from({ length: 40 }, (_, i) =
     'Bannière Tempête Laser ⚡', 'Bannière Horizon Cassé 🌅', 'Bannière Cyber Samurai 🗡️', 'Bannière Univers Parallèle 🪐',
     'Bannière Code Source 💻', 'Bannière Matrice Infinie ♾️', 'Bannière Pulsar Stellaire 💫', 'Bannière Boss Suprême 💀',
     'Bannière Vainqueur de la Saison 🥇', 'Bannière Diamant Pur 💎', 'Bannière Chasseur de Score 🎯', 'Bannière Pixel Art 🎨',
-    'Bannière Musique Synth 🎵', 'Bannière Arcade Retro 🎮', 'Bannière Glitch Master 👾', 'Bannière Oméga Final 🔮'
+    'Bannière Musique Synth 🎵', 'Bannière Arcade Retro 🎮', 'Bannière Glitch Master 👾', 'Bannière Oméga Final 🔮',
+    'Bannière Mascotte Cyber 🐉', 'Bannière Raid de Boss ⚔️', 'Bannière Drift Suprême 🏎️', 'Bannière Air Hockey 🏒',
+    'Bannière Grille 2048 🧩', 'Bannière Défenseur Spatiale 🎯', 'Bannière V2.1 Élite ⚡', 'Bannière Souverain Céleste 👑'
   ];
   const gradients = [
     'bg-cyan-900', 'bg-rose-900', 'bg-emerald-900', 'bg-orange-900', 'bg-purple-900', 'bg-yellow-900', 'bg-fuchsia-900',
@@ -686,18 +734,18 @@ export const TITLE_BANNERS: CosmeticItem[] = Array.from({ length: 40 }, (_, i) =
   ];
   return {
     id: i === 0 ? 'banner_neon' : `banner_${i}`,
-    name: names[i] || `Bannière V2.0 #${i}`,
+    name: names[i] || `Bannière V2.1 #${i}`,
     category: 'banner',
     cost: i === 0 ? 0 : 50 + i * 20,
     rarity,
-    desc: `Bannière de profil exclusive V2.0.`,
+    desc: `Bannière de profil exclusive V2.1.`,
     gradient: gradients[i % gradients.length]
   };
 });
 
-export const SHOP_TITLES: CosmeticItem[] = Array.from({ length: 80 }, (_, i) => {
+export const SHOP_TITLES: CosmeticItem[] = Array.from({ length: 150 }, (_, i) => {
   const rarities: CosmeticRarity[] = ['commun', 'rare', 'epique', 'legendaire', 'mythique', 'divin'];
-  const rarity = rarities[Math.floor(i / 14)] || 'divin';
+  const rarity = rarities[Math.floor(i / 25)] || 'divin';
   const titlesList = [
     'APPRENTI DU NÉON', 'PRO D\'ARCADE 🎮', 'HACKER QUANTIQUE 💻', 'DÉMON DE VITESSE ⚡', 'LÉGENDE VIVANTE 👑',
     'DIEU DU PIXEL 🌌', 'SEIGNEUR DU SPRINT 🏃', 'MAÎTRE DU PINBALL 🎯', 'LÉGENDE HYPERSPACE 🚀', 'CYBER ARCHITECTE 📐',
@@ -711,18 +759,17 @@ export const SHOP_TITLES: CosmeticItem[] = Array.from({ length: 80 }, (_, i) => 
     'LE DRAGON NÉON 🐉', 'SPECTRE CYBER 👻', 'MAÎTRE DU SERPENT 🐍', 'CASSEUR DE BLOCS 🧱', 'BOMBERMAN NÉON 💣',
     'CHASSEUR D\'ÉTOILES 🌠', 'PHOENIX REBORN 🦅', 'LÉGENDE DU CASSE-BRIQUES 🧱', 'CHAMPION DES RÉFLÈXES ⚡', 'ROI DU MORPION ❌',
     'ASTRONAUTE QUANTIQUE 👨‍🚀', 'DOMINATEUR DE GRILLE 📊', 'INCONTESTABLE 🥇', 'PRO GAMER 2.0 🎮', 'VIP VERTEX 💎',
-    'ULTRA SPEEDSTER ⚡', 'CYBER SAMURAI 🗡️', 'NINJA DU PIXEL 🥷', 'SEIGNEUR DU MATRIX 🕶️', 'PROTOTYPE V2 🧪',
-    'DIVINITÉ DE SAISON 🌌', 'EXÉCUTEUR DU CODE 💻', 'HYPERDRIVE ACE 🚀', 'MAÎTRE DES TOURS 🏛️', 'INARRÊTABLE 🛑',
-    'SOUVERAIN DU NÉON 👑', 'PRINCE DU PIXEL 👑', 'SAGE DE L\'ARCADE 🧙', 'CYBER WIZARD 🧙‍♂️', 'VALKYRIE NÉON 🛡️',
-    'COMMANDANT SPATIAL 🚀', 'EMPILAGE PARFAIT 📚', 'ROI DES COMBOS 💥', 'OVERLORD ARCADE 👑', 'DIVINITÉ ULTIME ✨'
+    'PIONNIER DE LA V2.1 ⚡', 'AS DU 2048 🧩', 'PILOTE DE DRIFT 🏎️', 'CHAMPION D\'AIR HOCKEY 🏒', 'DEFENDEUR CELESTE 🎯',
+    'MAÎTRE DES COMPAGNONS 🐉', 'DOMPTEUR DE MECHA 🦊', 'EXÉCUTEUR DE RAID ⚔️', 'VAINQUEUR D\'OMEGA-9 💀', 'SOUVERAIN V2.1 👑',
+    'PIONNIER DU FUTUR 🚀', 'HEROS DES PIXELS 💫', 'LEGENDE D\'ARCADE 🏆', 'GRANDMASTER 👑', 'CHALLENGER V2.1 ⚡'
   ];
   return {
     id: `title_shop_${i}`,
-    name: titlesList[i] || `TITRE VIP #${i + 1}`,
+    name: titlesList[i] || `TITRE VIP V2.1 #${i + 1}`,
     category: 'title',
     cost: 30 + i * 15,
     rarity,
-    previewVal: titlesList[i] || `TITRE VIP #${i + 1}`,
+    previewVal: titlesList[i] || `TITRE VIP V2.1 #${i + 1}`,
     desc: `Titre prestigieux pour profil.`
   };
 });
@@ -959,6 +1006,48 @@ export const COMPETITIVE_RANKS: CompetitiveRank[] = [
     glowColor: 'shadow-[0_0_60px_rgba(253,230,138,1)]',
     icon: 'Sparkles',
     description: 'RANG DIVIN LÉGENDAIRE. Le sommet de l\'univers Vertex Arcades !'
+  },
+  {
+    id: 'grandmaster_v2',
+    name: 'GRANDMASTER APEX',
+    frenchName: 'GrandMaster Apex 👑',
+    tier: 'master',
+    division: 'SUPREME',
+    minScore: 9500,
+    pixelReward: 15000,
+    titleReward: 'SOUVERAIN V2.1 ⚡',
+    badgeColor: 'border-fuchsia-400 bg-fuchsia-950/95 text-fuchsia-200',
+    glowColor: 'shadow-[0_0_65px_rgba(217,70,239,1)]',
+    icon: 'Crown',
+    description: 'Nouveau Rang V2.1 ! Récompenses de prestige inégalées.'
+  },
+  {
+    id: 'challenger_ultimate',
+    name: 'CHALLENGER SUPRÊME',
+    frenchName: 'Challenger Suprême 🏆',
+    tier: 'celestial',
+    division: 'DIVINE',
+    minScore: 12500,
+    pixelReward: 20000,
+    titleReward: 'CHALLENGER ABSOLU 💫',
+    badgeColor: 'border-yellow-300 bg-yellow-950/95 text-yellow-300',
+    glowColor: 'shadow-[0_0_70px_rgba(253,224,71,1)]',
+    icon: 'Trophy',
+    description: 'Seuls le TOP 0.1% des pilotes d\'arcade franchissent cette barrière.'
+  },
+  {
+    id: 'divinity_eternity',
+    name: 'ETERNITY OMNIPOTENT',
+    frenchName: 'Éternité Omnipotente 🌌',
+    tier: 'celestial',
+    division: 'OMNIPOTENT',
+    minScore: 18000,
+    pixelReward: 30000,
+    titleReward: 'OMNIPOTENT V2.1 🔮',
+    badgeColor: 'border-cyan-300 bg-cyan-950/95 text-cyan-200',
+    glowColor: 'shadow-[0_0_80px_rgba(6,182,212,1)]',
+    icon: 'Sparkles',
+    description: 'RANG LÉGENDAIRE V2.1 : Vous avez vaincu l\'Espace et le Temps.'
   }
 ];
 

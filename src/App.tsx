@@ -73,6 +73,13 @@ import AsteroidBlaster from './games/AsteroidBlaster';
 import GalagaShooter from './games/GalagaShooter';
 import GeometryJump from './games/GeometryJump';
 import QuantumClicker from './games/QuantumClicker';
+import Neon2048 from './games/Neon2048';
+import CyberDrift from './games/CyberDrift';
+import NeonAirHockey from './games/NeonAirHockey';
+import CyberDefender from './games/CyberDefender';
+
+import { CyberCompanionsModal } from './components/CyberCompanionsModal';
+import { BossRaidArenaModal } from './components/BossRaidArenaModal';
 
 export default function App() {
   const [state, setState] = useState<GlobalState>(() => {
@@ -137,6 +144,8 @@ export default function App() {
   const [showBoxesModal, setShowBoxesModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
+  const [showCompanionsModal, setShowCompanionsModal] = useState(false);
+  const [showBossRaidModal, setShowBossRaidModal] = useState(false);
   const [activeNotification, setActiveNotification] = useState<string | null>(null);
 
   // Active Skin theme finding
@@ -312,6 +321,20 @@ export default function App() {
             </button>
 
             <button
+              onClick={() => { audio.playClick(); setShowCompanionsModal(true); }}
+              className="px-3 py-1.5 bg-fuchsia-500/20 hover:bg-fuchsia-500/30 border border-fuchsia-500/40 text-fuchsia-300 rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition cursor-pointer shadow-[0_0_12px_rgba(217,70,239,0.3)]"
+            >
+              <Cpu size={16} /> Compagnons V2.1
+            </button>
+
+            <button
+              onClick={() => { audio.playClick(); setShowBossRaidModal(true); }}
+              className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition cursor-pointer shadow-[0_0_12px_rgba(245,158,11,0.3)]"
+            >
+              <Sword size={16} /> Boss Raid
+            </button>
+
+            <button
               onClick={() => { audio.playClick(); setShowShopModal(true); }}
               className="p-2 bg-slate-900/80 hover:bg-slate-800 text-purple-400 border border-slate-700 hover:border-purple-400 rounded-xl transition cursor-pointer"
               title="Boutique"
@@ -415,6 +438,10 @@ export default function App() {
               {activeGameId === 'laserdodge' && <LaserDodge onScore={() => {}} onGameOver={(score) => handleFinishGame('laserdodge', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['laserdodge']?.highScore || 0} />}
               {activeGameId === 'codebreaker' && <MatrixCodeBreaker onScore={() => {}} onGameOver={(score) => handleFinishGame('codebreaker', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['codebreaker']?.highScore || 0} />}
               {activeGameId === 'geometry' && <GeometryJump onScoreUpdate={() => {}} onGameOver={(score) => handleFinishGame('geometry', score)} highScore={state.stats['geometry']?.highScore || 0} />}
+              {activeGameId === '2048' && <Neon2048 onScore={() => {}} onGameOver={(score) => handleFinishGame('2048', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['2048']?.highScore || 0} />}
+              {activeGameId === 'drift' && <CyberDrift onScore={() => {}} onGameOver={(score) => handleFinishGame('drift', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['drift']?.highScore || 0} />}
+              {activeGameId === 'airhockey' && <NeonAirHockey onScore={() => {}} onGameOver={(score) => handleFinishGame('airhockey', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['airhockey']?.highScore || 0} />}
+              {activeGameId === 'defender' && <CyberDefender onScore={() => {}} onGameOver={(score) => handleFinishGame('defender', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['defender']?.highScore || 0} />}
             </div>
           </main>
         ) : (
@@ -892,6 +919,85 @@ export default function App() {
               a.id === achId ? { ...a, isUnlocked: true } : a
             )
           }));
+        }}
+      />
+
+      {/* Cyber Companions V2.1 Modal */}
+      <CyberCompanionsModal
+        show={showCompanionsModal}
+        onClose={() => setShowCompanionsModal(false)}
+        profile={state.profile}
+        equippedCompanionId={state.profile.equippedCompanionId || 'comp_panda'}
+        unlockedCompanionIds={state.profile.unlockedCompanionIds || ['comp_panda']}
+        companionLevels={state.profile.companionLevels || { comp_panda: 1 }}
+        onOpenBossRaid={() => setShowBossRaidModal(true)}
+        onUnlockCompanion={(companionId, cost) => {
+          if (state.profile.totalPixels < cost) return;
+          audio.playWin();
+          setState(prev => ({
+            ...prev,
+            profile: {
+              ...prev.profile,
+              totalPixels: prev.profile.totalPixels - cost,
+              unlockedCompanionIds: [...(prev.profile.unlockedCompanionIds || ['comp_panda']), companionId],
+              companionLevels: { ...(prev.profile.companionLevels || { comp_panda: 1 }), [companionId]: 1 }
+            }
+          }));
+          setActiveNotification(`🐉 NOUVEAU COMPAGNON DÉBLOQUÉ !`);
+          setTimeout(() => setActiveNotification(null), 3000);
+        }}
+        onEquipCompanion={(companionId) => {
+          audio.playClick();
+          setState(prev => ({
+            ...prev,
+            profile: {
+              ...prev.profile,
+              equippedCompanionId: companionId
+            }
+          }));
+          setActiveNotification(`⚡ COMPAGNON ÉQUIPÉ !`);
+          setTimeout(() => setActiveNotification(null), 2500);
+        }}
+        onFeedCompanion={(companionId, foodCost) => {
+          if (state.profile.totalPixels < foodCost) return;
+          audio.playWin();
+          setState(prev => {
+            const currentLevels = prev.profile.companionLevels || { comp_panda: 1 };
+            const curLvl = currentLevels[companionId] || 1;
+            return {
+              ...prev,
+              profile: {
+                ...prev.profile,
+                totalPixels: prev.profile.totalPixels - foodCost,
+                companionLevels: {
+                  ...currentLevels,
+                  [companionId]: curLvl + 1
+                }
+              }
+            };
+          });
+          setActiveNotification(`🍲 COMPAGNON NOURRI & NIVEAU SUPÉRIEUR !`);
+          setTimeout(() => setActiveNotification(null), 3000);
+        }}
+      />
+
+      {/* Boss Raid Arena V2.1 Modal */}
+      <BossRaidArenaModal
+        show={showBossRaidModal}
+        onClose={() => setShowBossRaidModal(false)}
+        profile={state.profile}
+        equippedCompanionId={state.profile.equippedCompanionId || 'comp_panda'}
+        onVictoryReward={(rewardPx) => {
+          audio.playWin();
+          setState(prev => ({
+            ...prev,
+            profile: {
+              ...prev.profile,
+              totalPixels: prev.profile.totalPixels + rewardPx
+            }
+          }));
+          setActiveNotification(`⚔️ VICTOIRE BOSS RAID : +${rewardPx} PX RÉCOLTÉS !`);
+          setTimeout(() => setActiveNotification(null), 4000);
         }}
       />
     </div>
