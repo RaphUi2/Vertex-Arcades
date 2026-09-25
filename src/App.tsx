@@ -1,134 +1,127 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Zap, Brain, Target, Play, Grid, Layers, Shield, Cpu, Sword, PlusCircle, Grid3X3, Sparkles, Award, Trophy, User, ShoppingBag, Settings, Volume2, VolumeX, Medal, Flame, PlayCircle, Eye, Info, Check, Lock, Key, Navigation, RefreshCw, Calendar, Crown, Music, Compass, Disc, Star, Clock, Heart, Search, Filter, RotateCcw
+  Zap, Trophy, Sparkles, Heart, Search, Play, X, Coins,
+  Settings, Gamepad2, Volume2, VolumeX, Crown, Target, ShoppingBag,
+  ArrowRightLeft, Skull, Flame, Check, Shield, Lock, User, Award
 } from 'lucide-react';
 
 import { audio } from './utils/audio';
-import { GlobalState, GameStats, Achievement, Quest, ArcadePass, Tournament, CosmeticRarity, AppSettings, RankedGameScores } from './types';
+import { useGamepad } from './utils/gamepad';
+import { GlobalState, GameStats, UserProfile, Quest, RngUniverseItem } from './types';
 import {
   GAMES_LIST,
-  CABINET_SKINS,
-  INITIAL_ACHIEVEMENTS,
-  INITIAL_QUESTS,
-  QUEST_POOL,
-  PASS_LEVELS,
-  PRO_PASS_LEVELS,
-  AURA_COSMETICS,
-  TITLE_BANNERS,
-  SHOP_TITLES,
-  AVATAR_ICONS_SHOP,
-  AVATAR_COLORS_SHOP,
-  FRAME_BORDERS_SHOP,
-  VICTORY_FX_SHOP,
-  COMPETITIVE_RANKS
+  INITIAL_ACHIEVEMENTS_200,
+  INITIAL_QUESTS_V3,
+  INITIAL_TRADE_REQUESTS,
+  NEW_COSMETICS_SHOP,
+  RANKED_GAMES_IDS,
+  ShopCosmetic
 } from './gamesData';
 
-import { ArcadeBackgroundCanvas } from './components/ArcadeBackgroundCanvas';
-import { AchievementToast } from './components/AchievementToast';
-import { WheelOfFortuneModal } from './components/WheelOfFortuneModal';
-import { LootBoxesModal } from './components/LootBoxesModal';
-import { ArcadePassModal } from './components/ArcadePassModal';
-import { QuestsAndFlashModal } from './components/QuestsAndFlashModal';
-import { SettingsModal } from './components/SettingsModal';
-import { RankedSeasonModal } from './components/RankedSeasonModal';
-import { ShopBoutiqueModal } from './components/ShopBoutiqueModal';
-import { PrestigeModal } from './components/PrestigeModal';
-import { AchievementsModal } from './components/AchievementsModal';
-import { UserProfileAvatar } from './components/UserProfileAvatar';
-import { UserProfileCard } from './components/UserProfileCard';
+// Modals
+import { GameCardIllustration } from './components/GameCardIllustration';
+import { RngUniverseModal } from './components/RngUniverseModal';
+import { ApexTrophyRoadModal } from './components/ApexTrophyRoadModal';
+import { RankedV3Modal } from './components/RankedV3Modal';
+import { ProfileCreatorModal } from './components/ProfileCreatorModal';
+import { QuestsV3Modal } from './components/QuestsV3Modal';
+import { MetaverseForgeModal } from './components/MetaverseForgeModal';
+import { AchievementsV3Modal } from './components/AchievementsV3Modal';
+import { ShopV3Modal } from './components/ShopV3Modal';
+import { SettingsV3Modal } from './components/SettingsV3Modal';
+import { ArcadePassV3Modal } from './components/ArcadePassV3Modal';
+import { MobileGameControls } from './components/MobileGameControls';
 
-// Mini games imports
-import NeonClicker from './games/NeonClicker';
-import SimonMemory from './games/SimonMemory';
-import ReflexTap from './games/ReflexTap';
-import RetroSnake from './games/RetroSnake';
-import BrickBreaker from './games/BrickBreaker';
-import Stacker from './games/Stacker';
-import ColorCatch from './games/ColorCatch';
-import BinaryCipher from './games/BinaryCipher';
-import TicTacToe from './games/TicTacToe';
-import MathBlitz from './games/MathBlitz';
-import GridMemory from './games/GridMemory';
-import WhackNode from './games/WhackNode';
-import NeonInvaders from './games/NeonInvaders';
-import MeteorStorm from './games/MeteorStorm';
-import NeonFlappy from './games/NeonFlappy';
-import CyberHighway from './games/CyberHighway';
-import CyberLock from './games/CyberLock';
-import NeonBubble from './games/NeonBubble';
-import MemoryPairs from './games/MemoryPairs';
-import NeonTarget from './games/NeonTarget';
-import NeonPong from './games/NeonPong';
-import LaserDodge from './games/LaserDodge';
-import NeonRunner from './games/NeonRunner';
-import NeonPinball from './games/NeonPinball';
-import CyberRhythm from './games/CyberRhythm';
-import NeonMaze from './games/NeonMaze';
-import GravityOrb from './games/GravityOrb';
-import MatrixCodeBreaker from './games/MatrixCodeBreaker';
-import TetrisMicro from './games/TetrisMicro';
-import FroggerCross from './games/FroggerCross';
-import AsteroidBlaster from './games/AsteroidBlaster';
-import GalagaShooter from './games/GalagaShooter';
-import GeometryJump from './games/GeometryJump';
-import QuantumClicker from './games/QuantumClicker';
-import Neon2048 from './games/Neon2048';
-import CyberDrift from './games/CyberDrift';
-import NeonAirHockey from './games/NeonAirHockey';
-import CyberDefender from './games/CyberDefender';
-import JurassicDinoDash from './games/JurassicDinoDash';
-import JurassicPinball from './games/JurassicPinball';
-import JurassicDinoHunter from './games/JurassicDinoHunter';
-
-import { CyberCompanionsModal } from './components/CyberCompanionsModal';
-import { BossRaidArenaModal } from './components/BossRaidArenaModal';
-import { FriendsModal } from './components/FriendsModal';
-import { ArcadeChatModal } from './components/ArcadeChatModal';
-import { DuelArenaModal } from './components/DuelArenaModal';
-import { Friend, ChatMessage, DuelChallenge } from './types';
+// 15 Games
+import { QuantumObby } from './games/QuantumObby';
+import { AetheriaVoid } from './games/AetheriaVoid';
+import { TitanCore } from './games/TitanCore';
+import { CyberHeist } from './games/CyberHeist';
+import { NebulaStrike } from './games/NebulaStrike';
+import { ChronoShift } from './games/ChronoShift';
+import { RoboTycoon } from './games/RoboTycoon';
+import { ShadowDungeon } from './games/ShadowDungeon';
+import { HyperDrift } from './games/HyperDrift';
+import { PixelForge } from './games/PixelForge';
+import { GravitySurge } from './games/GravitySurge';
+import { SynthRider } from './games/SynthRider';
+import { BioHazardDefense } from './games/BioHazardDefense';
+import { SkyboundWings } from './games/SkyboundWings';
+import { GlitchHunter } from './games/GlitchHunter';
 
 export default function App() {
   const [state, setState] = useState<GlobalState>(() => {
     let parsed: any = null;
     try {
-      const saved = localStorage.getItem('vertex_arcades_v2_state');
+      const saved = localStorage.getItem('vertex_arcades_v3_state');
       if (saved) parsed = JSON.parse(saved);
     } catch (e) {
       console.warn("Failed to parse state", e);
     }
 
-    if (!parsed) {
+    if (!parsed || !parsed.rngInventory) {
       parsed = {
         profile: {
           username: 'CYBER_HERO',
-          avatarColor: 'cyan',
+          avatarColor: '#06b6d4',
           avatarIcon: 'Crown',
-          totalPixels: 500,
-          unlockedSkins: ['neon'],
-          activeSkin: 'neon',
-          title: 'PILOTE DE NÉON',
-          unlockedTitles: ['PILOTE DE NÉON'],
-          unlockedColors: ['cyan'],
-          unlockedAvatarIcons: ['Crown'],
+          avatarModel: 'cyber_agent',
+          totalVCoins: 850,
+          totalPixels: 850,
+          title: 'VÉTÉRAN VERTEX 3.0',
+          unlockedTitles: ['VÉTÉRAN VERTEX 3.0'],
+          unlockedAvatarIcons: ['Crown', 'Zap', 'Star'],
           activeAura: 'none',
           unlockedAuras: ['none'],
-          activeBanner: 'banner_neon',
-          unlockedBanners: ['banner_neon'],
-          goldenKeys: 2
+          activeBanner: 'banner_cyber_grid',
+          unlockedBanners: ['banner_cyber_grid'],
+          activeFrame: 'frame_neon_cyan',
+          unlockedFrames: ['frame_neon_cyan'],
+          activeHat: 'hat_cap_pro',
+          unlockedHats: ['hat_cap_pro'],
+          bio: 'Prêt pour la version 3.0 ! Explorateur de mondes et collectionneur de reliques.',
+          selectedTags: ['Pro Gamer', 'Obby King', 'Trader'],
+          unlockedGames: [],
+          luckMultiplier: 1
         },
         stats: GAMES_LIST.reduce((acc, g) => {
           acc[g.id] = { plays: 0, highScore: 0 };
           return acc;
         }, {} as Record<string, GameStats>),
-        achievements: INITIAL_ACHIEVEMENTS,
-        quests: INITIAL_QUESTS,
+        achievements: INITIAL_ACHIEVEMENTS_200,
+        quests: INITIAL_QUESTS_V3,
         arcadePass: { level: 1, xp: 0, isPremium: false, claimedFreeRewards: [], claimedPremiumRewards: [] },
-        proPass: { level: 1, xp: 0, isPro: false, claimedFreeRewards: [], claimedProRewards: [] },
-        settings: { sfxEnabled: true, musicEnabled: true, particleDensity: 'normal', crtFilter: false, autoSave: true },
-        rankedScores: { sprintReflex: 0, laserBlitz: 0, quantumTarget: 0 },
-        rankPoints: 0,
-        favorites: [],
+        settings: {
+          sfxEnabled: true,
+          musicEnabled: true,
+          sfxVolume: 70,
+          musicVolume: 40,
+          currentTrack: 'chill',
+          graphicsQuality: 'ultra',
+          particleDensity: 'extreme',
+          glowEffects: true,
+          scanlines: false,
+          hapticVibration: true,
+          showFps: false,
+          controllerLayout: 'xbox'
+        },
+        rankPoints: 150,
+        totalTrophies: 60,
+        claimedTrophyRoadRewards: [50],
+        rngInventory: { bloxy_cola: 2, golden_noob_head: 1 },
+        rngTotalRolls: 3,
+        activeTradeRequests: INITIAL_TRADE_REQUESTS,
+        completedTradesCount: 0,
+        worldBoss: {
+          name: 'TITAN GLITCH OMNI',
+          currentHp: 885000,
+          maxHp: 1000000,
+          stage: 1,
+          playerTotalDamage: 4500,
+          claimedMilestones: []
+        },
+        favorites: ['quantum_obby', 'titan_core'],
         recentGames: []
       };
     }
@@ -136,1150 +129,951 @@ export default function App() {
     return parsed;
   });
 
-  // Modal controls
+  // Active game & category filters
   const [activeGameId, setActiveGameId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedRarity, setSelectedRarity] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [showQuestsModal, setShowQuestsModal] = useState(false);
-  const [showShopModal, setShowShopModal] = useState(false);
-  const [showPassModal, setShowPassModal] = useState(false);
+  // Modals state
+  const [showRngModal, setShowRngModal] = useState(false);
+  const [showTrophyModal, setShowTrophyModal] = useState(false);
   const [showRankedModal, setShowRankedModal] = useState(false);
-  const [showPrestigeModal, setShowPrestigeModal] = useState(false);
-  const [showWheelModal, setShowWheelModal] = useState(false);
-  const [showBoxesModal, setShowBoxesModal] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showQuestsModal, setShowQuestsModal] = useState(false);
+  const [showForgeModal, setShowForgeModal] = useState(false);
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
-  const [showCompanionsModal, setShowCompanionsModal] = useState(false);
-  const [showBossRaidModal, setShowBossRaidModal] = useState(false);
-  const [showFriendsModal, setShowFriendsModal] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false);
-  const [showDuelModal, setShowDuelModal] = useState(false);
-  const [selectedDuelOpponent, setSelectedDuelOpponent] = useState<Friend | null>(null);
-  const [activeNotification, setActiveNotification] = useState<string | null>(null);
+  const [showShopModal, setShowShopModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showPassModal, setShowPassModal] = useState(false);
 
-  // Social & Duel State with default seeds
-  const [friendsList, setFriendsList] = useState<Friend[]>(() => {
-    return state.friends || [
-      {
-        id: 'f_rex',
-        username: 'RexHunter_99 🦖',
-        avatarColor: '#f59e0b',
-        avatarIcon: 'Flame',
-        status: 'online',
-        currentGame: 'Jurassic Dino Dash',
-        rankPoints: 4800,
-        rankTier: 'master',
-        totalPixels: 34200,
-        duelWins: 42,
-        duelLosses: 11
-      },
-      {
-        id: 'f_raptor',
-        username: 'CyberRaptor 🦕',
-        avatarColor: '#06b6d4',
-        avatarIcon: 'Zap',
-        status: 'in-game',
-        currentGame: 'Jurassic Pinball',
-        rankPoints: 6100,
-        rankTier: 'celestial',
-        totalPixels: 51000,
-        duelWins: 68,
-        duelLosses: 19
-      },
-      {
-        id: 'f_queen',
-        username: 'AmberQueen 💎',
-        avatarColor: '#ec4899',
-        avatarIcon: 'Crown',
-        status: 'online',
-        currentGame: 'Neon 2048 Fusion',
-        rankPoints: 3900,
-        rankTier: 'diamond',
-        totalPixels: 28900,
-        duelWins: 31,
-        duelLosses: 14
-      }
-    ];
+  // Paid game prompt modal state
+  const [paidGamePrompt, setPaidGamePrompt] = useState<string | null>(null);
+
+  // Notification Toast
+  const [notification, setNotification] = useState<string | null>(null);
+  const notify = (msg: string) => {
+    setNotification(msg);
+    setTimeout(() => setNotification(null), 3500);
+  };
+
+  // Controller / Gamepad Hook
+  const { gamepadState, vibrate } = useGamepad((action) => {
+    if (action === 'B') {
+      // Close any open modal
+      setShowRngModal(false);
+      setShowTrophyModal(false);
+      setShowRankedModal(false);
+      setShowProfileModal(false);
+      setShowQuestsModal(false);
+      setShowForgeModal(false);
+      setShowAchievementsModal(false);
+      setShowShopModal(false);
+      setShowSettingsModal(false);
+      setShowPassModal(false);
+      setPaidGamePrompt(null);
+    } else if (action === 'Y') {
+      audio.playClick();
+      setShowProfileModal(true);
+    }
   });
 
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(() => {
-    return state.chatMessages || [
-      {
-        id: 'msg_1',
-        senderId: 'f_rex',
-        senderName: 'RexHunter_99 🦖',
-        senderColor: '#f59e0b',
-        senderIcon: 'Flame',
-        senderRank: 'APEX MASTER',
-        message: 'Bienvenue sur la mise à jour 2.2 ! Les épreuves jurassiques sont folles ! 🔥',
-        timestamp: Date.now() - 300000,
-        channel: 'jurassic'
-      },
-      {
-        id: 'msg_2',
-        senderId: 'f_raptor',
-        senderName: 'CyberRaptor 🦕',
-        senderColor: '#06b6d4',
-        senderIcon: 'Zap',
-        senderRank: 'CELESTIAL',
-        message: 'Qui veut un duel 1v1 sur Jurassic Pinball ? Mise de 250 PX prête ! ⚔️',
-        timestamp: Date.now() - 120000,
-        channel: 'duels'
-      },
-      {
-        id: 'msg_3',
-        senderId: 'f_queen',
-        senderName: 'AmberQueen 💎',
-        senderColor: '#ec4899',
-        senderIcon: 'Crown',
-        senderRank: 'DIAMANT APEX',
-        message: 'GG pour vos scores en Classé Saison 2 ! 👑',
-        timestamp: Date.now() - 45000,
-        channel: 'general'
-      }
-    ];
-  });
-
-  const [duelHistory, setDuelHistory] = useState<DuelChallenge[]>(() => {
-    return state.duelHistory || [
-      {
-        id: 'duel_seed_1',
-        challengerId: 'user',
-        challengerName: state.profile.username,
-        challengedId: 'f_rex',
-        challengedName: 'RexHunter_99 🦖',
-        gameId: 'dino_dash',
-        gameName: 'Course Dino Jurassique 🦖',
-        wagerPx: 200,
-        status: 'completed',
-        winnerId: 'user',
-        timestamp: Date.now() - 86400000
-      }
-    ];
-  });
-
-  // Active Skin theme finding
-  const activeSkinData = CABINET_SKINS.find(s => s.id === (state.profile.activeSkin || 'neon')) || CABINET_SKINS[0];
-
-  // Auto-save
+  // Save state to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('vertex_arcades_v2_state', JSON.stringify(state));
+      localStorage.setItem('vertex_arcades_v3_state', JSON.stringify(state));
     } catch (e) {
-      console.warn("Save state error", e);
+      console.warn("Failed to persist state", e);
     }
   }, [state]);
 
-  const toggleFavorite = (gameId: string, e?: React.MouseEvent) => {
-    if (e) e.stopPropagation();
-    audio.playClick();
+  const currentVCoins = state.profile.totalVCoins ?? 0;
+
+  // Toggle favorite with Heart icon
+  const handleToggleFavorite = (gameId: string) => {
+    audio.playHeartPop();
+    vibrate(40, 0.4, 0.5);
     setState(prev => {
-      const favs = prev.favorites || [];
-      const exists = favs.includes(gameId);
-      return { ...prev, favorites: exists ? favs.filter(id => id !== gameId) : [...favs, gameId] };
+      const isFav = prev.favorites.includes(gameId);
+      const newFavs = isFav
+        ? prev.favorites.filter(id => id !== gameId)
+        : [...prev.favorites, gameId];
+      return { ...prev, favorites: newFavs };
     });
   };
 
-  const handleClaimQuest = (questId: string, rewardPx: number, rewardXp: number) => {
-    audio.playWin();
-    setState(prev => {
-      const updatedQuests = (prev.quests || []).map(q =>
-        q.id === questId ? { ...q, isClaimed: true } : q
-      );
-      const currentPass = prev.arcadePass || { level: 1, xp: 0, isPremium: false, claimedFreeRewards: [], claimedPremiumRewards: [] };
-      let newXp = currentPass.xp + rewardXp;
-      let newLvl = currentPass.level;
-      if (newXp >= 200) {
-        newLvl += Math.floor(newXp / 200);
-        newXp = newXp % 200;
-      }
+  // Handle Game launch with Paid verification
+  const handleTryLaunchGame = (gameId: string) => {
+    const game = GAMES_LIST.find(g => g.id === gameId);
+    if (!game) return;
 
-      return {
-        ...prev,
-        profile: { ...prev.profile, totalPixels: prev.profile.totalPixels + rewardPx },
-        quests: updatedQuests,
-        arcadePass: { ...currentPass, level: newLvl, xp: newXp }
-      };
-    });
-    setActiveNotification(`🎯 RÉCOMPENSE RÉCLAMÉE : +${rewardPx} PX & +${rewardXp} XP !`);
-    setTimeout(() => setActiveNotification(null), 3500);
+    if (game.isPaid && !state.profile.unlockedGames?.includes(gameId)) {
+      audio.playClick();
+      setPaidGamePrompt(gameId);
+      return;
+    }
+
+    audio.playStart();
+    setActiveGameId(gameId);
   };
 
-  const handleResetQuests = () => {
-    if (state.profile.totalPixels < 1000) return;
+  // Unlock paid game with V-Coins
+  const handleUnlockPaidGame = (gameId: string) => {
+    const game = GAMES_LIST.find(g => g.id === gameId);
+    if (!game || currentVCoins < game.costVCoins) return;
+
     audio.playWin();
     setState(prev => ({
       ...prev,
-      profile: { ...prev.profile, totalPixels: prev.profile.totalPixels - 1000 },
-      quests: INITIAL_QUESTS.map(q => ({ ...q, current: 0, isCompleted: false, isClaimed: false }))
+      profile: {
+        ...prev.profile,
+        totalVCoins: prev.profile.totalVCoins - game.costVCoins,
+        unlockedGames: [...(prev.profile.unlockedGames || []), gameId]
+      }
     }));
-    setActiveNotification(`🔄 QUÊTES RÉINITIALISÉES (-1 000 PX) !`);
-    setTimeout(() => setActiveNotification(null), 3500);
+    notify(`Jeu débloqué avec succès : ${game.frenchName} !`);
+    setPaidGamePrompt(null);
+    setActiveGameId(gameId);
   };
 
-  const handleFinishGame = (gameId: string, finalScore: number) => {
+  // Finish Game Handler (Rewards + Quests + Trophies + Ranked Points + World Boss Damage)
+  const handleFinishGame = (gameId: string, score: number, customVCoinsBonus = 0) => {
+    const prevStats = state.stats[gameId] || { plays: 0, highScore: 0 };
+    const isNewHigh = score > prevStats.highScore;
+
+    // High performance reward scaling
+    const earnedVC = Math.max(25, Math.min(350, Math.floor(score * 0.15) + (isNewHigh ? 50 : 0) + customVCoinsBonus));
+    const earnedXP = Math.floor(earnedVC * 1.5) + (isNewHigh ? 60 : 25);
+    const earnedTrophies = isNewHigh ? 6 : 3;
+
+    // Ranked Points if this is one of the 3 Ranked Games
+    const isRanked = RANKED_GAMES_IDS.includes(gameId);
+    const earnedRP = isRanked ? Math.floor(score * 0.25) + 30 : 0;
+
+    // Deal damage to World Boss
+    const bossDmg = Math.max(100, Math.floor(score * 1.2));
+
     audio.playWin();
+
     setState(prev => {
-      const currentStats = prev.stats[gameId] || { plays: 0, highScore: 0 };
-      const newHighScore = Math.max(currentStats.highScore, finalScore);
-      const mult = 1 + (prev.profile.prestigeLevel || 0) * 0.25;
-      const earnedPx = Math.floor(finalScore * mult);
+      // 1. Stats
+      const newStats = {
+        ...prev.stats,
+        [gameId]: {
+          plays: prevStats.plays + 1,
+          highScore: Math.max(prevStats.highScore, score)
+        }
+      };
+
+      // 2. Quests
+      const newQuests = prev.quests.map(q => {
+        let added = 0;
+        if (q.id === 'q_daily_1') added = 1;
+        if (q.id === 'q_daily_2' && gameId === 'quantum_obby') added = score;
+        if (q.id === 'q_daily_3') added = earnedVC;
+        if (q.id === 'q_weekly_1') added = 1;
+        if (q.id === 'q_weekly_2' && gameId === 'aetheria_void') added = score;
+        if (q.id === 'q_meta_1') added = bossDmg;
+
+        const nextCur = Math.min(q.target, q.current + added);
+        return { ...q, current: nextCur, isCompleted: nextCur >= q.target };
+      });
+
+      // 3. Pass XP
+      let nextPassXp = prev.arcadePass.xp + earnedXP;
+      let nextPassLevel = prev.arcadePass.level;
+      while (nextPassXp >= 1000 && nextPassLevel < 50) {
+        nextPassXp -= 1000;
+        nextPassLevel += 1;
+      }
+
+      // 4. World Boss
+      const nextBossHp = Math.max(0, prev.worldBoss.currentHp - bossDmg);
 
       return {
         ...prev,
-        profile: { ...prev.profile, totalPixels: prev.profile.totalPixels + earnedPx },
-        stats: {
-          ...prev.stats,
-          [gameId]: { plays: currentStats.plays + 1, highScore: newHighScore }
-        }
+        profile: {
+          ...prev.profile,
+          totalVCoins: prev.profile.totalVCoins + earnedVC
+        },
+        totalTrophies: prev.totalTrophies + earnedTrophies,
+        rankPoints: prev.rankPoints + earnedRP,
+        stats: newStats,
+        quests: newQuests,
+        arcadePass: {
+          ...prev.arcadePass,
+          level: nextPassLevel,
+          xp: nextPassXp
+        },
+        worldBoss: {
+          ...prev.worldBoss,
+          currentHp: nextBossHp,
+          playerTotalDamage: prev.worldBoss.playerTotalDamage + bossDmg
+        },
+        recentGames: [gameId, ...prev.recentGames.filter(id => id !== gameId)].slice(0, 8)
       };
     });
 
-    setActiveNotification(`🎮 PARTIE TERMINÉE ! Score: ${finalScore} (+${Math.floor(finalScore * (1 + (state.profile.prestigeLevel || 0) * 0.25))} PX)`);
-    setTimeout(() => setActiveNotification(null), 4000);
-    setActiveGameId(null);
+    notify(
+      `🏆 VICTOIRE : +${earnedVC} V-Coins • +${earnedTrophies} 🏆${isRanked ? ` • +${earnedRP} RP` : ''} • -${bossDmg} PV au Boss !`
+    );
   };
 
-  const filteredGames = GAMES_LIST.filter(g => {
-    const matchesSearch = g.name.toLowerCase().includes(searchQuery.toLowerCase()) || g.frenchName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || g.category === selectedCategory || (selectedCategory === 'fav' && (state.favorites || []).includes(g.id));
-    const matchesRarity = selectedRarity === 'all' || g.rarity === selectedRarity;
-    return matchesSearch && matchesCategory && matchesRarity;
+  // Filter games
+  const filteredGames = GAMES_LIST.filter(game => {
+    const matchesCategory =
+      selectedCategory === 'all'
+        ? true
+        : selectedCategory === 'favorites'
+        ? state.favorites.includes(game.id)
+        : selectedCategory === 'paid'
+        ? game.isPaid
+        : selectedCategory === 'ranked'
+        ? game.isRankedAvailable
+        : game.category === selectedCategory;
+
+    const gameTitle = game.frenchName || game.name;
+    const matchesSearch =
+      gameTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      game.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return matchesCategory && matchesSearch;
   });
 
   return (
-    <div className={`min-h-screen text-slate-100 relative font-sans overflow-x-hidden ${activeSkinData.bgGradient}`}>
-      {/* Dynamic Theme Animated Background Canvas */}
-      <ArcadeBackgroundCanvas themeType={activeSkinData.bgType || 'grid'} />
+    <div className="relative min-h-screen bg-[#080b14] text-slate-100 flex flex-col justify-between overflow-x-hidden font-sans select-none">
+      {/* 1. Notification Toast */}
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            initial={{ opacity: 0, y: -30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full bg-slate-900/95 border-2 border-cyan-400 text-white font-mono text-xs font-bold shadow-[0_0_35px_rgba(6,182,212,0.6)] flex items-center gap-2.5 backdrop-blur-xl"
+          >
+            <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
+            <span>{notification}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Main Container */}
-      <div className="relative z-10 flex flex-col min-h-screen">
-        {/* --- TOP BAR (COMPLETELY AT THE TOP) --- */}
-        <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-2xl">
-          {/* Top Left: Avatar Profile Icon + VERTEX ARCADES Branding */}
-          <div className="flex items-center gap-3">
-            <UserProfileAvatar
-              avatarIcon={state.profile.avatarIcon || 'Zap'}
-              avatarColor={state.profile.avatarColor || '#06b6d4'}
-              activeFrame={state.profile.activeFrame || 'none'}
-              activeAura={state.profile.activeAura || 'none'}
-              size="md"
-              onClick={() => { audio.playClick(); setShowShopModal(true); }}
-            />
+      {/* 2. Top Header: REFRESHED LOGO DEAD CENTER, NO TEXT "VERTEX ARCADES" */}
+      <header className="sticky top-0 z-40 w-full bg-[#070a12] border-b border-slate-800 px-4 sm:px-8 py-3 flex items-center justify-between shadow-2xl">
+        {/* Left: Player Profile Pill */}
+        <div
+          onClick={() => { audio.playClick(); setShowProfileModal(true); }}
+          className="flex items-center gap-3 p-1.5 pr-4 rounded-full bg-[#0d1222] border border-slate-700 hover:border-cyan-400 transition-all cursor-pointer group shadow-md"
+        >
+          <div
+            className="w-9 h-9 rounded-full flex items-center justify-center text-lg border-2 border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.4)]"
+            style={{ backgroundColor: state.profile.avatarColor }}
+          >
+            {state.profile.avatarModel === 'cyber_ninja' ? '🥷' : state.profile.avatarModel === 'blocky_knight' ? '🛡️' : '🧑‍🚀'}
+          </div>
+          <div className="hidden sm:block text-left">
+            <div className="text-xs font-black text-white font-mono leading-none group-hover:text-cyan-300 transition-colors">
+              {state.profile.username}
+            </div>
+            <div className="text-[10px] text-yellow-400 font-mono flex items-center gap-1 mt-0.5 font-bold">
+              <Trophy className="w-3 h-3 fill-current" /> {state.totalTrophies} 🏆
+            </div>
+          </div>
+        </div>
 
+        {/* Center: REFRESHED VERTEX ARCADES LOGO DEAD CENTER (NO TEXT!) */}
+        <div className="flex items-center justify-center">
+          <div
+            onClick={() => { audio.playWin(); }}
+            className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-400 via-fuchsia-500 to-amber-400 border-2 border-white/80 flex items-center justify-center text-slate-950 shadow-[0_0_30px_rgba(6,182,212,0.7),0_0_20px_rgba(217,70,239,0.6)] cursor-pointer hover:rotate-12 transition-transform active:scale-95"
+            title="Vertex Arcades v3.0 Logo"
+          >
+            {/* Chromatic stylized geometric cube logo icon */}
+            <svg className="w-7 h-7 fill-slate-950" viewBox="0 0 24 24">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Right: V-Coins Pill & Quick Actions */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Gamepad detection indicator */}
+          <div
+            className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all ${
+              gamepadState.connected
+                ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-[0_0_12px_rgba(34,197,94,0.5)]'
+                : 'bg-slate-900 border-slate-800 text-slate-500'
+            }`}
+            title={gamepadState.connected ? `Manette connectée : ${gamepadState.id}` : 'Manette déconnectée'}
+          >
+            <Gamepad2 className="w-4 h-4" />
+          </div>
+
+          {/* V-Coins Wallet */}
+          <div
+            onClick={() => { audio.playClick(); setShowShopModal(true); }}
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-950/80 border border-amber-500 text-yellow-300 shadow-[0_0_15px_rgba(245,158,11,0.3)] text-xs font-mono font-bold cursor-pointer hover:bg-amber-900/80 transition-all"
+          >
+            <Coins className="w-4 h-4 fill-current text-yellow-400 animate-pulse" />
+            <span>{currentVCoins.toLocaleString()} VC</span>
+          </div>
+
+          {/* Settings */}
+          <button
+            onClick={() => { audio.playClick(); setShowSettingsModal(true); }}
+            className="w-9 h-9 rounded-full bg-[#0d1222] hover:bg-slate-800 border border-slate-700 hover:border-cyan-400 flex items-center justify-center text-slate-300 hover:text-white transition-all cursor-pointer"
+            title="Paramètres"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+        </div>
+      </header>
+
+      {/* 3. Main Content Body */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-6 pb-28">
+        {/* Vertex Arcades Action Hub Banners */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {/* 1. Sanctuaire RNG (Replaces Nano Star) */}
+          <div
+            onClick={() => { audio.playClick(); setShowRngModal(true); }}
+            className="p-5 rounded-3xl border-2 border-cyan-500/40 bg-[#0c1224] hover:bg-[#121a32] hover:border-cyan-400 transition-all cursor-pointer group shadow-lg flex flex-col justify-between"
+          >
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-black italic tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-fuchsia-400 to-yellow-400">
-                  VERTEX ARCADES <span className="text-[10px] text-slate-950 bg-cyan-400 px-1.5 py-0.5 rounded font-black not-italic">2.0</span>
-                </h1>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                  🎲
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-cyan-500/20 text-cyan-300 border border-cyan-400 font-mono">
+                  RNG VERTEX
+                </span>
               </div>
-              <p className="text-[10px] text-slate-400 font-bold tracking-wide">
-                {state.profile.username} • <span className="text-purple-300">{state.profile.title || 'PILOTE'}</span>
+              <h3 className="font-bold text-white text-base font-mono group-hover:text-cyan-300 transition-colors">
+                Sanctuaire RNG
+              </h3>
+              <p className="text-xs text-slate-300 mt-1">
+                Tirez et échangez des reliques mythiques du Cyberverse, Fortnite et Minecraft !
               </p>
             </div>
           </div>
 
-          {/* Top Right: Redesigned PX Glass Enclosure & Quick Action Navigation Icons */}
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* PX Display Box */}
-            <div className="px-3 py-1.5 bg-slate-900/90 border border-yellow-500/40 rounded-xl text-yellow-400 font-black text-sm flex items-center gap-2 shadow-[0_0_15px_rgba(234,179,8,0.2)]">
-              <Sparkles size={16} className="text-yellow-400 animate-pulse" />
-              <span>{state.profile.totalPixels} PX</span>
-              {(state.profile.prestigeLevel || 0) > 0 && (
-                <span className="text-[9px] bg-yellow-500/20 text-yellow-300 border border-yellow-500/30 px-1.5 py-0.5 rounded">
-                  x{(1 + (state.profile.prestigeLevel || 0) * 0.25).toFixed(2)}
+          {/* 2. Ligue des Trophées Vertex */}
+          <div
+            onClick={() => { audio.playClick(); setShowTrophyModal(true); }}
+            className="p-5 rounded-3xl border-2 border-yellow-500/40 bg-[#0c1224] hover:bg-[#121a32] hover:border-yellow-400 transition-all cursor-pointer group shadow-lg flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-12 h-12 rounded-2xl bg-yellow-500/20 border border-yellow-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(234,179,8,0.3)]">
+                  🏆
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-yellow-400/20 text-yellow-300 border border-yellow-400 font-mono">
+                  LIGUE APEX
                 </span>
-              )}
+              </div>
+              <h3 className="font-bold text-white text-base font-mono group-hover:text-yellow-300 transition-colors">
+                Ligue des Trophées
+              </h3>
+              <p className="text-xs text-slate-300 mt-1">
+                Route des trophées 0 à 10 000 🏆 avec récompenses et chapeaux exclusifs.
+              </p>
             </div>
-
-            {/* Quick Actions */}
-            <button
-              onClick={() => { audio.playClick(); setShowWheelModal(true); }}
-              className="p-2 bg-slate-900/80 hover:bg-slate-800 text-yellow-400 border border-slate-700 hover:border-yellow-400 rounded-xl transition cursor-pointer"
-              title="Roue de la Fortune"
-            >
-              <Disc size={18} />
-            </button>
-
-            <button
-              onClick={() => { audio.playClick(); setShowBoxesModal(true); }}
-              className="p-2 bg-slate-900/80 hover:bg-slate-800 text-cyan-400 border border-slate-700 hover:border-cyan-400 rounded-xl transition cursor-pointer"
-              title="Coffres & Clefs"
-            >
-              <Key size={18} />
-            </button>
-
-            <button
-              onClick={() => { audio.playClick(); setShowQuestsModal(true); }}
-              className="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-400 rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition cursor-pointer"
-            >
-              <Target size={16} /> Quêtes & Flash
-            </button>
-
-            <button
-              onClick={() => { audio.playClick(); setShowRankedModal(true); }}
-              className="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-400 rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition cursor-pointer"
-            >
-              <Trophy size={16} /> Mode Classé
-            </button>
-
-            <button
-              onClick={() => { audio.playClick(); setShowPassModal(true); }}
-              className="px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-300 rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition cursor-pointer shadow-[0_0_12px_rgba(168,85,247,0.3)]"
-            >
-              <Award size={16} /> Pass S2 Jurassique
-            </button>
-
-            <button
-              onClick={() => { audio.playClick(); setShowFriendsModal(true); }}
-              className="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition cursor-pointer shadow-[0_0_12px_rgba(6,182,212,0.3)]"
-            >
-              <User size={16} /> Amis ({friendsList.length})
-            </button>
-
-            <button
-              onClick={() => { audio.playClick(); setShowChatModal(true); }}
-              className="px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/40 text-blue-300 rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition cursor-pointer shadow-[0_0_12px_rgba(59,130,246,0.3)]"
-            >
-              <Navigation size={16} /> Tchat Live
-            </button>
-
-            <button
-              onClick={() => { audio.playClick(); setShowDuelModal(true); }}
-              className="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition cursor-pointer shadow-[0_0_12px_rgba(244,63,94,0.3)]"
-            >
-              <Sword size={16} /> Duels 1v1
-            </button>
-
-            <button
-              onClick={() => { audio.playClick(); setShowCompanionsModal(true); }}
-              className="px-3 py-1.5 bg-fuchsia-500/20 hover:bg-fuchsia-500/30 border border-fuchsia-500/40 text-fuchsia-300 rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition cursor-pointer shadow-[0_0_12px_rgba(217,70,239,0.3)]"
-            >
-              <Cpu size={16} /> Compagnons V2.1
-            </button>
-
-            <button
-              onClick={() => { audio.playClick(); setShowBossRaidModal(true); }}
-              className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 rounded-xl text-xs font-black uppercase flex items-center gap-1.5 transition cursor-pointer shadow-[0_0_12px_rgba(245,158,11,0.3)]"
-            >
-              <Sword size={16} /> Boss Raid
-            </button>
-
-            <button
-              onClick={() => { audio.playClick(); setShowShopModal(true); }}
-              className="p-2 bg-slate-900/80 hover:bg-slate-800 text-purple-400 border border-slate-700 hover:border-purple-400 rounded-xl transition cursor-pointer"
-              title="Boutique"
-            >
-              <ShoppingBag size={18} />
-            </button>
-
-            <button
-              onClick={() => { audio.playClick(); setShowPrestigeModal(true); }}
-              className="p-2 bg-slate-900/80 hover:bg-slate-800 text-amber-400 border border-slate-700 hover:border-amber-400 rounded-xl transition cursor-pointer"
-              title="Prestige 2.0"
-            >
-              <Star size={18} />
-            </button>
-
-            <button
-              onClick={() => { audio.playClick(); setShowAchievementsModal(true); }}
-              className="p-2 bg-slate-900/80 hover:bg-slate-800 text-yellow-400 border border-slate-700 hover:border-yellow-400 rounded-xl transition cursor-pointer"
-              title="Succès & Hauts Faits (100)"
-            >
-              <Trophy size={18} />
-            </button>
-
-            <button
-              onClick={() => { audio.playClick(); setShowSettingsModal(true); }}
-              className="p-2 bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-700 hover:border-white rounded-xl transition cursor-pointer"
-              title="Paramètres"
-            >
-              <Settings size={18} />
-            </button>
           </div>
-        </header>
 
-        {/* Notification Toast */}
-        <AnimatePresence>
-          {activeNotification && (
-            <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50">
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="px-4 py-2 bg-slate-900 border-2 border-emerald-500 text-emerald-300 rounded-xl font-extrabold text-xs shadow-[0_0_25px_rgba(16,185,129,0.5)] flex items-center gap-2"
-              >
-                <Sparkles size={16} /> {activeNotification}
-              </motion.div>
+          {/* 3. Classé v3.0 (3 dedicated games, pure ladder progression) */}
+          <div
+            onClick={() => { audio.playClick(); setShowRankedModal(true); }}
+            className="p-5 rounded-3xl border-2 border-red-500/40 bg-[#0c1224] hover:bg-[#121a32] hover:border-red-400 transition-all cursor-pointer group shadow-lg flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-12 h-12 rounded-2xl bg-red-500/20 border border-red-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+                  🔥
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-red-500/20 text-red-300 border border-red-400 font-mono">
+                  3 ÉPREUVES
+                </span>
+              </div>
+              <h3 className="font-bold text-white text-base font-mono group-hover:text-red-300 transition-colors">
+                Classé v3.0
+              </h3>
+              <p className="text-xs text-slate-300 mt-1">
+                Grimpez du Bronze au rang Apex. Plus vous jouez, plus vous engrangez de RP !
+              </p>
             </div>
-          )}
-        </AnimatePresence>
+          </div>
 
-        {/* MAIN GAME VIEW OR SELECTION */}
-        {activeGameId ? (
-          /* ACTIVE GAME PLAYER */
-          <main className="flex-1 p-4 flex flex-col max-w-5xl mx-auto w-full">
-            <div className="mb-3 flex justify-between items-center">
+          {/* 4. Crazy New System: World Boss & Fusion Forge */}
+          <div
+            onClick={() => { audio.playClick(); setShowForgeModal(true); }}
+            className="p-5 rounded-3xl border-2 border-fuchsia-500/40 bg-[#0c1224] hover:bg-[#121a32] hover:border-fuchsia-400 transition-all cursor-pointer group shadow-lg flex flex-col justify-between"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-12 h-12 rounded-2xl bg-fuchsia-500/20 border border-fuchsia-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(217,70,239,0.3)]">
+                  👾
+                </div>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-400 font-mono">
+                  WORLD BOSS
+                </span>
+              </div>
+              <h3 className="font-bold text-white text-base font-mono group-hover:text-fuchsia-300 transition-colors">
+                Titan Glitch Raid
+              </h3>
+              <p className="text-xs text-slate-300 mt-1">
+                Boss mondial à 1M de PV & laboratoire de transmutation de reliques !
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Search & Category Filter Bar */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-6">
+          {/* Category Filter Pills */}
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {[
+              { id: 'all', label: 'Tous les Jeux (15)' },
+              { id: 'favorites', label: 'Mes Favoris ❤️' },
+              { id: 'ranked', label: 'Classé 🏆' },
+              { id: 'paid', label: 'VIP V-Coins 💎' },
+              { id: 'action', label: 'Action & Combat' },
+              { id: 'platformer', label: 'Obby & Runner' },
+              { id: 'tycoon', label: 'Tycoon & Factory' },
+              { id: 'rhythm', label: 'Rythme' }
+            ].map(cat => (
               <button
-                onClick={() => setActiveGameId(null)}
-                className="px-4 py-2 bg-slate-900 border border-slate-700 hover:border-cyan-400 text-slate-200 font-extrabold text-xs uppercase rounded-xl cursor-pointer transition flex items-center gap-2"
+                key={cat.id}
+                onClick={() => { audio.playClick(); setSelectedCategory(cat.id); }}
+                className={`px-4 py-2 rounded-2xl text-xs font-mono font-bold whitespace-nowrap transition-all cursor-pointer ${
+                  selectedCategory === cat.id
+                    ? 'bg-cyan-500 text-slate-950 font-black shadow-[0_0_15px_rgba(6,182,212,0.5)]'
+                    : 'bg-[#0d1222] text-slate-400 hover:text-white border border-slate-800'
+                }`}
               >
-                ← Quitter le jeu
+                {cat.label}
               </button>
+            ))}
+          </div>
 
-              <div className="text-right">
-                <span className="text-xs text-slate-400 font-bold block">Thème Actif</span>
-                <span className="text-sm font-black text-cyan-400 uppercase">{activeSkinData.name}</span>
-              </div>
-            </div>
-
-            {/* Render Game Container */}
-            <div className="flex-1 bg-slate-950/90 border-2 border-cyan-500/40 rounded-2xl p-4 shadow-[0_0_40px_rgba(6,182,212,0.2)] flex items-center justify-center min-h-[500px]">
-              {activeGameId === 'clicker' && <NeonClicker onScore={() => {}} onGameOver={(score) => handleFinishGame('clicker', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['clicker']?.highScore || 0} />}
-              {activeGameId === 'reflex' && <ReflexTap onScore={() => {}} onGameOver={(score) => handleFinishGame('reflex', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['reflex']?.highScore || 0} />}
-              {activeGameId === 'snake' && <RetroSnake onScore={() => {}} onGameOver={(score) => handleFinishGame('snake', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['snake']?.highScore || 0} />}
-              {activeGameId === 'brick' && <BrickBreaker onScore={() => {}} onGameOver={(score) => handleFinishGame('brick', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['brick']?.highScore || 0} />}
-              {activeGameId === 'tictactoe' && <TicTacToe onScore={() => {}} onGameOver={(score) => handleFinishGame('tictactoe', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['tictactoe']?.highScore || 0} />}
-              {activeGameId === 'math' && <MathBlitz onScore={() => {}} onGameOver={(score) => handleFinishGame('math', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['math']?.highScore || 0} />}
-              {activeGameId === 'whack' && <WhackNode onScore={() => {}} onGameOver={(score) => handleFinishGame('whack', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['whack']?.highScore || 0} />}
-              {activeGameId === 'bubble' && <NeonBubble onScore={() => {}} onGameOver={(score) => handleFinishGame('bubble', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['bubble']?.highScore || 0} />}
-              {activeGameId === 'pairs' && <MemoryPairs onScore={() => {}} onGameOver={(score) => handleFinishGame('pairs', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['pairs']?.highScore || 0} />}
-              {activeGameId === 'simon' && <SimonMemory onScore={() => {}} onGameOver={(score) => handleFinishGame('simon', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['simon']?.highScore || 0} />}
-              {activeGameId === 'stacker' && <Stacker onScore={() => {}} onGameOver={(score) => handleFinishGame('stacker', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['stacker']?.highScore || 0} />}
-              {activeGameId === 'binary' && <BinaryCipher onScore={() => {}} onGameOver={(score) => handleFinishGame('binary', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['binary']?.highScore || 0} />}
-              {activeGameId === 'gridmemory' && <GridMemory onScore={() => {}} onGameOver={(score) => handleFinishGame('gridmemory', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['gridmemory']?.highScore || 0} />}
-              {activeGameId === 'flappy' && <NeonFlappy onScore={() => {}} onGameOver={(score) => handleFinishGame('flappy', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['flappy']?.highScore || 0} />}
-              {activeGameId === 'target' && <NeonTarget onScore={() => {}} onGameOver={(score) => handleFinishGame('target', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['target']?.highScore || 0} />}
-              {activeGameId === 'pong' && <NeonPong onScore={() => {}} onGameOver={(score) => handleFinishGame('pong', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['pong']?.highScore || 0} />}
-              {activeGameId === 'maze' && <NeonMaze onScore={() => {}} onGameOver={(score) => handleFinishGame('maze', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['maze']?.highScore || 0} />}
-              {activeGameId === 'tetris' && <TetrisMicro onScoreUpdate={() => {}} onGameOver={(score) => handleFinishGame('tetris', score)} highScore={state.stats['tetris']?.highScore || 0} />}
-              {activeGameId === 'frogger' && <FroggerCross onScoreUpdate={() => {}} onGameOver={(score) => handleFinishGame('frogger', score)} highScore={state.stats['frogger']?.highScore || 0} />}
-              {activeGameId === 'quantum_clicker' && <QuantumClicker onScore={() => {}} onGameOver={(score) => handleFinishGame('quantum_clicker', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['quantum_clicker']?.highScore || 0} />}
-              {activeGameId === 'catch' && <ColorCatch onScore={() => {}} onGameOver={(score) => handleFinishGame('catch', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['catch']?.highScore || 0} />}
-              {activeGameId === 'invaders' && <NeonInvaders onScore={() => {}} onGameOver={(score) => handleFinishGame('invaders', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['invaders']?.highScore || 0} />}
-              {activeGameId === 'runner' && <NeonRunner onScore={() => {}} onGameOver={(score) => handleFinishGame('runner', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['runner']?.highScore || 0} />}
-              {activeGameId === 'gravity' && <GravityOrb onScore={() => {}} onGameOver={(score) => handleFinishGame('gravity', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['gravity']?.highScore || 0} />}
-              {activeGameId === 'asteroid' && <AsteroidBlaster onScoreUpdate={() => {}} onGameOver={(score) => handleFinishGame('asteroid', score)} highScore={state.stats['asteroid']?.highScore || 0} />}
-              {activeGameId === 'meteor' && <MeteorStorm onScore={() => {}} onGameOver={(score) => handleFinishGame('meteor', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['meteor']?.highScore || 0} />}
-              {activeGameId === 'pinball' && <NeonPinball onScore={() => {}} onGameOver={(score) => handleFinishGame('pinball', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['pinball']?.highScore || 0} />}
-              {activeGameId === 'rhythm' && <CyberRhythm onScore={() => {}} onGameOver={(score) => handleFinishGame('rhythm', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['rhythm']?.highScore || 0} />}
-              {activeGameId === 'galaga' && <GalagaShooter onScoreUpdate={() => {}} onGameOver={(score) => handleFinishGame('galaga', score)} highScore={state.stats['galaga']?.highScore || 0} />}
-              {activeGameId === 'highway' && <CyberHighway onScore={() => {}} onGameOver={(score) => handleFinishGame('highway', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['highway']?.highScore || 0} />}
-              {activeGameId === 'lock' && <CyberLock onScore={() => {}} onGameOver={(score) => handleFinishGame('lock', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['lock']?.highScore || 0} />}
-              {activeGameId === 'laserdodge' && <LaserDodge onScore={() => {}} onGameOver={(score) => handleFinishGame('laserdodge', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['laserdodge']?.highScore || 0} />}
-              {activeGameId === 'codebreaker' && <MatrixCodeBreaker onScore={() => {}} onGameOver={(score) => handleFinishGame('codebreaker', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['codebreaker']?.highScore || 0} />}
-              {activeGameId === 'geometry' && <GeometryJump onScoreUpdate={() => {}} onGameOver={(score) => handleFinishGame('geometry', score)} highScore={state.stats['geometry']?.highScore || 0} />}
-              {activeGameId === '2048' && <Neon2048 onScore={() => {}} onGameOver={(score) => handleFinishGame('2048', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['2048']?.highScore || 0} />}
-              {activeGameId === 'drift' && <CyberDrift onScore={() => {}} onGameOver={(score) => handleFinishGame('drift', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['drift']?.highScore || 0} />}
-              {activeGameId === 'airhockey' && <NeonAirHockey onScore={() => {}} onGameOver={(score) => handleFinishGame('airhockey', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['airhockey']?.highScore || 0} />}
-              {activeGameId === 'defender' && <CyberDefender onScore={() => {}} onGameOver={(score) => handleFinishGame('defender', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['defender']?.highScore || 0} />}
-              {activeGameId === 'dino_dash' && <JurassicDinoDash onScore={() => {}} onGameOver={(score) => handleFinishGame('dino_dash', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['dino_dash']?.highScore || 0} />}
-              {activeGameId === 'pinball_jurassic' && <JurassicPinball onScore={() => {}} onGameOver={(score) => handleFinishGame('pinball_jurassic', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['pinball_jurassic']?.highScore || 0} />}
-              {activeGameId === 'dino_hunter' && <JurassicDinoHunter onScore={() => {}} onGameOver={(score) => handleFinishGame('dino_hunter', score)} onBack={() => setActiveGameId(null)} highScore={state.stats['dino_hunter']?.highScore || 0} />}
-            </div>
-          </main>
-        ) : (
-          /* CATALOG / GRID OF GAMES */
-          <main className="flex-1 p-6 max-w-7xl mx-auto w-full space-y-6">
-            {/* User Profile Banner & Cosmetic Card */}
-            <UserProfileCard
-              profile={state.profile}
-              rankPoints={state.rankPoints || 0}
-              unlockedAchievementsCount={(state.achievements || []).filter(a => a.isUnlocked).length}
-              onUpdateUsername={(newUsername) => setState(prev => ({ ...prev, profile: { ...prev.profile, username: newUsername } }))}
-              onOpenShop={() => setShowShopModal(true)}
+          {/* Search Box */}
+          <div className="relative min-w-[240px]">
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Rechercher une expérience..."
+              className="w-full pl-10 pr-4 py-2 rounded-2xl bg-[#0d1222] border border-slate-800 text-xs text-white placeholder-slate-500 outline-none focus:border-cyan-400"
             />
+          </div>
+        </div>
 
-            {/* Filter and Search Bar */}
-            <div className="p-4 bg-slate-950/70 backdrop-blur-md rounded-2xl border border-slate-800 flex flex-wrap items-center justify-between gap-4">
-              {/* Categories */}
-              <div className="flex flex-wrap gap-2">
-                {[
-                  { id: 'all', label: 'Tout' },
-                  { id: 'fav', label: 'Favoris ❤️' },
-                  { id: 'clicker', label: 'Clicker' },
-                  { id: 'reflex', label: 'Réflexe' },
-                  { id: 'arcade', label: 'Arcade' },
-                  { id: 'puzzle', label: 'Puzzle' },
-                  { id: 'memory', label: 'Mémoire' },
-                  { id: 'rhythm', label: 'Rythme' }
-                ].map((cat) => (
+        {/* 4. Vertex Experiences Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+          {filteredGames.map((game) => {
+            const stats = state.stats[game.id] || { plays: 0, highScore: 0 };
+            const isFavorite = state.favorites.includes(game.id);
+            const isUnlocked = !game.isPaid || state.profile.unlockedGames?.includes(game.id);
+
+            return (
+              <div
+                key={game.id}
+                className="rounded-3xl border-2 border-slate-800 bg-[#0c1020] hover:border-cyan-400/80 transition-all flex flex-col justify-between overflow-hidden group shadow-xl hover:shadow-[0_0_25px_rgba(6,182,212,0.2)]"
+              >
+                {/* Game Card Illustration Banner */}
+                <div className="relative">
+                  <GameCardIllustration gameId={game.id} className="w-full h-44" />
+
+                  {/* Favorite Heart Button */}
                   <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase cursor-pointer border transition ${
-                      selectedCategory === cat.id
-                        ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.4)]'
-                        : 'bg-slate-900/80 text-slate-300 border-slate-800 hover:text-white'
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleFavorite(game.id);
+                    }}
+                    className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md border transition-all cursor-pointer ${
+                      isFavorite
+                        ? 'bg-rose-500/30 border-rose-400 text-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.6)]'
+                        : 'bg-slate-900/80 border-slate-700 text-slate-400 hover:text-white'
                     }`}
                   >
-                    {cat.label}
+                    <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
                   </button>
-                ))}
-              </div>
 
-              {/* Rarity Filter */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-400">Rareté:</span>
-                <select
-                  value={selectedRarity}
-                  onChange={(e) => setSelectedRarity(e.target.value)}
-                  className="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500 cursor-pointer font-bold"
-                >
-                  <option value="all">Toutes Raretés</option>
-                  <option value="commun">Commun</option>
-                  <option value="rare">Rare</option>
-                  <option value="epique">Épique</option>
-                  <option value="legendaire">Légendaire</option>
-                  <option value="mythique">Mythique</option>
-                  <option value="divin">Divin</option>
-                </select>
-              </div>
-            </div>
+                  {/* Meta Pill (Active players & thumbs up) */}
+                  <div className="absolute bottom-3 left-3 flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-full bg-slate-950/85 backdrop-blur-md text-[10px] font-mono font-bold text-emerald-400 border border-slate-700 flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      {game.activePlayers}
+                    </span>
+                    <span className="px-2.5 py-1 rounded-full bg-slate-950/85 backdrop-blur-md text-[10px] font-mono font-bold text-cyan-300 border border-slate-700">
+                      👍 {game.rating}%
+                    </span>
+                  </div>
+                </div>
 
-            {/* Games Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {filteredGames.map((game) => {
-                const stats = state.stats[game.id] || { plays: 0, highScore: 0 };
-                const isFav = (state.favorites || []).includes(game.id);
-
-                const rarityGlows: Record<CosmeticRarity, string> = {
-                  commun: 'border-slate-800 hover:border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.2)]',
-                  rare: 'border-cyan-600 hover:border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.35)]',
-                  epique: 'border-purple-600 hover:border-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.35)]',
-                  legendaire: 'border-amber-500 hover:border-yellow-400 shadow-[0_0_25px_rgba(245,158,11,0.4)]',
-                  mythique: 'border-fuchsia-500 hover:border-fuchsia-300 shadow-[0_0_30px_rgba(217,70,239,0.5)] animate-pulse',
-                  divin: 'border-rose-400 hover:border-yellow-300 shadow-[0_0_35px_rgba(244,63,94,0.6)] animate-pulse'
-                };
-
-                return (
-                  <div
-                    key={game.id}
-                    className={`p-5 rounded-2xl bg-slate-900/80 backdrop-blur-md border flex flex-col justify-between transition group hover:-translate-y-1 ${
-                      rarityGlows[game.rarity || 'commun']
-                    }`}
-                  >
-                    <div>
-                      <div className="flex justify-between items-start mb-3">
-                        <span className="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-slate-950 border border-slate-800 text-slate-300">
-                          {game.rarity || 'commun'}
-                        </span>
-
-                        <button
-                          onClick={(e) => toggleFavorite(game.id, e)}
-                          className="p-1.5 text-slate-500 hover:text-rose-400 transition cursor-pointer"
-                        >
-                          <Heart size={18} className={isFav ? 'fill-rose-500 text-rose-500' : ''} />
-                        </button>
-                      </div>
-
-                      <h3 className="text-lg font-black text-white group-hover:text-cyan-400 transition mb-1">
-                        {game.frenchName}
-                      </h3>
-                      <p className="text-xs text-slate-400 line-clamp-2 mb-4 font-normal">
-                        {game.description}
-                      </p>
-
-                      <div className="p-2.5 bg-slate-950/80 rounded-xl border border-slate-800/80 text-xs flex justify-between font-bold mb-4">
-                        <span className="text-slate-400">Meilleur Score :</span>
-                        <span className="text-yellow-400">{stats.highScore} PTS</span>
-                      </div>
+                {/* Card Information */}
+                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                  <div>
+                    <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 mb-1">
+                      <span>Créateur : <strong className="text-slate-300">{game.creator}</strong></span>
+                      <span className="text-yellow-400 font-bold">{game.isPaid ? `${game.costVCoins} VC` : 'GRATUIT'}</span>
                     </div>
 
+                    <h3 className="font-black text-white text-base group-hover:text-cyan-300 transition-colors font-mono">
+                      {game.frenchName}
+                    </h3>
+                    <p className="text-xs text-slate-300 mt-1 line-clamp-2 leading-relaxed">
+                      {game.description}
+                    </p>
+                  </div>
+
+                  {/* Highscore & Play Button */}
+                  <div className="pt-3 border-t border-slate-800">
+                    <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 mb-3">
+                      <span>Record : <strong className="text-cyan-300">{stats.highScore.toLocaleString()} pts</strong></span>
+                      <span>Parties : {stats.plays}</span>
+                    </div>
+
+                    {/* Play Button */}
                     <button
-                      onClick={() => { audio.playClick(); setActiveGameId(game.id); }}
-                      className="w-full py-2.5 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs uppercase rounded-xl cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.4)] transition flex items-center justify-center gap-2"
+                      onClick={() => handleTryLaunchGame(game.id)}
+                      className={`w-full py-3 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg font-mono ${
+                        isUnlocked
+                          ? 'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 shadow-[0_0_20px_rgba(34,197,94,0.4)]'
+                          : 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.4)]'
+                      }`}
                     >
-                      <Play size={16} /> Jouer
+                      {isUnlocked ? (
+                        <>
+                          <Play className="w-4 h-4 fill-current" /> JOUER
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="w-4 h-4" /> DÉBLOQUER ({game.costVCoins} VC)
+                        </>
+                      )}
                     </button>
                   </div>
-                );
-              })}
-            </div>
-          </main>
-        )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </main>
+
+      {/* 5. Floating Rounded Bottom Navigation Bar */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-auto max-w-[94vw]">
+        <div className="px-4 py-2.5 rounded-full bg-[#080d1a] border-2 border-cyan-500/50 shadow-[0_4px_30px_rgba(0,0,0,0.9),0_0_25px_rgba(6,182,212,0.35)] flex items-center gap-1 sm:gap-3">
+          <button
+            onClick={() => { audio.playClick(); setActiveGameId(null); }}
+            className="p-2.5 rounded-full hover:bg-cyan-500/20 text-cyan-300 flex flex-col items-center gap-0.5 transition-all cursor-pointer"
+            title="Catalogue de Jeux"
+          >
+            <Gamepad2 className="w-5 h-5" />
+            <span className="text-[9px] font-bold">Jeux</span>
+          </button>
+
+          <button
+            onClick={() => { audio.playClick(); setShowRngModal(true); }}
+            className="p-2.5 rounded-full hover:bg-cyan-500/20 text-cyan-300 flex flex-col items-center gap-0.5 transition-all cursor-pointer"
+            title="Sanctuaire RNG"
+          >
+            <Sparkles className="w-5 h-5" />
+            <span className="text-[9px] font-bold">RNG</span>
+          </button>
+
+          <button
+            onClick={() => { audio.playClick(); setShowTrophyModal(true); }}
+            className="p-2.5 rounded-full hover:bg-yellow-500/20 text-yellow-300 flex flex-col items-center gap-0.5 transition-all cursor-pointer"
+            title="Ligue des Trophées"
+          >
+            <Trophy className="w-5 h-5" />
+            <span className="text-[9px] font-bold">Trophées</span>
+          </button>
+
+          <button
+            onClick={() => { audio.playClick(); setShowRankedModal(true); }}
+            className="p-2.5 rounded-full hover:bg-red-500/20 text-red-400 flex flex-col items-center gap-0.5 transition-all cursor-pointer"
+            title="Mode Classé"
+          >
+            <Flame className="w-5 h-5" />
+            <span className="text-[9px] font-bold">Classé</span>
+          </button>
+
+          <button
+            onClick={() => { audio.playClick(); setShowPassModal(true); }}
+            className="p-2.5 rounded-full hover:bg-purple-500/20 text-purple-300 flex flex-col items-center gap-0.5 transition-all cursor-pointer"
+            title="Pass Arcade"
+          >
+            <Crown className="w-5 h-5" />
+            <span className="text-[9px] font-bold">Pass</span>
+          </button>
+
+          <button
+            onClick={() => { audio.playClick(); setShowQuestsModal(true); }}
+            className="p-2.5 rounded-full hover:bg-emerald-500/20 text-emerald-300 flex flex-col items-center gap-0.5 transition-all cursor-pointer"
+            title="Missions"
+          >
+            <Target className="w-5 h-5" />
+            <span className="text-[9px] font-bold">Missions</span>
+          </button>
+
+          <button
+            onClick={() => { audio.playClick(); setShowShopModal(true); }}
+            className="p-2.5 rounded-full hover:bg-rose-500/20 text-rose-300 flex flex-col items-center gap-0.5 transition-all cursor-pointer"
+            title="Boutique"
+          >
+            <ShoppingBag className="w-5 h-5" />
+            <span className="text-[9px] font-bold">Boutique</span>
+          </button>
+
+          <button
+            onClick={() => { audio.playClick(); setShowAchievementsModal(true); }}
+            className="p-2.5 rounded-full hover:bg-yellow-500/20 text-yellow-300 flex flex-col items-center gap-0.5 transition-all cursor-pointer"
+            title="Succès (200)"
+          >
+            <Award className="w-5 h-5" />
+            <span className="text-[9px] font-bold">200 Succès</span>
+          </button>
+        </div>
       </div>
 
-      {/* --- MODALS INTEGRATION --- */}
-      <QuestsAndFlashModal
-        isOpen={showQuestsModal}
-        onClose={() => setShowQuestsModal(false)}
-        quests={state.quests || INITIAL_QUESTS}
-        userPixels={state.profile.totalPixels}
-        onClaimQuest={handleClaimQuest}
-        onResetQuests={handleResetQuests}
+      {/* 6. Active Game Overlay Cabinet */}
+      {activeGameId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-slate-950/95 backdrop-blur-xl overflow-y-auto">
+          <div className="relative w-full max-w-5xl my-auto py-2">
+            {activeGameId === 'quantum_obby' && (
+              <QuantumObby
+                onFinish={(sc, b) => handleFinishGame('quantum_obby', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'aetheria_void' && (
+              <AetheriaVoid
+                onFinish={(sc, b) => handleFinishGame('aetheria_void', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'titan_core' && (
+              <TitanCore
+                onFinish={(sc, b) => handleFinishGame('titan_core', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'cyber_heist' && (
+              <CyberHeist
+                onFinish={(sc, b) => handleFinishGame('cyber_heist', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'nebula_strike' && (
+              <NebulaStrike
+                onFinish={(sc, b) => handleFinishGame('nebula_strike', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'chrono_shift' && (
+              <ChronoShift
+                onFinish={(sc, b) => handleFinishGame('chrono_shift', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'robo_tycoon' && (
+              <RoboTycoon
+                onFinish={(sc, b) => handleFinishGame('robo_tycoon', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'shadow_dungeon' && (
+              <ShadowDungeon
+                onFinish={(sc, b) => handleFinishGame('shadow_dungeon', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'hyper_drift' && (
+              <HyperDrift
+                onFinish={(sc, b) => handleFinishGame('hyper_drift', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'pixelforge_craft' && (
+              <PixelForge
+                onFinish={(sc, b) => handleFinishGame('pixelforge_craft', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'gravity_surge' && (
+              <GravitySurge
+                onFinish={(sc, b) => handleFinishGame('gravity_surge', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'synth_rider' && (
+              <SynthRider
+                onFinish={(sc, b) => handleFinishGame('synth_rider', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'biohazard_defense' && (
+              <BioHazardDefense
+                onFinish={(sc, b) => handleFinishGame('biohazard_defense', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'skybound_wings' && (
+              <SkyboundWings
+                onFinish={(sc, b) => handleFinishGame('skybound_wings', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'glitch_hunter' && (
+              <GlitchHunter
+                onFinish={(sc, b) => handleFinishGame('glitch_hunter', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+
+            {/* Mobile / Touch Ergonomic Controls */}
+            <MobileGameControls
+              gameId={activeGameId}
+              onExit={() => setActiveGameId(null)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* 7. Paid Game Unlock Modal */}
+      {paidGamePrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+          <div className="w-full max-w-md p-6 rounded-3xl bg-[#0e1424] border-2 border-amber-500 shadow-2xl text-center space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-400 mx-auto flex items-center justify-center text-3xl">
+              💎
+            </div>
+            <h3 className="text-xl font-bold text-white font-mono">
+              ACCÈS VIP REQUIS
+            </h3>
+            <p className="text-xs text-slate-300">
+              Cette expérience arcade de prestige nécessite un pass VIP de{' '}
+              <strong className="text-yellow-400">
+                {GAMES_LIST.find(g => g.id === paidGamePrompt)?.costVCoins} V-Coins
+              </strong>{' '}
+              pour un déblocage permanent !
+            </p>
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setPaidGamePrompt(null)}
+                className="flex-1 py-2.5 rounded-xl bg-slate-800 text-white font-bold text-xs uppercase cursor-pointer"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={() => handleUnlockPaidGame(paidGamePrompt)}
+                disabled={currentVCoins < (GAMES_LIST.find(g => g.id === paidGamePrompt)?.costVCoins || 0)}
+                className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 disabled:opacity-40 text-slate-950 font-black text-xs uppercase cursor-pointer"
+              >
+                Débloquer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 8. Modals System */}
+      <RngUniverseModal
+        isOpen={showRngModal}
+        onClose={() => setShowRngModal(false)}
+        inventory={state.rngInventory}
+        onInventoryUpdate={(newInv, vc) => {
+          setState(prev => ({
+            ...prev,
+            rngInventory: newInv,
+            rngTotalRolls: prev.rngTotalRolls + 1,
+            profile: { ...prev.profile, totalVCoins: prev.profile.totalVCoins + vc }
+          }));
+        }}
+        tradeRequests={state.activeTradeRequests}
+        onAcceptTrade={(tradeId) => {
+          const trade = state.activeTradeRequests.find(t => t.id === tradeId);
+          if (!trade) return;
+          setState(prev => ({
+            ...prev,
+            activeTradeRequests: prev.activeTradeRequests.filter(t => t.id !== tradeId),
+            completedTradesCount: prev.completedTradesCount + 1,
+            profile: { ...prev.profile, totalVCoins: prev.profile.totalVCoins + trade.offeredVCoins }
+          }));
+          notify(`Échange accepté avec ${trade.traderName} ! (+${trade.offeredVCoins} VC)`);
+        }}
+        totalRolls={state.rngTotalRolls}
+        userVCoins={currentVCoins}
       />
 
-      <SettingsModal
-        isOpen={showSettingsModal}
-        onClose={() => setShowSettingsModal(false)}
-        settings={state.settings || { sfxEnabled: true, musicEnabled: true, particleDensity: 'normal', crtFilter: false, autoSave: true }}
-        username={state.profile.username}
-        onUpdateUsername={(newUsername) => setState(prev => ({ ...prev, profile: { ...prev.profile, username: newUsername } }))}
-        onUpdateSettings={(newSet) => setState(prev => ({ ...prev, settings: { ...prev.settings!, ...newSet } }))}
-        onResetData={() => {
-          localStorage.removeItem('vertex_arcades_v2_state');
-          window.location.reload();
-        }}
-        onExportData={() => {
-          const blob = new Blob([JSON.stringify(state)], { type: 'application/json' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'vertex_arcades_backup.json';
-          a.click();
-        }}
-        onImportData={() => {
-          const input = document.createElement('input');
-          input.type = 'file';
-          input.onchange = (e: any) => {
-            const file = e.target.files[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = (evt) => {
-                try {
-                  const imported = JSON.parse(evt.target?.result as string);
-                  setState(imported);
-                  setShowSettingsModal(false);
-                } catch (err) {
-                  alert('Fichier invalide');
-                }
-              };
-              reader.readAsText(file);
-            }
-          };
-          input.click();
+      <ApexTrophyRoadModal
+        isOpen={showTrophyModal}
+        onClose={() => setShowTrophyModal(false)}
+        totalTrophies={state.totalTrophies}
+        claimedMilestones={state.claimedTrophyRoadRewards}
+        onClaimMilestone={(nodeReq, label, type, val) => {
+          setState(prev => {
+            const nextClaimed = [...prev.claimedTrophyRoadRewards, nodeReq];
+            let nextVC = prev.profile.totalVCoins;
+            if (type === 'vcoins') nextVC += Number(val);
+            return {
+              ...prev,
+              claimedTrophyRoadRewards: nextClaimed,
+              profile: { ...prev.profile, totalVCoins: nextVC }
+            };
+          });
+          notify(`Palier débloqué : ${label} !`);
         }}
       />
 
-      <RankedSeasonModal
+      <RankedV3Modal
         isOpen={showRankedModal}
         onClose={() => setShowRankedModal(false)}
-        rankPoints={state.rankPoints || 0}
-        rankedScores={state.rankedScores || { sprintReflex: 0, laserBlitz: 0, quantumTarget: 0 }}
-        proPass={state.proPass || { level: 1, xp: 0, isPro: false, claimedFreeRewards: [], claimedProRewards: [] }}
-        onPlayRankedGame={(gameType) => {
+        rankPoints={state.rankPoints}
+        onLaunchRankedGame={(gameId) => {
           setShowRankedModal(false);
-          const mappedId = gameType === 'sprintReflex' ? 'reflex' : gameType === 'laserBlitz' ? 'laserdodge' : 'target';
-          setActiveGameId(mappedId);
-        }}
-        onClaimProPassReward={(lvl, isPro) => {
-          setState(prev => {
-            const currentPro = prev.proPass || { level: 1, xp: 0, isPro: false, claimedFreeRewards: [], claimedProRewards: [] };
-            const claimed = isPro ? currentPro.claimedProRewards : currentPro.claimedFreeRewards;
-            if (claimed.includes(lvl)) return prev;
-
-            const updated = isPro ? [...currentPro.claimedProRewards, lvl] : [...currentPro.claimedFreeRewards, lvl];
-            return {
-              ...prev,
-              proPass: {
-                ...currentPro,
-                claimedFreeRewards: isPro ? currentPro.claimedFreeRewards : updated,
-                claimedProRewards: isPro ? updated : currentPro.claimedProRewards
-              }
-            };
-          });
+          setActiveGameId(gameId);
         }}
       />
 
-      <ShopBoutiqueModal
-        isOpen={showShopModal}
-        onClose={() => setShowShopModal(false)}
+      <ProfileCreatorModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
         profile={state.profile}
-        onBuySkin={(skinId, cost) => {
-          if (state.profile.totalPixels < cost) return;
-          audio.playWin();
+        onSaveProfile={(updated) => {
+          setState(prev => ({ ...prev, profile: updated }));
+          notify(`Profil de ${updated.username} mis à jour avec succès !`);
+        }}
+        totalTrophies={state.totalTrophies}
+        rankPoints={state.rankPoints}
+      />
+
+      <QuestsV3Modal
+        isOpen={showQuestsModal}
+        onClose={() => setShowQuestsModal(false)}
+        quests={state.quests}
+        onClaimQuest={(qId) => {
+          const q = state.quests.find(quest => quest.id === qId);
+          if (!q) return;
           setState(prev => ({
             ...prev,
-            profile: {
-              ...prev.profile,
-              totalPixels: prev.profile.totalPixels - cost,
-              unlockedSkins: [...(prev.profile.unlockedSkins || []), skinId]
-            }
+            profile: { ...prev.profile, totalVCoins: prev.profile.totalVCoins + q.rewardVCoins },
+            quests: prev.quests.map(qst => qst.id === qId ? { ...qst, isClaimed: true } : qst)
           }));
+          notify(`Quête complétée : +${q.rewardVCoins} V-Coins !`);
         }}
-        onEquipSkin={(skinId) => {
-          audio.playClick();
-          setState(prev => ({ ...prev, profile: { ...prev.profile, activeSkin: skinId } }));
-        }}
-        onBuyAura={(auraId, cost) => {
-          if (state.profile.totalPixels < cost) return;
-          audio.playWin();
-          setState(prev => ({
-            ...prev,
-            profile: {
-              ...prev.profile,
-              totalPixels: prev.profile.totalPixels - cost,
-              unlockedAuras: [...(prev.profile.unlockedAuras || []), auraId]
-            }
-          }));
-        }}
-        onEquipAura={(auraId) => {
-          audio.playClick();
-          setState(prev => ({ ...prev, profile: { ...prev.profile, activeAura: auraId } }));
-        }}
-        onBuyBanner={(bannerId, cost) => {
-          if (state.profile.totalPixels < cost) return;
-          audio.playWin();
-          setState(prev => ({
-            ...prev,
-            profile: {
-              ...prev.profile,
-              totalPixels: prev.profile.totalPixels - cost,
-              unlockedBanners: [...(prev.profile.unlockedBanners || []), bannerId]
-            }
-          }));
-        }}
-        onEquipBanner={(bannerId) => {
-          audio.playClick();
-          setState(prev => ({ ...prev, profile: { ...prev.profile, activeBanner: bannerId } }));
-        }}
-        onBuyTitle={(title, cost) => {
-          if (state.profile.totalPixels < cost) return;
-          audio.playWin();
-          setState(prev => ({
-            ...prev,
-            profile: {
-              ...prev.profile,
-              totalPixels: prev.profile.totalPixels - cost,
-              unlockedTitles: [...(prev.profile.unlockedTitles || []), title]
-            }
-          }));
-        }}
-        onEquipTitle={(title) => {
-          audio.playClick();
-          setState(prev => ({ ...prev, profile: { ...prev.profile, title } }));
-        }}
-        onBuyAvatarIcon={(iconName, cost) => {
-          if (state.profile.totalPixels < cost) return;
-          audio.playWin();
-          setState(prev => ({
-            ...prev,
-            profile: {
-              ...prev.profile,
-              totalPixels: prev.profile.totalPixels - cost,
-              unlockedAvatarIcons: [...(prev.profile.unlockedAvatarIcons || []), iconName]
-            }
-          }));
-        }}
-        onEquipAvatarIcon={(iconName) => {
-          audio.playClick();
-          setState(prev => ({ ...prev, profile: { ...prev.profile, avatarIcon: iconName } }));
-        }}
-        onBuyAvatarColor={(colorHex, cost) => {
-          if (state.profile.totalPixels < cost) return;
-          audio.playWin();
-          setState(prev => ({
-            ...prev,
-            profile: {
-              ...prev.profile,
-              totalPixels: prev.profile.totalPixels - cost,
-              unlockedColors: [...(prev.profile.unlockedColors || []), colorHex]
-            }
-          }));
-        }}
-        onEquipAvatarColor={(colorHex) => {
-          audio.playClick();
-          setState(prev => ({ ...prev, profile: { ...prev.profile, avatarColor: colorHex } }));
-        }}
-        onBuyFrame={(frameId, cost) => {
-          if (state.profile.totalPixels < cost) return;
-          audio.playWin();
-          setState(prev => ({
-            ...prev,
-            profile: {
-              ...prev.profile,
-              totalPixels: prev.profile.totalPixels - cost,
-              unlockedFrames: [...(prev.profile.unlockedFrames || []), frameId]
-            }
-          }));
-        }}
-        onEquipFrame={(frameId) => {
-          audio.playClick();
-          setState(prev => ({ ...prev, profile: { ...prev.profile, activeFrame: frameId } }));
-        }}
-        onBuyFx={(fxId, cost) => {
-          if (state.profile.totalPixels < cost) return;
-          audio.playWin();
-          setState(prev => ({
-            ...prev,
-            profile: {
-              ...prev.profile,
-              totalPixels: prev.profile.totalPixels - cost,
-              unlockedFx: [...(prev.profile.unlockedFx || []), fxId]
-            }
-          }));
-        }}
-        onEquipFx={(fxId) => {
-          audio.playClick();
-          setState(prev => ({ ...prev, profile: { ...prev.profile, activeFx: fxId } }));
+        onLaunchGame={(gId) => {
+          setShowQuestsModal(false);
+          handleTryLaunchGame(gId);
         }}
       />
 
-      <PrestigeModal
-        isOpen={showPrestigeModal}
-        onClose={() => setShowPrestigeModal(false)}
-        profile={state.profile}
-        onPerformPrestige={() => {
-          const currentP = state.profile.prestigeLevel || 0;
-          const req = (currentP + 1) * 5000;
-          if (state.profile.totalPixels < req) return;
-          audio.playWin();
+      <MetaverseForgeModal
+        isOpen={showForgeModal}
+        onClose={() => setShowForgeModal(false)}
+        worldBoss={state.worldBoss}
+        onDealBossDamage={(dmg) => {
+          setState(prev => ({
+            ...prev,
+            profile: { ...prev.profile, totalVCoins: Math.max(0, prev.profile.totalVCoins - 30) },
+            worldBoss: {
+              ...prev.worldBoss,
+              currentHp: Math.max(0, prev.worldBoss.currentHp - dmg),
+              playerTotalDamage: prev.worldBoss.playerTotalDamage + dmg
+            }
+          }));
+          notify(`Frappe directe au Boss : -${dmg} PV !`);
+        }}
+        inventory={state.rngInventory}
+        onFuseArtifact={() => {
           setState(prev => ({
             ...prev,
             profile: {
               ...prev.profile,
-              prestigeLevel: currentP + 1,
-              totalPixels: prev.profile.totalPixels - req + 1000
+              luckMultiplier: 2,
+              totalVCoins: prev.profile.totalVCoins + 500
             }
           }));
-          setShowPrestigeModal(false);
-          setActiveNotification(`🌀 PRESTIGE ${currentP + 1} DÉBLOQUÉ ! Multiplicateur permanent actif !`);
-          setTimeout(() => setActiveNotification(null), 4500);
+          notify(`Fusion réussie : Relique Stellaire Forgée (+2x Chance & +500 VC) !`);
         }}
+        userVCoins={currentVCoins}
       />
 
-      {/* Wheel of fortune */}
-      <WheelOfFortuneModal
-        show={showWheelModal}
-        onClose={() => setShowWheelModal(false)}
-        totalPixels={state.profile.totalPixels}
-        onReward={(reward) => {
-          if (reward.type === 'px') {
-            const amount = typeof reward.val === 'number' ? reward.val : parseInt(reward.val, 10) || 100;
-            setState(prev => ({
-              ...prev,
-              profile: { ...prev.profile, totalPixels: prev.profile.totalPixels + amount }
-            }));
-            setActiveNotification(`🎰 ROUE : GAGNÉ +${amount} PX !`);
-          } else if (reward.type === 'pass') {
-            setState(prev => {
-              const pass = prev.arcadePass || { level: 1, xp: 0, isPremium: false, claimedFreeRewards: [], claimedPremiumRewards: [] };
-              return {
-                ...prev,
-                arcadePass: { ...pass, level: pass.level + 1 }
-              };
-            });
-            setActiveNotification(`🎰 ROUE : +1 NIVEAU DE PASS ARCADE !`);
-          } else if (reward.type === 'title') {
-            const titleName = String(reward.val);
-            setState(prev => ({
-              ...prev,
-              profile: {
-                ...prev.profile,
-                title: titleName,
-                unlockedTitles: [...(prev.profile.unlockedTitles || []), titleName]
-              }
-            }));
-            setActiveNotification(`🎰 ROUE : TITRE ÉQUIPÉ : ${titleName} !`);
-          }
-          setTimeout(() => setActiveNotification(null), 4000);
-        }}
-      />
-
-      {/* Loot Boxes */}
-      <LootBoxesModal
-        show={showBoxesModal}
-        onClose={() => setShowBoxesModal(false)}
-        totalPixels={state.profile.totalPixels}
-        onOpenBox={(cost, boxName) => {
-          if (state.profile.totalPixels < cost) return;
-          const boxTier = { cost, minWin: Math.floor(cost * 0.8), maxWin: Math.floor(cost * 2.5) };
-          const win = Math.floor(Math.random() * (boxTier.maxWin - boxTier.minWin + 1)) + boxTier.minWin;
-          setState(prev => ({
-            ...prev,
-            profile: { ...prev.profile, totalPixels: prev.profile.totalPixels - cost + win }
-          }));
-          setActiveNotification(`📦 ${boxName} OUVERT : +${win} PX RÉCOLTÉS !`);
-          setTimeout(() => setActiveNotification(null), 4000);
-        }}
-      />
-
-      {/* Season 3 Pass */}
-      <ArcadePassModal
-        show={showPassModal}
-        onClose={() => setShowPassModal(false)}
-        arcadePass={state.arcadePass || { level: 1, xp: 0, isPremium: false, claimedFreeRewards: [], claimedPremiumRewards: [] }}
-        totalPixels={state.profile.totalPixels}
-        onUnlockPremium={(cost) => {
-          if (state.profile.totalPixels < cost) return;
-          setState(prev => ({
-            ...prev,
-            profile: { ...prev.profile, totalPixels: prev.profile.totalPixels - cost },
-            arcadePass: { ...(prev.arcadePass || { level: 1, xp: 0, isPremium: false, claimedFreeRewards: [], claimedPremiumRewards: [] }), isPremium: true }
-          }));
-          setActiveNotification(`⭐ PASS PREMIUM DÉBLOQUÉ !`);
-          setTimeout(() => setActiveNotification(null), 3500);
-        }}
-        onClaimReward={(lvl, isPrem, reward) => {
-          setState(prev => {
-            const currentPass = prev.arcadePass || { level: 1, xp: 0, isPremium: false, claimedFreeRewards: [], claimedPremiumRewards: [] };
-            const claimed = isPrem ? currentPass.claimedPremiumRewards : currentPass.claimedFreeRewards;
-            if (claimed.includes(lvl)) return prev;
-
-            const updated = isPrem ? [...currentPass.claimedPremiumRewards, lvl] : [...currentPass.claimedFreeRewards, lvl];
-            let addedPx = 0;
-            if (reward && reward.type === 'pixels') addedPx = typeof reward.val === 'number' ? reward.val : 100;
-
-            return {
-              ...prev,
-              profile: { ...prev.profile, totalPixels: prev.profile.totalPixels + addedPx },
-              arcadePass: {
-                ...currentPass,
-                claimedFreeRewards: isPrem ? currentPass.claimedFreeRewards : updated,
-                claimedPremiumRewards: isPrem ? updated : currentPass.claimedPremiumRewards
-              }
-            };
-          });
-          setActiveNotification(`🎁 RÉCOMPENSE DU PASS (Niv. ${lvl}) RÉCLAMÉE !`);
-          setTimeout(() => setActiveNotification(null), 3500);
-        }}
-      />
-
-      <AchievementsModal
+      <AchievementsV3Modal
         isOpen={showAchievementsModal}
         onClose={() => setShowAchievementsModal(false)}
-        achievements={state.achievements || INITIAL_ACHIEVEMENTS}
-        userPixels={state.profile.totalPixels}
-        onClaimAchievement={(achId, rewardPx) => {
-          audio.playWin();
-          setState(prev => ({
-            ...prev,
-            profile: {
-              ...prev.profile,
-              totalPixels: prev.profile.totalPixels + rewardPx
-            },
-            achievements: (prev.achievements || INITIAL_ACHIEVEMENTS).map(a =>
-              a.id === achId ? { ...a, isUnlocked: true } : a
-            )
-          }));
+        achievements={state.achievements}
+      />
+
+      <ShopV3Modal
+        isOpen={showShopModal}
+        onClose={() => setShowShopModal(false)}
+        userVCoins={currentVCoins}
+        profile={state.profile}
+        onBuyAndEquip={(item) => {
+          setState(prev => {
+            let nextProfile = { ...prev.profile };
+            if (!nextProfile.unlockedHats?.includes(item.id) && item.category === 'hat') {
+              nextProfile.unlockedHats = [...(nextProfile.unlockedHats || []), item.id];
+              nextProfile.activeHat = item.id;
+              nextProfile.totalVCoins -= item.costVCoins;
+            } else if (!nextProfile.unlockedAuras?.includes(item.id) && item.category === 'aura') {
+              nextProfile.unlockedAuras = [...(nextProfile.unlockedAuras || []), item.id];
+              nextProfile.activeAura = item.id;
+              nextProfile.totalVCoins -= item.costVCoins;
+            } else if (!nextProfile.unlockedTitles?.includes(item.name) && item.category === 'title') {
+              nextProfile.unlockedTitles = [...(nextProfile.unlockedTitles || []), item.name];
+              nextProfile.title = item.name;
+              nextProfile.totalVCoins -= item.costVCoins;
+            }
+            return { ...prev, profile: nextProfile };
+          });
+          notify(`Cosmétique équipé : ${item.name} !`);
         }}
       />
 
-      {/* Cyber Companions V2.1 Modal */}
-      <CyberCompanionsModal
-        show={showCompanionsModal}
-        onClose={() => setShowCompanionsModal(false)}
-        profile={state.profile}
-        equippedCompanionId={state.profile.equippedCompanionId || 'comp_panda'}
-        unlockedCompanionIds={state.profile.unlockedCompanionIds || ['comp_panda']}
-        companionLevels={state.profile.companionLevels || { comp_panda: 1 }}
-        onOpenBossRaid={() => setShowBossRaidModal(true)}
-        onUnlockCompanion={(companionId, cost) => {
-          if (state.profile.totalPixels < cost) return;
-          audio.playWin();
-          setState(prev => ({
-            ...prev,
-            profile: {
-              ...prev.profile,
-              totalPixels: prev.profile.totalPixels - cost,
-              unlockedCompanionIds: [...(prev.profile.unlockedCompanionIds || ['comp_panda']), companionId],
-              companionLevels: { ...(prev.profile.companionLevels || { comp_panda: 1 }), [companionId]: 1 }
-            }
-          }));
-          setActiveNotification(`🐉 NOUVEAU COMPAGNON DÉBLOQUÉ !`);
-          setTimeout(() => setActiveNotification(null), 3000);
+      <SettingsV3Modal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+        settings={state.settings}
+        onUpdateSettings={(newSet) => setState(prev => ({ ...prev, settings: newSet }))}
+        gamepadConnected={gamepadState.connected}
+        gamepadName={gamepadState.id}
+        onResetData={() => {
+          localStorage.removeItem('vertex_arcades_v3_state');
+          window.location.reload();
         }}
-        onEquipCompanion={(companionId) => {
-          audio.playClick();
-          setState(prev => ({
-            ...prev,
-            profile: {
-              ...prev.profile,
-              equippedCompanionId: companionId
-            }
-          }));
-          setActiveNotification(`⚡ COMPAGNON ÉQUIPÉ !`);
-          setTimeout(() => setActiveNotification(null), 2500);
-        }}
-        onFeedCompanion={(companionId, foodCost) => {
-          if (state.profile.totalPixels < foodCost) return;
-          audio.playWin();
+      />
+
+      <ArcadePassV3Modal
+        isOpen={showPassModal}
+        onClose={() => setShowPassModal(false)}
+        passState={state.arcadePass}
+        onClaimReward={(lvl, isPrem, label, type, val) => {
           setState(prev => {
-            const currentLevels = prev.profile.companionLevels || { comp_panda: 1 };
-            const curLvl = currentLevels[companionId] || 1;
+            const nextFreeClaimed = !isPrem ? [...prev.arcadePass.claimedFreeRewards, lvl] : prev.arcadePass.claimedFreeRewards;
+            const nextPremClaimed = isPrem ? [...prev.arcadePass.claimedPremiumRewards, lvl] : prev.arcadePass.claimedPremiumRewards;
+            let nextVC = prev.profile.totalVCoins;
+            if (type === 'vcoins') nextVC += Number(val);
             return {
               ...prev,
-              profile: {
-                ...prev.profile,
-                totalPixels: prev.profile.totalPixels - foodCost,
-                companionLevels: {
-                  ...currentLevels,
-                  [companionId]: curLvl + 1
-                }
+              profile: { ...prev.profile, totalVCoins: nextVC },
+              arcadePass: {
+                ...prev.arcadePass,
+                claimedFreeRewards: nextFreeClaimed,
+                claimedPremiumRewards: nextPremClaimed
               }
             };
           });
-          setActiveNotification(`🍲 COMPAGNON NOURRI & NIVEAU SUPÉRIEUR !`);
-          setTimeout(() => setActiveNotification(null), 3000);
+          notify(`Récompense du Pass récupérée : ${label} !`);
         }}
-      />
-
-      {/* Boss Raid Arena V2.1 Modal */}
-      <BossRaidArenaModal
-        show={showBossRaidModal}
-        onClose={() => setShowBossRaidModal(false)}
-        profile={state.profile}
-        equippedCompanionId={state.profile.equippedCompanionId || 'comp_panda'}
-        onVictoryReward={(rewardPx) => {
-          audio.playWin();
+        onUpgradeToPremium={() => {
           setState(prev => ({
             ...prev,
-            profile: {
-              ...prev.profile,
-              totalPixels: prev.profile.totalPixels + rewardPx
-            }
+            profile: { ...prev.profile, totalVCoins: prev.profile.totalVCoins - 1000 },
+            arcadePass: { ...prev.arcadePass, isPremium: true }
           }));
-          setActiveNotification(`⚔️ VICTOIRE BOSS RAID : +${rewardPx} PX RÉCOLTÉS !`);
-          setTimeout(() => setActiveNotification(null), 4000);
+          notify(`Pass Arcade VIP débloqué avec succès ! 👑`);
         }}
-      />
-
-      {/* Friends Modal V2.2 */}
-      <FriendsModal
-        show={showFriendsModal}
-        onClose={() => setShowFriendsModal(false)}
-        friends={friendsList}
-        userPixels={state.profile.totalPixels}
-        onAddFriend={(friend) => {
-          setFriendsList(prev => [...prev, friend]);
-          setActiveNotification(`👥 NOUVEL AMI AJOUTÉ : ${friend.username} !`);
-          setTimeout(() => setActiveNotification(null), 3000);
-        }}
-        onRemoveFriend={(friendId) => {
-          setFriendsList(prev => prev.filter(f => f.id !== friendId));
-          setActiveNotification(`Ami retiré.`);
-          setTimeout(() => setActiveNotification(null), 2000);
-        }}
-        onChallengeFriend={(friend) => {
-          setSelectedDuelOpponent(friend);
-          setShowFriendsModal(false);
-          setShowDuelModal(true);
-        }}
-        onOpenChat={(friend) => {
-          setShowFriendsModal(false);
-          setShowChatModal(true);
-        }}
-        onSendGift={(friendId, giftPx) => {
-          if (state.profile.totalPixels < giftPx) return;
-          audio.playWin();
-          setState(prev => ({
-            ...prev,
-            profile: { ...prev.profile, totalPixels: prev.profile.totalPixels - giftPx }
-          }));
-          setActiveNotification(`🎁 CADEAU DE ${giftPx} PX ENVOYÉ !`);
-          setTimeout(() => setActiveNotification(null), 3000);
-        }}
-      />
-
-      {/* Arcade Chat Live Modal V2.2 */}
-      <ArcadeChatModal
-        show={showChatModal}
-        onClose={() => setShowChatModal(false)}
-        profile={state.profile}
-        friends={friendsList}
-        messages={chatMessages}
-        onSendMessage={(msg) => {
-          setChatMessages(prev => [...prev, msg]);
-        }}
-        onChallengeUser={(targetUsername, targetId) => {
-          const friendMatch = friendsList.find(f => f.id === targetId) || {
-            id: targetId,
-            username: targetUsername,
-            avatarColor: '#06b6d4',
-            avatarIcon: 'Zap',
-            status: 'online',
-            rankPoints: 3500,
-            rankTier: 'diamond',
-            totalPixels: 25000,
-            duelWins: 10,
-            duelLosses: 5
-          };
-          setSelectedDuelOpponent(friendMatch);
-          setShowChatModal(false);
-          setShowDuelModal(true);
-        }}
-      />
-
-      {/* Duel Arena 1v1 Modal V2.2 */}
-      <DuelArenaModal
-        show={showDuelModal}
-        onClose={() => {
-          setShowDuelModal(false);
-          setSelectedDuelOpponent(null);
-        }}
-        profile={state.profile}
-        friends={friendsList}
-        duelHistory={duelHistory}
-        initialOpponent={selectedDuelOpponent}
-        onStartDuelGame={(gameId, opp, wager) => {
-          setShowDuelModal(false);
-          setActiveGameId(gameId);
-          setActiveNotification(`⚔️ DUEL 1v1 LANCÉ SUR ${gameId.toUpperCase()} ! MISE : ${wager} PX !`);
-          setTimeout(() => setActiveNotification(null), 4000);
-        }}
-        onClaimDuelWin={(wager, oppName, gameTitle) => {
-          audio.playWin();
-          setState(prev => ({
-            ...prev,
-            profile: {
-              ...prev.profile,
-              totalPixels: prev.profile.totalPixels + wager,
-              duelWins: (prev.profile.duelWins || 0) + 1,
-              duelStreak: (prev.profile.duelStreak || 0) + 1
-            }
-          }));
-          setDuelHistory(prev => [
-            {
-              id: `duel_${Date.now()}`,
-              challengerId: 'user',
-              challengerName: state.profile.username,
-              challengedId: selectedDuelOpponent?.id || 'opp',
-              challengedName: oppName,
-              gameId: 'duel',
-              gameName: gameTitle,
-              wagerPx: wager,
-              status: 'completed',
-              winnerId: 'user',
-              timestamp: Date.now()
-            },
-            ...prev
-          ]);
-          setActiveNotification(`🏆 VICTOIRE EN DUEL CONTRE ${oppName} (+${wager * 2} PX) !`);
-          setTimeout(() => setActiveNotification(null), 4500);
-        }}
-        onClaimDuelLoss={(wager, oppName, gameTitle) => {
-          audio.playLoss();
-          setState(prev => ({
-            ...prev,
-            profile: {
-              ...prev.profile,
-              totalPixels: Math.max(0, prev.profile.totalPixels - wager),
-              duelLosses: (prev.profile.duelLosses || 0) + 1,
-              duelStreak: 0
-            }
-          }));
-          setDuelHistory(prev => [
-            {
-              id: `duel_${Date.now()}`,
-              challengerId: 'user',
-              challengerName: state.profile.username,
-              challengedId: selectedDuelOpponent?.id || 'opp',
-              challengedName: oppName,
-              gameId: 'duel',
-              gameName: gameTitle,
-              wagerPx: wager,
-              status: 'completed',
-              winnerId: 'opponent',
-              timestamp: Date.now()
-            },
-            ...prev
-          ]);
-          setActiveNotification(`💀 DÉFAITE EN DUEL CONTRE ${oppName} (-${wager} PX)...`);
-          setTimeout(() => setActiveNotification(null), 4500);
-        }}
+        userVCoins={currentVCoins}
       />
     </div>
   );

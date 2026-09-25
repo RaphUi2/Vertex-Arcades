@@ -1,101 +1,46 @@
+// Vertex Arcades v3.0 TypeScript Definitions
+
 export type CosmeticRarity = 'commun' | 'rare' | 'epique' | 'legendaire' | 'mythique' | 'divin';
 
 export interface AppSettings {
   sfxEnabled: boolean;
   musicEnabled: boolean;
+  sfxVolume: number; // 0 to 100
+  musicVolume: number; // 0 to 100
+  currentTrack: 'chill' | 'synthwave' | 'hyper' | 'neon';
+  graphicsQuality: 'eco' | 'balanced' | 'ultra';
   particleDensity: 'faible' | 'normal' | 'extreme';
-  bgAnimationOverride?: string;
-  crtFilter: boolean;
-  autoSave: boolean;
+  glowEffects: boolean;
   scanlines: boolean;
-  retroGlow: boolean;
-}
-
-export interface Friend {
-  id: string;
-  username: string;
-  avatarColor: string;
-  avatarIcon: string;
-  activeBanner?: string;
-  activeAura?: string;
-  activeFrame?: string;
-  status: 'online' | 'in-game' | 'offline';
-  currentGame?: string;
-  rankPoints: number;
-  rankTier: string;
-  totalPixels: number;
-  duelWins: number;
-  duelLosses: number;
-  isFavorite?: boolean;
-}
-
-export interface ChatMessage {
-  id: string;
-  senderId: string;
-  senderName: string;
-  senderColor: string;
-  senderIcon: string;
-  senderRank?: string;
-  message: string;
-  timestamp: number;
-  channel: 'general' | 'jurassic' | 'duels' | 'dm';
-  recipientId?: string;
-  isSystem?: boolean;
-  scoreFlex?: { gameName: string; score: number };
-}
-
-export interface DuelChallenge {
-  id: string;
-  challengerId: string;
-  challengerName: string;
-  challengerAvatar: { color: string; icon: string };
-  challengedId: string;
-  challengedName: string;
-  challengedAvatar: { color: string; icon: string };
-  gameId: string;
-  gameName: string;
-  wagerPx: number;
-  status: 'pending' | 'active' | 'completed' | 'declined';
-  challengerScore?: number;
-  challengedScore?: number;
-  winnerId?: string;
-  timestamp: number;
+  hapticVibration: boolean;
+  showFps: boolean;
+  controllerLayout: 'xbox' | 'playstation';
+  mobileControlsEnabled: boolean;
 }
 
 export interface UserProfile {
   username: string;
   avatarColor: string;
-  totalPixels: number;
-  amberTokens?: number;
-  unlockedSkins: string[];
-  activeSkin: string;
-  title?: string;
-  unlockedTitles?: string[];
-  avatarIcon?: string;
-  unlockedAvatarIcons?: string[];
-  activeAura?: string;
-  unlockedAuras?: string[];
-  activeBanner?: string;
-  unlockedBanners?: string[];
-  unlockedColors?: string[];
-  unlockedFrames?: string[];
-  activeFrame?: string;
-  unlockedFx?: string[];
-  activeFx?: string;
-  bio?: string;
-  prestigeLevel?: number;
-  dailyStreak?: number;
-  lastDailyClaimTimestamp?: number;
-  lastWheelSpinTimestamp?: number;
-  goldenKeys?: number;
-  equippedCompanionId?: string;
-  unlockedCompanionIds?: string[];
-  companionLevels?: Record<string, number>;
-  duelWins?: number;
-  duelLosses?: number;
-  duelWinStreak?: number;
-  friends?: Friend[];
-  customBadges?: string[];
+  avatarIcon: string;
+  avatarModel: string;
+  totalVCoins: number;
+  totalPixels?: number; // legacy alias
+  title: string;
+  unlockedTitles: string[];
+  unlockedAvatarIcons: string[];
+  activeAura: string;
+  unlockedAuras: string[];
+  activeBanner: string;
+  unlockedBanners: string[];
+  activeFrame: string;
+  unlockedFrames: string[];
+  activeHat: string;
+  unlockedHats: string[];
+  bio: string;
+  selectedTags: string[]; // Up to 6 active from 50+ description tags
+  unlockedGames: string[]; // Paid games unlocked with V-Coins
+  luckMultiplier: number; // Bonus RNG luck
+  activeFusionArtifact?: string;
 }
 
 export interface GameStats {
@@ -108,13 +53,16 @@ export interface GameData {
   name: string;
   frenchName: string;
   description: string;
-  icon: string;
-  category: 'clicker' | 'memory' | 'reflex' | 'arcade' | 'puzzle' | 'rhythm' | 'jurassic';
-  difficulty: 'easy' | 'medium' | 'hard' | 'mythic';
-  color: string; // Tailwind glow/text color
-  rarity?: CosmeticRarity;
-  isNew?: boolean;
-  tag?: string;
+  category: 'action' | 'platformer' | 'puzzle' | 'racer' | 'rhythm' | 'tycoon' | 'survival' | 'rpg';
+  difficulty: 'Facile' | 'Moyen' | 'Difficile' | 'Extrême';
+  color: string;
+  rating: number; // e.g. 96 for 96%
+  activePlayers: string; // e.g. "2.4k"
+  creator: string;
+  badge?: string;
+  isPaid: boolean;
+  costVCoins: number;
+  isRankedAvailable?: boolean;
 }
 
 export interface Achievement {
@@ -123,31 +71,43 @@ export interface Achievement {
   frenchTitle: string;
   description: string;
   frenchDescription: string;
-  pixelReward: number;
+  vcoinReward: number;
   isUnlocked: boolean;
   icon: string;
+  category: 'gameplay' | 'ranked' | 'trophy' | 'rng' | 'trade' | 'cosmetics' | 'secret';
 }
 
 export interface Quest {
   id: string;
   title: string;
   description: string;
-  type: string;
   target: number;
   current: number;
-  rewardPixels: number;
+  rewardVCoins: number;
   rewardXp: number;
   isCompleted: boolean;
   isClaimed: boolean;
   gameId?: string;
-  isFlash?: boolean;
+  category: 'daily' | 'weekly' | 'metaverse';
+  icon: string;
   multiplier?: number;
 }
 
+export interface TrophyMilestone {
+  trophiesRequired: number;
+  leagueName: string;
+  rewardType: 'vcoins' | 'rng_roll' | 'hat' | 'aura' | 'title';
+  rewardLabel: string;
+  rewardValue: string | number;
+  badgeIcon: string;
+  color: string;
+}
+
 export interface PassLevelReward {
-  type: 'pixels' | 'title' | 'skin' | 'color' | 'aura' | 'banner' | 'frame' | 'key' | 'rp' | 'amber' | 'pet';
+  type: 'vcoins' | 'title' | 'hat' | 'aura' | 'banner' | 'frame' | 'rng_ticket' | 'pet';
   value: number | string;
   label: string;
+  icon?: string;
 }
 
 export interface PassLevel {
@@ -160,87 +120,70 @@ export interface ArcadePass {
   level: number;
   xp: number;
   isPremium: boolean;
-  season: number;
-  seasonName?: string;
   claimedFreeRewards: number[];
   claimedPremiumRewards: number[];
 }
 
-export interface ProPassState {
-  level: number;
-  xp: number;
-  isPro: boolean;
-  claimedFreeRewards: number[];
-  claimedProRewards: number[];
-}
-
-export interface TournamentLeaderboardEntry {
-  rank: number;
-  username: string;
-  avatarColor: string;
-  avatarIcon: string;
-  score: number;
-  isUser?: boolean;
-}
-
-export interface Tournament {
+export interface RngUniverseItem {
   id: string;
-  title: string;
-  frenchTitle: string;
-  gameId: string;
-  gameName: string;
+  name: string;
+  universe: 'Cyberverse' | 'Fortnite' | 'Minecraft' | 'Apex Legends' | 'Zelda' | 'Metaverse';
+  rarity: 'Commun' | 'Peu Commun' | 'Rare' | 'Épique' | 'Légendaire' | 'Mythique' | 'Cosmique' | 'Divin';
+  chanceDenominator: number; // 1 in X
+  iconName: string;
+  accentColor: string;
+  glowClass: string;
   description: string;
-  targetScore: number;
-  unit?: string;
-  prizePool: number;
-  titleReward: string;
-  endsInDays: number;
-  status: 'active' | 'upcoming' | 'ended';
-  participantsCount: number;
-  leaderboard: TournamentLeaderboardEntry[];
-  userBestScore?: number;
+  vcoinWorth: number;
 }
 
-export interface CompetitiveRank {
+export interface TradeRequest {
+  id: string;
+  traderName: string;
+  traderAvatar: string;
+  traderTitle: string;
+  offeredItemIds: string[];
+  offeredVCoins: number;
+  requestedItemIds: string[];
+  requestedVCoins: number;
+  message: string;
+}
+
+export interface RankedTier {
   id: string;
   name: string;
   frenchName: string;
-  tier: 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond' | 'master' | 'celestial' | 'apex_primal';
-  division: string;
-  minScore: number;
-  pixelReward: number;
-  titleReward?: string;
-  badgeColor: string;
-  glowColor: string;
+  minPoints: number;
+  color: string;
+  glow: string;
   icon: string;
-  description: string;
+  badgeGradient: string;
 }
 
-export interface RankedGameScores {
-  sprintReflex: number;
-  laserBlitz: number;
-  quantumTarget: number;
-  dinoTrial?: number;
+export interface WorldBossState {
+  name: string;
+  currentHp: number;
+  maxHp: number;
+  stage: number;
+  playerTotalDamage: number;
+  claimedMilestones: number[];
 }
 
 export interface GlobalState {
   profile: UserProfile;
-  stats: Record<string, GameStats>; // gameId -> stats
+  stats: Record<string, GameStats>;
   achievements: Achievement[];
-  quests?: Quest[];
-  arcadePass?: ArcadePass;
-  proPass?: ProPassState;
-  settings?: AppSettings;
-  rankedScores?: RankedGameScores;
-  tournamentScores?: Record<string, number>;
-  claimedTournaments?: string[];
-  claimedRankRewards?: string[];
-  rankPoints?: number;
-  favorites?: string[];
-  recentGames?: string[];
-  friends?: Friend[];
-  chatMessages?: ChatMessage[];
-  activeDuels?: DuelChallenge[];
-  duelHistory?: DuelChallenge[];
+  quests: Quest[];
+  arcadePass: ArcadePass;
+  settings: AppSettings;
+  rankPoints: number; // Ranked points
+  totalTrophies: number;
+  claimedTrophyRoadRewards: number[];
+  rngInventory: Record<string, number>; // itemId -> count
+  rngTotalRolls: number;
+  activeTradeRequests: TradeRequest[];
+  completedTradesCount: number;
+  worldBoss: WorldBossState;
+  favorites: string[]; // List of favorite game IDs (Hearts!)
+  recentGames: string[];
 }
-
