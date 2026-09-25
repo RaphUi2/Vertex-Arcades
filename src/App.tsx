@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap, Trophy, Sparkles, Heart, Search, Play, X, Coins,
   Settings, Gamepad2, Volume2, VolumeX, Crown, Target, ShoppingBag,
-  ArrowRightLeft, Skull, Flame, Check, Shield, Lock, User, Award
+  ArrowRightLeft, Skull, Flame, Check, Shield, Lock, User, Award,
+  Menu, ChevronRight, Plus, Star, Compass, Layers, Radio
 } from 'lucide-react';
 
 import { audio } from './utils/audio';
@@ -33,7 +34,7 @@ import { SettingsV3Modal } from './components/SettingsV3Modal';
 import { ArcadePassV3Modal } from './components/ArcadePassV3Modal';
 import { MobileGameControls } from './components/MobileGameControls';
 
-// 15 Games
+// 20 Games
 import { QuantumObby } from './games/QuantumObby';
 import { AetheriaVoid } from './games/AetheriaVoid';
 import { TitanCore } from './games/TitanCore';
@@ -49,6 +50,11 @@ import { SynthRider } from './games/SynthRider';
 import { BioHazardDefense } from './games/BioHazardDefense';
 import { SkyboundWings } from './games/SkyboundWings';
 import { GlitchHunter } from './games/GlitchHunter';
+import { CosmicMiner } from './games/CosmicMiner';
+import { ShadowShinobi } from './games/ShadowShinobi';
+import { SpeedRunners2099 } from './games/SpeedRunners2099';
+import { BlockCraftArena } from './games/BlockCraftArena';
+import { NeonCyberPong } from './games/NeonCyberPong';
 
 export default function App() {
   const [state, setState] = useState<GlobalState>(() => {
@@ -67,10 +73,10 @@ export default function App() {
           avatarColor: '#06b6d4',
           avatarIcon: 'Crown',
           avatarModel: 'cyber_agent',
-          totalVCoins: 850,
-          totalPixels: 850,
-          title: 'VÉTÉRAN VERTEX 3.0',
-          unlockedTitles: ['VÉTÉRAN VERTEX 3.0'],
+          totalVCoins: 1250,
+          totalPixels: 1250,
+          title: 'VÉTÉRAN VERTEX 3.1',
+          unlockedTitles: ['VÉTÉRAN VERTEX 3.1'],
           unlockedAvatarIcons: ['Crown', 'Zap', 'Star'],
           activeAura: 'none',
           unlockedAuras: ['none'],
@@ -80,7 +86,7 @@ export default function App() {
           unlockedFrames: ['frame_neon_cyan'],
           activeHat: 'hat_cap_pro',
           unlockedHats: ['hat_cap_pro'],
-          bio: 'Prêt pour la version 3.0 ! Explorateur de mondes et collectionneur de reliques.',
+          bio: 'Prêt pour la version 3.1 ! Explorateur d\'expériences et champion de l\'arène.',
           selectedTags: ['Pro Gamer', 'Obby King', 'Trader'],
           unlockedGames: [],
           luckMultiplier: 1
@@ -91,7 +97,7 @@ export default function App() {
         }, {} as Record<string, GameStats>),
         achievements: INITIAL_ACHIEVEMENTS_200,
         quests: INITIAL_QUESTS_V3,
-        arcadePass: { level: 1, xp: 0, isPremium: false, claimedFreeRewards: [], claimedPremiumRewards: [] },
+        arcadePass: { level: 2, xp: 350, isPremium: false, claimedFreeRewards: [], claimedPremiumRewards: [] },
         settings: {
           sfxEnabled: true,
           musicEnabled: true,
@@ -106,22 +112,22 @@ export default function App() {
           showFps: false,
           controllerLayout: 'xbox'
         },
-        rankPoints: 150,
-        totalTrophies: 60,
+        rankPoints: 240,
+        totalTrophies: 120,
         claimedTrophyRoadRewards: [50],
-        rngInventory: { bloxy_cola: 2, golden_noob_head: 1 },
-        rngTotalRolls: 3,
+        rngInventory: { matrice_cyber_apex: 2, boogie_bomb: 1 },
+        rngTotalRolls: 5,
         activeTradeRequests: INITIAL_TRADE_REQUESTS,
         completedTradesCount: 0,
         worldBoss: {
           name: 'TITAN GLITCH OMNI',
-          currentHp: 885000,
+          currentHp: 850000,
           maxHp: 1000000,
           stage: 1,
-          playerTotalDamage: 4500,
+          playerTotalDamage: 6500,
           claimedMilestones: []
         },
-        favorites: ['quantum_obby', 'titan_core'],
+        favorites: ['quantum_obby', 'titan_core', 'shadow_shinobi'],
         recentGames: []
       };
     }
@@ -133,6 +139,9 @@ export default function App() {
   const [activeGameId, setActiveGameId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // iOS Drawer Navigation Menu
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Modals state
   const [showRngModal, setShowRngModal] = useState(false);
@@ -149,6 +158,9 @@ export default function App() {
   // Paid game prompt modal state
   const [paidGamePrompt, setPaidGamePrompt] = useState<string | null>(null);
 
+  // Heart particle animation tracker
+  const [favoritedPopId, setFavoritedPopId] = useState<string | null>(null);
+
   // Notification Toast
   const [notification, setNotification] = useState<string | null>(null);
   const notify = (msg: string) => {
@@ -156,10 +168,27 @@ export default function App() {
     setTimeout(() => setNotification(null), 3500);
   };
 
+  const toggleSound = () => {
+    setState(prev => {
+      const nextSfx = !prev.settings.sfxEnabled;
+      audio.setSfxEnabled(nextSfx);
+      audio.setMusicEnabled(nextSfx);
+      if (nextSfx) audio.playClick();
+      return {
+        ...prev,
+        settings: {
+          ...prev.settings,
+          sfxEnabled: nextSfx,
+          musicEnabled: nextSfx
+        }
+      };
+    });
+  };
+
   // Controller / Gamepad Hook
   const { gamepadState, vibrate } = useGamepad((action) => {
     if (action === 'B') {
-      // Close any open modal
+      setIsDrawerOpen(false);
       setShowRngModal(false);
       setShowTrophyModal(false);
       setShowRankedModal(false);
@@ -174,6 +203,9 @@ export default function App() {
     } else if (action === 'Y') {
       audio.playClick();
       setShowProfileModal(true);
+    } else if (action === 'START') {
+      audio.playClick();
+      setIsDrawerOpen(prev => !prev);
     }
   });
 
@@ -188,10 +220,13 @@ export default function App() {
 
   const currentVCoins = state.profile.totalVCoins ?? 0;
 
-  // Toggle favorite with Heart icon
+  // Toggle favorite with animated Heart pop
   const handleToggleFavorite = (gameId: string) => {
     audio.playHeartPop();
-    vibrate(40, 0.4, 0.5);
+    vibrate(45, 0.4, 0.6);
+    setFavoritedPopId(gameId);
+    setTimeout(() => setFavoritedPopId(null), 800);
+
     setState(prev => {
       const isFav = prev.favorites.includes(gameId);
       const newFavs = isFav
@@ -240,22 +275,17 @@ export default function App() {
     const prevStats = state.stats[gameId] || { plays: 0, highScore: 0 };
     const isNewHigh = score > prevStats.highScore;
 
-    // High performance reward scaling
-    const earnedVC = Math.max(25, Math.min(350, Math.floor(score * 0.15) + (isNewHigh ? 50 : 0) + customVCoinsBonus));
-    const earnedXP = Math.floor(earnedVC * 1.5) + (isNewHigh ? 60 : 25);
-    const earnedTrophies = isNewHigh ? 6 : 3;
+    const earnedVC = Math.max(30, Math.min(400, Math.floor(score * 0.18) + (isNewHigh ? 60 : 0) + customVCoinsBonus));
+    const earnedXP = Math.floor(earnedVC * 1.5) + (isNewHigh ? 75 : 30);
+    const earnedTrophies = isNewHigh ? 8 : 4;
 
-    // Ranked Points if this is one of the 3 Ranked Games
     const isRanked = RANKED_GAMES_IDS.includes(gameId);
-    const earnedRP = isRanked ? Math.floor(score * 0.25) + 30 : 0;
-
-    // Deal damage to World Boss
-    const bossDmg = Math.max(100, Math.floor(score * 1.2));
+    const earnedRP = isRanked ? Math.floor(score * 0.25) + 35 : 0;
+    const bossDmg = Math.max(120, Math.floor(score * 1.25));
 
     audio.playWin();
 
     setState(prev => {
-      // 1. Stats
       const newStats = {
         ...prev.stats,
         [gameId]: {
@@ -264,7 +294,6 @@ export default function App() {
         }
       };
 
-      // 2. Quests
       const newQuests = prev.quests.map(q => {
         let added = 0;
         if (q.id === 'q_daily_1') added = 1;
@@ -278,7 +307,6 @@ export default function App() {
         return { ...q, current: nextCur, isCompleted: nextCur >= q.target };
       });
 
-      // 3. Pass XP
       let nextPassXp = prev.arcadePass.xp + earnedXP;
       let nextPassLevel = prev.arcadePass.level;
       while (nextPassXp >= 1000 && nextPassLevel < 50) {
@@ -286,7 +314,6 @@ export default function App() {
         nextPassLevel += 1;
       }
 
-      // 4. World Boss
       const nextBossHp = Math.max(0, prev.worldBoss.currentHp - bossDmg);
 
       return {
@@ -327,6 +354,8 @@ export default function App() {
         ? state.favorites.includes(game.id)
         : selectedCategory === 'paid'
         ? game.isPaid
+        : selectedCategory === 'free'
+        ? !game.isPaid
         : selectedCategory === 'ranked'
         ? game.isRankedAvailable
         : game.category === selectedCategory;
@@ -334,410 +363,658 @@ export default function App() {
     const gameTitle = game.frenchName || game.name;
     const matchesSearch =
       gameTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      game.description.toLowerCase().includes(searchQuery.toLowerCase());
+      game.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      game.creator.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesCategory && matchesSearch;
   });
 
   return (
-    <div className="relative min-h-screen bg-[#080b14] text-slate-100 flex flex-col justify-between overflow-x-hidden font-sans select-none">
-      {/* 1. Notification Toast */}
+    <div className="relative min-h-screen bg-[#070913] text-slate-100 flex flex-col justify-between overflow-x-hidden font-sans select-none antialiased">
+      {/* 1. iOS Glass Toast Notification */}
       <AnimatePresence>
         {notification && (
           <motion.div
-            initial={{ opacity: 0, y: -30, scale: 0.95 }}
+            initial={{ opacity: 0, y: -25, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-full bg-slate-900/95 border-2 border-cyan-400 text-white font-mono text-xs font-bold shadow-[0_0_35px_rgba(6,182,212,0.6)] flex items-center gap-2.5 backdrop-blur-xl"
+            exit={{ opacity: 0, y: -20, scale: 0.96 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-full bg-slate-900/90 border border-cyan-400/50 text-white font-mono text-xs font-bold shadow-[0_8px_32px_rgba(6,182,212,0.35)] flex items-center gap-2.5 backdrop-blur-2xl"
           >
-            <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
+            <Sparkles className="w-4 h-4 text-cyan-400 animate-spin" />
             <span>{notification}</span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* 2. Top Header: REFRESHED LOGO DEAD CENTER, NO TEXT "VERTEX ARCADES" */}
-      <header className="sticky top-0 z-40 w-full bg-[#070a12] border-b border-slate-800 px-4 sm:px-8 py-3 flex items-center justify-between shadow-2xl">
-        {/* Left: Player Profile Pill */}
+      {/* 2. Top Header - Liquid Glass Hotbar */}
+      <header className="liquid-glass-header sticky top-0 z-40 w-full px-4 sm:px-8 py-3 flex items-center justify-between">
+        {/* Specular top reflection glint line */}
+        <div className="absolute inset-x-8 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/35 to-transparent pointer-events-none" />
+
+        {/* Left: Enhanced Rich Player Profile Capsule */}
         <div
           onClick={() => { audio.playClick(); setShowProfileModal(true); }}
-          className="flex items-center gap-3 p-1.5 pr-4 rounded-full bg-[#0d1222] border border-slate-700 hover:border-cyan-400 transition-all cursor-pointer group shadow-md"
+          className="flex items-center gap-3 p-1.5 pr-4 rounded-2xl liquid-glass-pill hover:border-cyan-400/60 transition-all cursor-pointer group shadow-sm active:scale-98"
         >
-          <div
-            className="w-9 h-9 rounded-full flex items-center justify-center text-lg border-2 border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.4)]"
-            style={{ backgroundColor: state.profile.avatarColor }}
-          >
-            {state.profile.avatarModel === 'cyber_ninja' ? '🥷' : state.profile.avatarModel === 'blocky_knight' ? '🛡️' : '🧑‍🚀'}
-          </div>
-          <div className="hidden sm:block text-left">
-            <div className="text-xs font-black text-white font-mono leading-none group-hover:text-cyan-300 transition-colors">
-              {state.profile.username}
+          <div className="relative">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-lg border border-cyan-400/80 shadow-[0_0_12px_rgba(6,182,212,0.3)]"
+              style={{ backgroundColor: state.profile.avatarColor }}
+            >
+              {state.profile.avatarModel === 'cyber_ninja' ? '🥷' : state.profile.avatarModel === 'blocky_knight' ? '🛡️' : '🧑‍🚀'}
             </div>
-            <div className="text-[10px] text-yellow-400 font-mono flex items-center gap-1 mt-0.5 font-bold">
-              <Trophy className="w-3 h-3 fill-current" /> {state.totalTrophies} 🏆
+            {/* Live Online Status Dot */}
+            <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 border-2 border-slate-950 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+          </div>
+
+          <div className="text-left">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-black text-white font-mono group-hover:text-cyan-300 transition-colors">
+                {state.profile.username}
+              </span>
+              <span className="hidden md:inline-block px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
+                Niv. {state.arcadePass.level}
+              </span>
+            </div>
+            <div className="flex items-center gap-2.5 text-[10px] text-slate-400 font-mono mt-0.5">
+              <span className="text-yellow-400 font-bold flex items-center gap-1">
+                <Trophy className="w-3 h-3 fill-current" /> {state.totalTrophies}
+              </span>
+              <span>·</span>
+              <span className="text-orange-400 font-bold flex items-center gap-1">
+                <Flame className="w-3 h-3 fill-current" /> 5j
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Center: REFRESHED VERTEX ARCADES LOGO DEAD CENTER (NO TEXT!) */}
-        <div className="flex items-center justify-center">
-          <div
-            onClick={() => { audio.playWin(); }}
-            className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-400 via-fuchsia-500 to-amber-400 border-2 border-white/80 flex items-center justify-center text-slate-950 shadow-[0_0_30px_rgba(6,182,212,0.7),0_0_20px_rgba(217,70,239,0.6)] cursor-pointer hover:rotate-12 transition-transform active:scale-95"
-            title="Vertex Arcades v3.0 Logo"
-          >
-            {/* Chromatic stylized geometric cube logo icon */}
-            <svg className="w-7 h-7 fill-slate-950" viewBox="0 0 24 24">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-            </svg>
-          </div>
+        {/* Center: SLEEK MONOCHROME GAMEPAD LOGO (NO TEXT) */}
+        <div
+          onClick={() => { audio.playWin(); }}
+          className="w-10 h-10 rounded-2xl liquid-glass-pill hover:border-cyan-400/70 flex items-center justify-center transition-all cursor-pointer group shadow-sm active:scale-95"
+          title="Vertex Arcades"
+        >
+          <Gamepad2 className="w-5 h-5 text-cyan-400 filter drop-shadow-[0_0_8px_rgba(6,182,212,0.9)] group-hover:scale-110 transition-transform" />
         </div>
 
-        {/* Right: V-Coins Pill & Quick Actions */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {/* Gamepad detection indicator */}
-          <div
-            className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all ${
-              gamepadState.connected
-                ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-[0_0_12px_rgba(34,197,94,0.5)]'
-                : 'bg-slate-900 border-slate-800 text-slate-500'
-            }`}
-            title={gamepadState.connected ? `Manette connectée : ${gamepadState.id}` : 'Manette déconnectée'}
-          >
-            <Gamepad2 className="w-4 h-4" />
-          </div>
-
-          {/* V-Coins Wallet */}
+        {/* Right: Compact VC Bubble + 3-Bars Menu Button */}
+        <div className="flex items-center gap-2.5">
+          {/* Compact Golden Liquid Glass VC Bubble */}
           <div
             onClick={() => { audio.playClick(); setShowShopModal(true); }}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-950/80 border border-amber-500 text-yellow-300 shadow-[0_0_15px_rgba(245,158,11,0.3)] text-xs font-mono font-bold cursor-pointer hover:bg-amber-900/80 transition-all"
+            className="liquid-glass-vc flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-yellow-300 text-[11px] font-mono font-bold cursor-pointer group shadow-sm active:scale-95 transition-all"
+            title="Votre solde V-Coins (Cliquer pour recharger)"
           >
-            <Coins className="w-4 h-4 fill-current text-yellow-400 animate-pulse" />
+            <Coins className="w-3.5 h-3.5 fill-current text-yellow-400 group-hover:rotate-12 transition-transform" />
             <span>{currentVCoins.toLocaleString()} VC</span>
+            <div className="w-4 h-4 rounded-md bg-amber-400/30 flex items-center justify-center text-yellow-200 group-hover:bg-amber-400/50 transition-colors">
+              <Plus className="w-2.5 h-2.5 stroke-[3]" />
+            </div>
           </div>
 
-          {/* Settings */}
+          {/* 3-BARS MENU BUTTON (OPENS DRAWER INTERFACE WITH ALL BUTTONS) */}
           <button
-            onClick={() => { audio.playClick(); setShowSettingsModal(true); }}
-            className="w-9 h-9 rounded-full bg-[#0d1222] hover:bg-slate-800 border border-slate-700 hover:border-cyan-400 flex items-center justify-center text-slate-300 hover:text-white transition-all cursor-pointer"
-            title="Paramètres"
+            onClick={() => {
+              audio.playClick();
+              setIsDrawerOpen(true);
+            }}
+            className="w-10 h-10 rounded-2xl liquid-glass-pill hover:border-cyan-400 flex items-center justify-center text-slate-200 hover:text-white transition-all cursor-pointer shadow-md active:scale-95 group"
+            title="Ouvrir le menu principal (tous les menus)"
           >
-            <Settings className="w-4 h-4" />
+            <Menu className="w-5 h-5 text-cyan-300 group-hover:scale-110 transition-transform" />
           </button>
         </div>
       </header>
 
-      {/* 3. Main Content Body */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-6 pb-28">
-        {/* Vertex Arcades Action Hub Banners */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {/* 1. Sanctuaire RNG (Replaces Nano Star) */}
-          <div
-            onClick={() => { audio.playClick(); setShowRngModal(true); }}
-            className="p-5 rounded-3xl border-2 border-cyan-500/40 bg-[#0c1224] hover:bg-[#121a32] hover:border-cyan-400 transition-all cursor-pointer group shadow-lg flex flex-col justify-between"
-          >
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-                  🎲
-                </div>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-cyan-500/20 text-cyan-300 border border-cyan-400 font-mono">
-                  RNG VERTEX
-                </span>
-              </div>
-              <h3 className="font-bold text-white text-base font-mono group-hover:text-cyan-300 transition-colors">
-                Sanctuaire RNG
-              </h3>
-              <p className="text-xs text-slate-300 mt-1">
-                Tirez et échangez des reliques mythiques du Cyberverse, Fortnite et Minecraft !
-              </p>
-            </div>
-          </div>
-
-          {/* 2. Ligue des Trophées Vertex */}
-          <div
-            onClick={() => { audio.playClick(); setShowTrophyModal(true); }}
-            className="p-5 rounded-3xl border-2 border-yellow-500/40 bg-[#0c1224] hover:bg-[#121a32] hover:border-yellow-400 transition-all cursor-pointer group shadow-lg flex flex-col justify-between"
-          >
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-12 h-12 rounded-2xl bg-yellow-500/20 border border-yellow-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(234,179,8,0.3)]">
-                  🏆
-                </div>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-yellow-400/20 text-yellow-300 border border-yellow-400 font-mono">
-                  LIGUE APEX
-                </span>
-              </div>
-              <h3 className="font-bold text-white text-base font-mono group-hover:text-yellow-300 transition-colors">
-                Ligue des Trophées
-              </h3>
-              <p className="text-xs text-slate-300 mt-1">
-                Route des trophées 0 à 10 000 🏆 avec récompenses et chapeaux exclusifs.
-              </p>
-            </div>
-          </div>
-
-          {/* 3. Classé v3.0 (3 dedicated games, pure ladder progression) */}
-          <div
-            onClick={() => { audio.playClick(); setShowRankedModal(true); }}
-            className="p-5 rounded-3xl border-2 border-red-500/40 bg-[#0c1224] hover:bg-[#121a32] hover:border-red-400 transition-all cursor-pointer group shadow-lg flex flex-col justify-between"
-          >
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-12 h-12 rounded-2xl bg-red-500/20 border border-red-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(239,68,68,0.3)]">
-                  🔥
-                </div>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-red-500/20 text-red-300 border border-red-400 font-mono">
-                  3 ÉPREUVES
-                </span>
-              </div>
-              <h3 className="font-bold text-white text-base font-mono group-hover:text-red-300 transition-colors">
-                Classé v3.0
-              </h3>
-              <p className="text-xs text-slate-300 mt-1">
-                Grimpez du Bronze au rang Apex. Plus vous jouez, plus vous engrangez de RP !
-              </p>
-            </div>
-          </div>
-
-          {/* 4. Crazy New System: World Boss & Fusion Forge */}
-          <div
-            onClick={() => { audio.playClick(); setShowForgeModal(true); }}
-            className="p-5 rounded-3xl border-2 border-fuchsia-500/40 bg-[#0c1224] hover:bg-[#121a32] hover:border-fuchsia-400 transition-all cursor-pointer group shadow-lg flex flex-col justify-between"
-          >
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-12 h-12 rounded-2xl bg-fuchsia-500/20 border border-fuchsia-400 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(217,70,239,0.3)]">
-                  👾
-                </div>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-400 font-mono">
-                  WORLD BOSS
-                </span>
-              </div>
-              <h3 className="font-bold text-white text-base font-mono group-hover:text-fuchsia-300 transition-colors">
-                Titan Glitch Raid
-              </h3>
-              <p className="text-xs text-slate-300 mt-1">
-                Boss mondial à 1M de PV & laboratoire de transmutation de reliques !
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Search & Category Filter Bar */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-6">
-          {/* Category Filter Pills */}
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {[
-              { id: 'all', label: 'Tous les Jeux (15)' },
-              { id: 'favorites', label: 'Mes Favoris ❤️' },
-              { id: 'ranked', label: 'Classé 🏆' },
-              { id: 'paid', label: 'VIP V-Coins 💎' },
-              { id: 'action', label: 'Action & Combat' },
-              { id: 'platformer', label: 'Obby & Runner' },
-              { id: 'tycoon', label: 'Tycoon & Factory' },
-              { id: 'rhythm', label: 'Rythme' }
-            ].map(cat => (
-              <button
-                key={cat.id}
-                onClick={() => { audio.playClick(); setSelectedCategory(cat.id); }}
-                className={`px-4 py-2 rounded-2xl text-xs font-mono font-bold whitespace-nowrap transition-all cursor-pointer ${
-                  selectedCategory === cat.id
-                    ? 'bg-cyan-500 text-slate-950 font-black shadow-[0_0_15px_rgba(6,182,212,0.5)]'
-                    : 'bg-[#0d1222] text-slate-400 hover:text-white border border-slate-800'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Search Box */}
-          <div className="relative min-w-[240px]">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher une expérience..."
-              className="w-full pl-10 pr-4 py-2 rounded-2xl bg-[#0d1222] border border-slate-800 text-xs text-white placeholder-slate-500 outline-none focus:border-cyan-400"
+      {/* 3. Liquid Glass Slide-In Drawer Navigation Menu (From Right) */}
+      <AnimatePresence>
+        {isDrawerOpen && (
+          <div className="fixed inset-0 z-50 flex justify-end">
+            {/* Backdrop Blur */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsDrawerOpen(false)}
+              className="fixed inset-0 bg-slate-950/70 backdrop-blur-md"
             />
+
+            {/* Slide-out Sheet */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+              className="liquid-glass-drawer relative w-full max-w-md h-full p-6 flex flex-col justify-between shadow-2xl z-10 overflow-y-auto no-scrollbar"
+            >
+              <div className="space-y-6">
+                {/* Drawer Header with Title & Close button */}
+                <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                      <Layers className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-white font-mono tracking-wider flex items-center gap-2">
+                        HUB VERTEX
+                        <span className="px-1.5 py-0.2 rounded text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
+                          v3.1
+                        </span>
+                      </h3>
+                      <p className="text-[11px] text-slate-400 font-sans">Toutes les expériences & fonctionnalités</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => { audio.playClick(); setIsDrawerOpen(false); }}
+                    className="w-9 h-9 rounded-full liquid-glass-pill text-slate-300 flex items-center justify-center hover:text-white hover:border-white/40 transition-all cursor-pointer shadow-sm"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Profile Summary Card inside Drawer */}
+                <div 
+                  onClick={() => { audio.playClick(); setShowProfileModal(true); setIsDrawerOpen(false); }}
+                  className="p-3.5 rounded-2xl liquid-glass-card border border-white/15 cursor-pointer hover:border-cyan-400/60 transition-all group flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="w-11 h-11 rounded-xl flex items-center justify-center text-xl border border-cyan-400/60 shadow-inner"
+                      style={{ backgroundColor: state.profile.avatarColor }}
+                    >
+                      {state.profile.avatarModel === 'cyber_ninja' ? '🥷' : state.profile.avatarModel === 'blocky_knight' ? '🛡️' : '🧑‍🚀'}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black text-white font-mono group-hover:text-cyan-300 transition-colors">
+                          {state.profile.username}
+                        </span>
+                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-cyan-500/25 text-cyan-300 border border-cyan-400/30 font-bold">
+                          VIP Niv. {state.arcadePass.level}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 text-[10px] font-mono text-slate-300 mt-1">
+                        <span className="text-yellow-400 font-bold flex items-center gap-1">
+                          <Trophy className="w-3 h-3 fill-current" /> {state.totalTrophies}
+                        </span>
+                        <span className="text-amber-300 font-bold flex items-center gap-1">
+                          <Coins className="w-3 h-3 fill-current" /> {currentVCoins.toLocaleString()} VC
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-cyan-300 group-hover:translate-x-0.5 transition-all" />
+                </div>
+
+                {/* Categorized Navigation Sections */}
+                <div className="space-y-5">
+                  {/* Category 1: JEUX & EXPÉRIENCES */}
+                  <div>
+                    <span className="text-[10px] font-mono font-black text-cyan-400/90 tracking-wider uppercase px-1 mb-2 block">
+                      🎮 Jeux & Expériences
+                    </span>
+                    <div className="space-y-1.5">
+                      {[
+                        {
+                          id: 'games',
+                          title: 'Catalogue des Jeux',
+                          subtitle: '20 Expériences (3 Gratuits • 17 VIP)',
+                          badge: '20 JEUX',
+                          badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/30',
+                          icon: <Gamepad2 className="w-4 h-4 text-cyan-400" />,
+                          iconBg: 'bg-cyan-500/10 border-cyan-400/30',
+                          action: () => { setActiveGameId(null); setIsDrawerOpen(false); }
+                        },
+                        {
+                          id: 'rng',
+                          title: 'Sanctuaire RNG',
+                          subtitle: 'Roulette de Reliques & Potions Alchimiques',
+                          badge: 'CHANCE x3',
+                          badgeColor: 'bg-teal-500/20 text-teal-300 border-teal-400/30',
+                          icon: <Sparkles className="w-4 h-4 text-teal-300" />,
+                          iconBg: 'bg-teal-500/10 border-teal-400/30',
+                          action: () => { setShowRngModal(true); setIsDrawerOpen(false); }
+                        },
+                        {
+                          id: 'ranked',
+                          title: 'Mode Classé v3.1',
+                          subtitle: 'Compétition, 3 Épreuves & Ladder Mondial',
+                          badge: 'SAISON 1',
+                          badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-400/30',
+                          icon: <Flame className="w-4 h-4 text-rose-400" />,
+                          iconBg: 'bg-rose-500/10 border-rose-400/30',
+                          action: () => { setShowRankedModal(true); setIsDrawerOpen(false); }
+                        }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => { audio.playClick(); item.action(); }}
+                          className="w-full p-2.5 rounded-2xl liquid-glass-menu-item flex items-center justify-between cursor-pointer group text-left"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${item.iconBg} group-hover:scale-105 transition-transform`}>
+                              {item.icon}
+                            </div>
+                            <div>
+                              <h4 className="text-xs font-bold text-white font-mono group-hover:text-cyan-300 transition-colors">
+                                {item.title}
+                              </h4>
+                              <p className="text-[10px] text-slate-400 font-sans">{item.subtitle}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono font-bold border ${item.badgeColor}`}>
+                              {item.badge}
+                            </span>
+                            <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-300 group-hover:translate-x-0.5 transition-all" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Category 2: PROGRESSION & RÉCOMPENSES */}
+                  <div>
+                    <span className="text-[10px] font-mono font-black text-amber-400/90 tracking-wider uppercase px-1 mb-2 block">
+                      🏆 Progression & Récompenses
+                    </span>
+                    <div className="space-y-1.5">
+                      {[
+                        {
+                          id: 'trophy',
+                          title: 'Ligue Stellaire Apex',
+                          subtitle: 'Route des 10 000 Trophées & Paliers',
+                          badge: `${state.totalTrophies} 🏆`,
+                          badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-400/30',
+                          icon: <Trophy className="w-4 h-4 text-amber-400" />,
+                          iconBg: 'bg-amber-500/10 border-amber-400/30',
+                          action: () => { setShowTrophyModal(true); setIsDrawerOpen(false); }
+                        },
+                        {
+                          id: 'pass',
+                          title: 'Pass Arcade VIP',
+                          subtitle: '50 Paliers débloquables & Titres légendaires',
+                          badge: `Niv. ${state.arcadePass.level}`,
+                          badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-400/30',
+                          icon: <Crown className="w-4 h-4 text-purple-400" />,
+                          iconBg: 'bg-purple-500/10 border-purple-400/30',
+                          action: () => { setShowPassModal(true); setIsDrawerOpen(false); }
+                        },
+                        {
+                          id: 'quests',
+                          title: 'Missions & Quêtes',
+                          subtitle: 'Défis journaliers, hebdos & boss',
+                          badge: 'GAIN VC',
+                          badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30',
+                          icon: <Target className="w-4 h-4 text-emerald-400" />,
+                          iconBg: 'bg-emerald-500/10 border-emerald-400/30',
+                          action: () => { setShowQuestsModal(true); setIsDrawerOpen(false); }
+                        },
+                        {
+                          id: 'boss',
+                          title: 'Titan Raid & Forge',
+                          subtitle: 'Combat de boss mondial & transmutation',
+                          badge: `BOSS V3`,
+                          badgeColor: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-400/30',
+                          icon: <Skull className="w-4 h-4 text-fuchsia-400" />,
+                          iconBg: 'bg-fuchsia-500/10 border-fuchsia-400/30',
+                          action: () => { setShowForgeModal(true); setIsDrawerOpen(false); }
+                        }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => { audio.playClick(); item.action(); }}
+                          className="w-full p-2.5 rounded-2xl liquid-glass-menu-item flex items-center justify-between cursor-pointer group text-left"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${item.iconBg} group-hover:scale-105 transition-transform`}>
+                              {item.icon}
+                            </div>
+                            <div>
+                              <h4 className="text-xs font-bold text-white font-mono group-hover:text-cyan-300 transition-colors">
+                                {item.title}
+                              </h4>
+                              <p className="text-[10px] text-slate-400 font-sans">{item.subtitle}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono font-bold border ${item.badgeColor}`}>
+                              {item.badge}
+                            </span>
+                            <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-300 group-hover:translate-x-0.5 transition-all" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Category 3: HUB JOUEUR & RÉGLAGES */}
+                  <div>
+                    <span className="text-[10px] font-mono font-black text-slate-400 tracking-wider uppercase px-1 mb-2 block">
+                      💎 Hub Joueur & Réglages
+                    </span>
+                    <div className="space-y-1.5">
+                      {[
+                        {
+                          id: 'shop',
+                          title: 'Boutique Cosmétiques',
+                          subtitle: 'Auras, Effets, Bannières, Chapeaux & Packs',
+                          badge: 'BOUTIQUE',
+                          badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-400/30',
+                          icon: <ShoppingBag className="w-4 h-4 text-rose-400" />,
+                          iconBg: 'bg-rose-500/10 border-rose-400/30',
+                          action: () => { setShowShopModal(true); setIsDrawerOpen(false); }
+                        },
+                        {
+                          id: 'achievements',
+                          title: '200 Succès de Maîtrise',
+                          subtitle: 'Défis complétés & récompenses de succès',
+                          badge: '200 SUCCÈS',
+                          badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-400/30',
+                          icon: <Award className="w-4 h-4 text-amber-400" />,
+                          iconBg: 'bg-amber-500/10 border-amber-400/30',
+                          action: () => { setShowAchievementsModal(true); setIsDrawerOpen(false); }
+                        },
+                        {
+                          id: 'profile',
+                          title: 'Mon Profil & Bio',
+                          subtitle: 'Personnaliser modèle, couleurs et tags',
+                          badge: 'PROFIL',
+                          badgeColor: 'bg-sky-500/20 text-sky-300 border-sky-400/30',
+                          icon: <User className="w-4 h-4 text-sky-400" />,
+                          iconBg: 'bg-sky-500/10 border-sky-400/30',
+                          action: () => { setShowProfileModal(true); setIsDrawerOpen(false); }
+                        },
+                        {
+                          id: 'settings',
+                          title: 'Paramètres & Audio',
+                          subtitle: 'Audio, graphismes, manettes et contrôles',
+                          badge: 'RÉGLAGES',
+                          badgeColor: 'bg-slate-500/20 text-slate-300 border-slate-400/30',
+                          icon: <Settings className="w-4 h-4 text-slate-300" />,
+                          iconBg: 'bg-slate-500/10 border-slate-400/30',
+                          action: () => { setShowSettingsModal(true); setIsDrawerOpen(false); }
+                        }
+                      ].map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => { audio.playClick(); item.action(); }}
+                          className="w-full p-2.5 rounded-2xl liquid-glass-menu-item flex items-center justify-between cursor-pointer group text-left"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center border ${item.iconBg} group-hover:scale-105 transition-transform`}>
+                              {item.icon}
+                            </div>
+                            <div>
+                              <h4 className="text-xs font-bold text-white font-mono group-hover:text-cyan-300 transition-colors">
+                                {item.title}
+                              </h4>
+                              <p className="text-[10px] text-slate-400 font-sans">{item.subtitle}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono font-bold border ${item.badgeColor}`}>
+                              {item.badge}
+                            </span>
+                            <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-cyan-300 group-hover:translate-x-0.5 transition-all" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Drawer Footer with Quick Controls */}
+              <div className="pt-5 border-t border-white/10 mt-6 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={toggleSound}
+                    className="p-2 rounded-xl liquid-glass-pill text-xs font-mono text-slate-300 hover:text-white flex items-center gap-1.5 cursor-pointer"
+                    title="Basculer le son"
+                  >
+                    {state.settings.sfxEnabled ? <Volume2 className="w-3.5 h-3.5 text-cyan-400" /> : <VolumeX className="w-3.5 h-3.5 text-slate-500" />}
+                    <span>{state.settings.sfxEnabled ? 'Son ON' : 'Son OFF'}</span>
+                  </button>
+                </div>
+                <span className="text-[10px] text-slate-400 font-mono">
+                  Vertex Arcades v3.1
+                </span>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* 4. Main Content Body - Clean Modern Experience Catalog */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-6">
+        {/* Liquid Glass Search & Segmented Filter Bar */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-7">
+          {/* Liquid Glass Segmented Category Tabs */}
+          <div className="relative flex items-center gap-1.5 overflow-x-auto p-1.5 rounded-2xl liquid-glass-container no-scrollbar shadow-2xl">
+            {/* Top liquid reflection specular glint */}
+            <div className="absolute inset-x-6 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+
+            {[
+              { id: 'all', label: `Tous les Jeux (${GAMES_LIST.length})` },
+              { id: 'favorites', label: 'Favoris ❤️' },
+              { id: 'free', label: 'Gratuits ⚡' },
+              { id: 'paid', label: 'VIP V-Coins 💎' },
+              { id: 'ranked', label: 'Classé 🏆' },
+              { id: 'action', label: 'Action' },
+              { id: 'survival', label: 'Survie' },
+              { id: 'racer', label: 'Course' },
+              { id: 'platformer', label: 'Obby' },
+              { id: 'tycoon', label: 'Tycoon' },
+              { id: 'rhythm', label: 'Rythme' }
+            ].map(cat => {
+              const isActive = selectedCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => { audio.playClick(); setSelectedCategory(cat.id); }}
+                  className={`relative px-4 py-2 rounded-xl text-xs font-mono font-bold whitespace-nowrap cursor-pointer transition-all ${
+                    isActive
+                      ? 'liquid-glass-pill-active scale-[1.02]'
+                      : 'liquid-glass-pill text-slate-300 hover:text-white'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Liquid Glass Search Box */}
+          <div className="relative min-w-[280px] group">
+            {/* Liquid aura backdrop glow */}
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/30 via-teal-400/20 to-blue-500/30 rounded-2xl blur-md opacity-40 group-focus-within:opacity-100 transition-all duration-500 pointer-events-none" />
+
+            <div className="relative flex items-center rounded-2xl liquid-glass-input overflow-hidden">
+              {/* Top specular refraction glint */}
+              <div className="absolute inset-x-4 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
+
+              <Search className="w-4 h-4 ml-3.5 text-cyan-400 group-focus-within:text-cyan-300 transition-colors pointer-events-none shrink-0" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Rechercher une expérience, créateur..."
+                className="w-full pl-3 pr-9 py-2.5 bg-transparent text-xs text-white placeholder-slate-400 outline-none font-sans"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 p-1 rounded-full bg-white/10 hover:bg-white/25 text-slate-300 hover:text-white transition-all cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* 4. Vertex Experiences Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+        {/* 5. Rich Experience Grid (20 Games) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filteredGames.map((game) => {
             const stats = state.stats[game.id] || { plays: 0, highScore: 0 };
             const isFavorite = state.favorites.includes(game.id);
             const isUnlocked = !game.isPaid || state.profile.unlockedGames?.includes(game.id);
+            const isPopping = favoritedPopId === game.id;
 
             return (
-              <div
+              <motion.div
                 key={game.id}
-                className="rounded-3xl border-2 border-slate-800 bg-[#0c1020] hover:border-cyan-400/80 transition-all flex flex-col justify-between overflow-hidden group shadow-xl hover:shadow-[0_0_25px_rgba(6,182,212,0.2)]"
+                whileHover={{ y: -7, scale: 1.025 }}
+                transition={{ type: "spring", stiffness: 380, damping: 24 }}
+                className="liquid-glass-card rounded-3xl border border-white/12 bg-gradient-to-b from-slate-900/85 via-slate-900/90 to-slate-950/95 hover:border-cyan-400/80 transition-all flex flex-col justify-between overflow-hidden group shadow-xl hover:shadow-[0_20px_50px_rgba(6,182,212,0.35),0_0_30px_rgba(34,211,238,0.25)] backdrop-blur-2xl relative"
               >
-                {/* Game Card Illustration Banner */}
-                <div className="relative">
-                  <GameCardIllustration gameId={game.id} className="w-full h-44" />
+                {/* Specular top reflection glint */}
+                <div className="absolute inset-x-8 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none z-20" />
 
-                  {/* Favorite Heart Button */}
-                  <button
+                {/* Subtle ambient cyan aura on hover */}
+                <div className="absolute inset-0 rounded-3xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-b from-cyan-400/12 via-transparent to-cyan-500/5 z-0" />
+
+                {/* --- Illustration Cover & Floating Glass Chips --- */}
+                <div className="relative overflow-hidden z-10">
+                  <div className="transform transition-transform duration-500 ease-out group-hover:scale-105">
+                    <GameCardIllustration gameId={game.id} className="w-full h-44 object-cover" />
+                  </div>
+
+                  {/* Contrast gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent pointer-events-none" />
+
+                  {/* Top-Left Floating Badge: Status / Price */}
+                  <div className="absolute top-3 left-3 z-10">
+                    {game.isPaid ? (
+                      isUnlocked ? (
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-black tracking-wider bg-emerald-500/25 text-emerald-300 border border-emerald-400/50 backdrop-blur-md shadow-md flex items-center gap-1">
+                          <Check className="w-3 h-3 text-emerald-400 stroke-[3]" /> ACQUIS
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-black tracking-wider bg-amber-500/25 text-amber-300 border border-amber-400/50 backdrop-blur-md shadow-md flex items-center gap-1">
+                          <Coins className="w-3 h-3 text-amber-400 fill-amber-400" /> {game.costVCoins} VC
+                        </span>
+                      )
+                    ) : (
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-black tracking-wider bg-cyan-500/25 text-cyan-300 border border-cyan-400/50 backdrop-blur-md shadow-md flex items-center gap-1">
+                        <Sparkles className="w-3 h-3 text-cyan-400" /> GRATUIT
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Top-Right Animated Heart Button */}
+                  <motion.button
+                    animate={isPopping ? { scale: [1, 1.4, 0.9, 1] } : { scale: 1 }}
+                    transition={{ duration: 0.35 }}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleToggleFavorite(game.id);
                     }}
-                    className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md border transition-all cursor-pointer ${
+                    className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-xl border transition-all cursor-pointer shadow-md z-10 ${
                       isFavorite
-                        ? 'bg-rose-500/30 border-rose-400 text-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.6)]'
-                        : 'bg-slate-900/80 border-slate-700 text-slate-400 hover:text-white'
+                        ? 'bg-rose-500/35 border-rose-400/70 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.6)]'
+                        : 'bg-slate-950/65 hover:bg-slate-900/80 border-white/20 text-slate-300 hover:text-white hover:border-white/40'
                     }`}
                   >
-                    <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
-                  </button>
+                    <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-current' : ''}`} />
+                  </motion.button>
 
-                  {/* Meta Pill (Active players & thumbs up) */}
-                  <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                    <span className="px-2.5 py-1 rounded-full bg-slate-950/85 backdrop-blur-md text-[10px] font-mono font-bold text-emerald-400 border border-slate-700 flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                      {game.activePlayers}
+                  {/* Bottom Image Badges: Category & Difficulty */}
+                  <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
+                    <span className="px-2.5 py-0.5 rounded-lg bg-slate-950/80 backdrop-blur-md text-[9px] font-mono font-bold text-cyan-300 border border-white/15 uppercase tracking-wider flex items-center gap-1">
+                      <Gamepad2 className="w-2.5 h-2.5" />
+                      {game.category}
                     </span>
-                    <span className="px-2.5 py-1 rounded-full bg-slate-950/85 backdrop-blur-md text-[10px] font-mono font-bold text-cyan-300 border border-slate-700">
-                      👍 {game.rating}%
+
+                    <span className={`px-2 py-0.5 rounded-lg backdrop-blur-md text-[9px] font-mono font-bold border flex items-center gap-1.5 ${
+                      game.difficulty === 'Facile'
+                        ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                        : game.difficulty === 'Moyen'
+                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                        : 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+                    }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        game.difficulty === 'Facile' ? 'bg-emerald-400' : game.difficulty === 'Moyen' ? 'bg-amber-400' : 'bg-rose-400'
+                      }`} />
+                      {game.difficulty}
                     </span>
                   </div>
                 </div>
 
-                {/* Card Information */}
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 mb-1">
-                      <span>Créateur : <strong className="text-slate-300">{game.creator}</strong></span>
-                      <span className="text-yellow-400 font-bold">{game.isPaid ? `${game.costVCoins} VC` : 'GRATUIT'}</span>
+                {/* --- Information Card Body --- */}
+                <div className="p-4 flex-1 flex flex-col justify-between gap-3.5 z-10">
+                  <div className="space-y-1.5">
+                    {/* Creator label */}
+                    <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/80" />
+                      <span className="truncate text-slate-300">
+                        Par <span className="text-cyan-300 font-semibold">{game.creator}</span>
+                      </span>
                     </div>
 
-                    <h3 className="font-black text-white text-base group-hover:text-cyan-300 transition-colors font-mono">
+                    {/* Title */}
+                    <h3 className="font-black text-white text-base group-hover:text-cyan-300 transition-colors font-sans tracking-tight line-clamp-1">
                       {game.frenchName}
                     </h3>
-                    <p className="text-xs text-slate-300 mt-1 line-clamp-2 leading-relaxed">
+
+                    {/* Description */}
+                    <p className="text-[11px] text-slate-300/85 leading-relaxed line-clamp-2 h-[34px]">
                       {game.description}
                     </p>
                   </div>
 
-                  {/* Highscore & Play Button */}
-                  <div className="pt-3 border-t border-slate-800">
-                    <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 mb-3">
-                      <span>Record : <strong className="text-cyan-300">{stats.highScore.toLocaleString()} pts</strong></span>
-                      <span>Parties : {stats.plays}</span>
+                  {/* Player Personal Stats Pod (Organized 2-Column Capsule) */}
+                  <div className="grid grid-cols-2 gap-2 p-2 rounded-xl bg-white/[0.03] border border-white/8 backdrop-blur-sm text-[10px] font-mono">
+                    <div className="flex items-center gap-2 text-slate-300">
+                      <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <div className="truncate">
+                        <span className="text-slate-400 text-[9px] block">Record</span>
+                        <strong className="text-amber-300 font-black">{stats.highScore.toLocaleString()}</strong>
+                      </div>
                     </div>
-
-                    {/* Play Button */}
-                    <button
-                      onClick={() => handleTryLaunchGame(game.id)}
-                      className={`w-full py-3 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg font-mono ${
-                        isUnlocked
-                          ? 'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 shadow-[0_0_20px_rgba(34,197,94,0.4)]'
-                          : 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.4)]'
-                      }`}
-                    >
-                      {isUnlocked ? (
-                        <>
-                          <Play className="w-4 h-4 fill-current" /> JOUER
-                        </>
-                      ) : (
-                        <>
-                          <Lock className="w-4 h-4" /> DÉBLOQUER ({game.costVCoins} VC)
-                        </>
-                      )}
-                    </button>
+                    <div className="flex items-center gap-2 text-slate-300 border-l border-white/10 pl-2.5">
+                      <Zap className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                      <div className="truncate">
+                        <span className="text-slate-400 text-[9px] block">Parties</span>
+                        <strong className="text-cyan-300 font-black">{stats.plays}</strong>
+                      </div>
+                    </div>
                   </div>
+
+                  {/* Action CTA Button */}
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleTryLaunchGame(game.id)}
+                    className={`w-full py-2.5 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg font-mono relative overflow-hidden ${
+                      isUnlocked
+                        ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 shadow-[0_0_20px_rgba(20,184,166,0.35)] border border-emerald-300/40'
+                        : 'bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.35)] border border-yellow-300/40'
+                    }`}
+                  >
+                    {/* Specular button sheen */}
+                    <div className="absolute inset-x-4 top-0 h-[1px] bg-white/40 pointer-events-none" />
+
+                    {isUnlocked ? (
+                      <>
+                        <Play className="w-3.5 h-3.5 fill-current" /> JOUER MAINTENANT
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-3.5 h-3.5 stroke-[2.5]" /> DÉBLOQUER ({game.costVCoins} VC)
+                      </>
+                    )}
+                  </motion.button>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
       </main>
 
-      {/* 5. Floating Rounded Bottom Navigation Bar */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-auto max-w-[94vw]">
-        <div className="px-4 py-2.5 rounded-full bg-[#080d1a] border-2 border-cyan-500/50 shadow-[0_4px_30px_rgba(0,0,0,0.9),0_0_25px_rgba(6,182,212,0.35)] flex items-center gap-1 sm:gap-3">
-          <button
-            onClick={() => { audio.playClick(); setActiveGameId(null); }}
-            className="p-2.5 rounded-full hover:bg-cyan-500/20 text-cyan-300 flex flex-col items-center gap-0.5 transition-all cursor-pointer"
-            title="Catalogue de Jeux"
-          >
-            <Gamepad2 className="w-5 h-5" />
-            <span className="text-[9px] font-bold">Jeux</span>
-          </button>
-
-          <button
-            onClick={() => { audio.playClick(); setShowRngModal(true); }}
-            className="p-2.5 rounded-full hover:bg-cyan-500/20 text-cyan-300 flex flex-col items-center gap-0.5 transition-all cursor-pointer"
-            title="Sanctuaire RNG"
-          >
-            <Sparkles className="w-5 h-5" />
-            <span className="text-[9px] font-bold">RNG</span>
-          </button>
-
-          <button
-            onClick={() => { audio.playClick(); setShowTrophyModal(true); }}
-            className="p-2.5 rounded-full hover:bg-yellow-500/20 text-yellow-300 flex flex-col items-center gap-0.5 transition-all cursor-pointer"
-            title="Ligue des Trophées"
-          >
-            <Trophy className="w-5 h-5" />
-            <span className="text-[9px] font-bold">Trophées</span>
-          </button>
-
-          <button
-            onClick={() => { audio.playClick(); setShowRankedModal(true); }}
-            className="p-2.5 rounded-full hover:bg-red-500/20 text-red-400 flex flex-col items-center gap-0.5 transition-all cursor-pointer"
-            title="Mode Classé"
-          >
-            <Flame className="w-5 h-5" />
-            <span className="text-[9px] font-bold">Classé</span>
-          </button>
-
-          <button
-            onClick={() => { audio.playClick(); setShowPassModal(true); }}
-            className="p-2.5 rounded-full hover:bg-purple-500/20 text-purple-300 flex flex-col items-center gap-0.5 transition-all cursor-pointer"
-            title="Pass Arcade"
-          >
-            <Crown className="w-5 h-5" />
-            <span className="text-[9px] font-bold">Pass</span>
-          </button>
-
-          <button
-            onClick={() => { audio.playClick(); setShowQuestsModal(true); }}
-            className="p-2.5 rounded-full hover:bg-emerald-500/20 text-emerald-300 flex flex-col items-center gap-0.5 transition-all cursor-pointer"
-            title="Missions"
-          >
-            <Target className="w-5 h-5" />
-            <span className="text-[9px] font-bold">Missions</span>
-          </button>
-
-          <button
-            onClick={() => { audio.playClick(); setShowShopModal(true); }}
-            className="p-2.5 rounded-full hover:bg-rose-500/20 text-rose-300 flex flex-col items-center gap-0.5 transition-all cursor-pointer"
-            title="Boutique"
-          >
-            <ShoppingBag className="w-5 h-5" />
-            <span className="text-[9px] font-bold">Boutique</span>
-          </button>
-
-          <button
-            onClick={() => { audio.playClick(); setShowAchievementsModal(true); }}
-            className="p-2.5 rounded-full hover:bg-yellow-500/20 text-yellow-300 flex flex-col items-center gap-0.5 transition-all cursor-pointer"
-            title="Succès (200)"
-          >
-            <Award className="w-5 h-5" />
-            <span className="text-[9px] font-bold">200 Succès</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 6. Active Game Overlay Cabinet */}
+      {/* 6. Active Game Overlay Cabinet (All 20 Games) */}
       {activeGameId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-slate-950/95 backdrop-blur-xl overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-slate-950/95 backdrop-blur-2xl overflow-y-auto">
           <div className="relative w-full max-w-5xl my-auto py-2">
             {activeGameId === 'quantum_obby' && (
               <QuantumObby
@@ -829,6 +1106,37 @@ export default function App() {
                 onExit={() => setActiveGameId(null)}
               />
             )}
+            {/* 5 NEW GAMES */}
+            {activeGameId === 'cosmic_miner' && (
+              <CosmicMiner
+                onFinish={(sc, b) => handleFinishGame('cosmic_miner', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'shadow_shinobi' && (
+              <ShadowShinobi
+                onFinish={(sc, b) => handleFinishGame('shadow_shinobi', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'speed_runners_2099' && (
+              <SpeedRunners2099
+                onFinish={(sc, b) => handleFinishGame('speed_runners_2099', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'block_craft_arena' && (
+              <BlockCraftArena
+                onFinish={(sc, b) => handleFinishGame('block_craft_arena', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === 'neon_cyber_pong' && (
+              <NeonCyberPong
+                onFinish={(sc, b) => handleFinishGame('neon_cyber_pong', sc, b)}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
 
             {/* Mobile / Touch Ergonomic Controls */}
             <MobileGameControls
@@ -842,7 +1150,7 @@ export default function App() {
       {/* 7. Paid Game Unlock Modal */}
       {paidGamePrompt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-          <div className="w-full max-w-md p-6 rounded-3xl bg-[#0e1424] border-2 border-amber-500 shadow-2xl text-center space-y-4">
+          <div className="w-full max-w-md p-6 rounded-3xl bg-slate-900/95 border border-amber-500/60 shadow-2xl text-center space-y-4">
             <div className="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-400 mx-auto flex items-center justify-center text-3xl">
               💎
             </div>

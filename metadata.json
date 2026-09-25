@@ -1,6 +1,6 @@
 {
   "name": "Vertex Arcades",
-  "description": "Vertex Arcades v3.0 : Plateforme de jeux avec catalogue de 15 nouveaux jeux originaux (3 gratuits et 12 VIP en V-Coins), Sanctuaire RNG et échanges de reliques, Ligue Stellaire des Trophées, Mode Classé et support manette et mobile tactile complet.",
+  "description": "Vertex Arcades v3.1 : Plateforme de jeux et d'expériences avec catalogue de 20 jeux originaux (3 gratuits et 17 VIP en V-Coins), Sanctuaire RNG équilibré avec alchimie de potions, Ligue Stellaire des Trophées, interface iOS fluide avec tiroir latéral et support manette & mobile tactile.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

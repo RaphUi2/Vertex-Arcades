@@ -56,8 +56,8 @@ export interface GameData {
   category: 'action' | 'platformer' | 'puzzle' | 'racer' | 'rhythm' | 'tycoon' | 'survival' | 'rpg';
   difficulty: 'Facile' | 'Moyen' | 'Difficile' | 'Extrême';
   color: string;
-  rating: number; // e.g. 96 for 96%
-  activePlayers: string; // e.g. "2.4k"
+  rating?: number;
+  activePlayers?: string;
   creator: string;
   badge?: string;
   isPaid: boolean;

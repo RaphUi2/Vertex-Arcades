@@ -32,9 +32,6 @@ export function GameCardIllustration({ gameId, className = 'w-full h-44' }: Illu
             {/* Checkpoint portal */}
             <ellipse cx="250" cy="45" rx="14" ry="24" fill="#8b5cf6" opacity="0.6" filter="drop-shadow(0 0 10px #8b5cf6)" />
           </svg>
-          <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-cyan-500/80 backdrop-blur-md text-[10px] font-black text-slate-950 font-mono">
-            OBBY SPEED
-          </div>
         </div>
       );
 
@@ -52,9 +49,6 @@ export function GameCardIllustration({ gameId, className = 'w-full h-44' }: Illu
             <path d="M122 84 L138 84 L142 120 L118 120 Z" fill="#0f172a" />
             <line x1="135" y1="80" x2="200" y2="40" stroke="#e879f9" strokeWidth="4" filter="drop-shadow(0 0 8px #e879f9)" />
           </svg>
-          <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-purple-500/80 backdrop-blur-md text-[10px] font-black text-white font-mono">
-            REFLEX SLASH
-          </div>
         </div>
       );
 
@@ -72,9 +66,6 @@ export function GameCardIllustration({ gameId, className = 'w-full h-44' }: Illu
             <line x1="60" y1="66" x2="10" y2="66" stroke="#fbbf24" strokeWidth="4" filter="drop-shadow(0 0 8px #fbbf24)" />
             <line x1="230" y1="66" x2="280" y2="66" stroke="#fbbf24" strokeWidth="4" filter="drop-shadow(0 0 8px #fbbf24)" />
           </svg>
-          <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-red-500/80 backdrop-blur-md text-[10px] font-black text-white font-mono">
-            CLASSÉ APEX 🏆
-          </div>
         </div>
       );
 
@@ -92,9 +83,6 @@ export function GameCardIllustration({ gameId, className = 'w-full h-44' }: Illu
             <circle cx="140" cy="80" r="8" fill="#eab308" />
             <circle cx="160" cy="80" r="8" fill="#facc15" />
           </svg>
-          <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-amber-500/90 backdrop-blur-md text-[10px] font-black text-slate-950 font-mono">
-            VIP 150 VC 💎
-          </div>
         </div>
       );
 
@@ -110,9 +98,6 @@ export function GameCardIllustration({ gameId, className = 'w-full h-44' }: Illu
             <circle cx="105" cy="115" r="14" fill="#d946ef" opacity="0.6" filter="drop-shadow(0 0 10px #d946ef)" />
             <circle cx="185" cy="118" r="16" fill="#d946ef" opacity="0.6" filter="drop-shadow(0 0 10px #d946ef)" />
           </svg>
-          <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-pink-500/90 backdrop-blur-md text-[10px] font-black text-white font-mono">
-            VIP 250 VC 💎
-          </div>
         </div>
       );
 
@@ -130,9 +115,68 @@ export function GameCardIllustration({ gameId, className = 'w-full h-44' }: Illu
             <rect x="220" y="35" width="50" height="70" rx="8" fill="#c2410c" />
             <circle cx="245" cy="65" r="12" fill="#fde047" filter="drop-shadow(0 0 8px #fde047)" />
           </svg>
-          <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-orange-500/90 backdrop-blur-md text-[10px] font-black text-slate-950 font-mono">
-            TYCOON 🏭
-          </div>
+        </div>
+      );
+
+    case 'cosmic_miner':
+      return (
+        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-950 via-slate-900 to-blue-950 flex items-center justify-center ${className}`}>
+          <svg className="w-full h-full" viewBox="0 0 300 160" fill="none" preserveAspectRatio="xMidYMid slice">
+            <circle cx="150" cy="190" r="120" fill="#1e1b4b" stroke="#38bdf8" strokeWidth="2" />
+            <rect x="70" y="70" width="24" height="24" rx="4" fill="#fbbf24" filter="drop-shadow(0 0 8px #fbbf24)" />
+            <rect x="200" y="50" width="28" height="28" rx="6" fill="#38bdf8" filter="drop-shadow(0 0 10px #38bdf8)" />
+            <rect x="135" y="40" width="30" height="45" rx="8" fill="#0284c7" stroke="#38bdf8" strokeWidth="3" />
+            <polygon points="150,105 140,85 160,85" fill="#f59e0b" />
+          </svg>
+        </div>
+      );
+
+    case 'shadow_shinobi':
+      return (
+        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-950 via-slate-900 to-pink-950 flex items-center justify-center ${className}`}>
+          <svg className="w-full h-full" viewBox="0 0 300 160" fill="none" preserveAspectRatio="xMidYMid slice">
+            <rect x="0" y="110" width="300" height="50" fill="#0f172a" />
+            <line x1="0" y1="110" x2="300" y2="110" stroke="#c084fc" strokeWidth="3" />
+            <circle cx="150" cy="50" r="35" fill="#f43f5e" opacity="0.4" filter="drop-shadow(0 0 25px #f43f5e)" />
+            <rect x="130" y="65" width="24" height="35" rx="4" fill="#3b0764" />
+            <path d="M100 100 Q 150 40 220 80" stroke="#e879f9" strokeWidth="5" strokeLinecap="round" filter="drop-shadow(0 0 10px #e879f9)" />
+          </svg>
+        </div>
+      );
+
+    case 'speed_runners_2099':
+      return (
+        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-sky-950 via-slate-900 to-indigo-950 flex items-center justify-center ${className}`}>
+          <svg className="w-full h-full" viewBox="0 0 300 160" fill="none" preserveAspectRatio="xMidYMid slice">
+            <polygon points="150,40 20,160 280,160" fill="#0c4a6e" opacity="0.6" />
+            <line x1="150" y1="40" x2="150" y2="160" stroke="#38bdf8" strokeWidth="3" strokeDasharray="6 6" />
+            <polygon points="150,110 130,140 170,140" fill="#0284c7" stroke="#38bdf8" strokeWidth="2" />
+            <circle cx="150" cy="148" r="8" fill="#f43f5e" filter="drop-shadow(0 0 12px #f43f5e)" />
+          </svg>
+        </div>
+      );
+
+    case 'block_craft_arena':
+      return (
+        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-950 via-slate-900 to-teal-950 flex items-center justify-center ${className}`}>
+          <svg className="w-full h-full" viewBox="0 0 300 160" fill="none" preserveAspectRatio="xMidYMid slice">
+            <rect x="40" y="110" width="220" height="30" fill="#22c55e" rx="4" />
+            <polygon points="150,50 165,80 150,105 135,80" fill="#38bdf8" filter="drop-shadow(0 0 15px #38bdf8)" />
+            <rect x="70" y="85" width="24" height="24" fill="#b45309" stroke="#f59e0b" strokeWidth="2" />
+            <rect x="210" y="85" width="24" height="24" fill="#b45309" stroke="#f59e0b" strokeWidth="2" />
+          </svg>
+        </div>
+      );
+
+    case 'neon_cyber_pong':
+      return (
+        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-950 via-slate-900 to-rose-950 flex items-center justify-center ${className}`}>
+          <svg className="w-full h-full" viewBox="0 0 300 160" fill="none" preserveAspectRatio="xMidYMid slice">
+            <line x1="150" y1="0" x2="150" y2="160" stroke="#334155" strokeWidth="3" strokeDasharray="6 6" />
+            <rect x="30" y="55" width="10" height="50" rx="4" fill="#06b6d4" filter="drop-shadow(0 0 10px #06b6d4)" />
+            <rect x="260" y="45" width="10" height="50" rx="4" fill="#f43f5e" filter="drop-shadow(0 0 10px #f43f5e)" />
+            <circle cx="165" cy="75" r="7" fill="#facc15" filter="drop-shadow(0 0 12px #facc15)" />
+          </svg>
         </div>
       );
 
@@ -145,9 +189,6 @@ export function GameCardIllustration({ gameId, className = 'w-full h-44' }: Illu
             <polygon points="150,30 200,120 100,120" stroke="#38bdf8" strokeWidth="3" fill="none" />
             <circle cx="150" cy="80" r="10" fill="#facc15" />
           </svg>
-          <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-cyan-500/80 backdrop-blur-md text-[10px] font-black text-slate-950 font-mono">
-            ARCADE 3.0
-          </div>
         </div>
       );
   }

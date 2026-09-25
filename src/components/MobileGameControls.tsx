@@ -621,6 +621,184 @@ export function MobileGameControls({ gameId }: MobileGameControlsProps) {
           👆 Touchez directement les stations et générateurs sur l'écran pour miner et moderniser votre usine !
         </div>
       )}
+
+      {/* GAME 16: COSMIC MINER */}
+      {gameId === 'cosmic_miner' && (
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex gap-2">
+            <button
+              onTouchStart={(e) => handlePressStart(e, 'ArrowLeft', 'ArrowLeft')}
+              onTouchEnd={(e) => handlePressEnd(e, 'ArrowLeft', 'ArrowLeft')}
+              onMouseDown={(e) => handlePressStart(e, 'ArrowLeft', 'ArrowLeft')}
+              onMouseUp={(e) => handlePressEnd(e, 'ArrowLeft', 'ArrowLeft')}
+              className="w-16 h-16 rounded-2xl bg-cyan-900/70 active:bg-cyan-500 border border-cyan-400 flex items-center justify-center text-white"
+            >
+              <ArrowLeft className="w-7 h-7" />
+            </button>
+            <button
+              onTouchStart={(e) => handlePressStart(e, 'ArrowRight', 'ArrowRight')}
+              onTouchEnd={(e) => handlePressEnd(e, 'ArrowRight', 'ArrowRight')}
+              onMouseDown={(e) => handlePressStart(e, 'ArrowRight', 'ArrowRight')}
+              onMouseUp={(e) => handlePressEnd(e, 'ArrowRight', 'ArrowRight')}
+              className="w-16 h-16 rounded-2xl bg-cyan-900/70 active:bg-cyan-500 border border-cyan-400 flex items-center justify-center text-white"
+            >
+              <ArrowRight className="w-7 h-7" />
+            </button>
+          </div>
+          <button
+            onTouchStart={(e) => handlePressStart(e, 'KeyC', 'c')}
+            onTouchEnd={(e) => handlePressEnd(e, 'KeyC', 'c')}
+            onMouseDown={(e) => handlePressStart(e, 'KeyC', 'c')}
+            onMouseUp={(e) => handlePressEnd(e, 'KeyC', 'c')}
+            className="flex-1 h-16 rounded-2xl bg-blue-600 active:bg-blue-400 text-white font-black text-xs uppercase"
+          >
+            ❄️ REFROIDIR (C)
+          </button>
+        </div>
+      )}
+
+      {/* GAME 17: SHADOW SHINOBI */}
+      {gameId === 'shadow_shinobi' && (
+        <div className="grid grid-cols-3 gap-3">
+          <button
+            onTouchStart={(e) => handlePressStart(e, 'Space', ' ')}
+            onTouchEnd={(e) => handlePressEnd(e, 'Space', ' ')}
+            onMouseDown={(e) => handlePressStart(e, 'Space', ' ')}
+            onMouseUp={(e) => handlePressEnd(e, 'Space', ' ')}
+            className="h-16 rounded-2xl bg-slate-800 active:bg-purple-600 border border-purple-400 text-white font-black text-xs uppercase"
+          >
+            🦘 SAUTER
+          </button>
+          <button
+            onTouchStart={(e) => handlePressStart(e, 'KeyE', 'e')}
+            onTouchEnd={(e) => handlePressEnd(e, 'KeyE', 'e')}
+            onMouseDown={(e) => handlePressStart(e, 'KeyE', 'e')}
+            onMouseUp={(e) => handlePressEnd(e, 'KeyE', 'e')}
+            className="h-16 rounded-2xl bg-slate-800 active:bg-cyan-600 border border-cyan-400 text-white font-black text-xs uppercase"
+          >
+            ⭐ SHURIKEN
+          </button>
+          <button
+            onTouchStart={(e) => handlePressStart(e, 'KeyF', 'f')}
+            onTouchEnd={(e) => handlePressEnd(e, 'KeyF', 'f')}
+            onMouseDown={(e) => handlePressStart(e, 'KeyF', 'f')}
+            onMouseUp={(e) => handlePressEnd(e, 'KeyF', 'f')}
+            className="h-16 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black text-xs uppercase"
+          >
+            ⚔️ SLASH
+          </button>
+        </div>
+      )}
+
+      {/* GAME 18: SPEED RUNNERS 2099 */}
+      {gameId === 'speed_runners_2099' && (
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex gap-2">
+            <button
+              onTouchStart={(e) => handlePressStart(e, 'ArrowLeft', 'ArrowLeft')}
+              onTouchEnd={(e) => handlePressEnd(e, 'ArrowLeft', 'ArrowLeft')}
+              onMouseDown={(e) => handlePressStart(e, 'ArrowLeft', 'ArrowLeft')}
+              onMouseUp={(e) => handlePressEnd(e, 'ArrowLeft', 'ArrowLeft')}
+              className="w-16 h-16 rounded-2xl bg-slate-800 active:bg-cyan-500 border border-cyan-400 flex items-center justify-center text-white"
+            >
+              <ArrowLeft className="w-7 h-7" />
+            </button>
+            <button
+              onTouchStart={(e) => handlePressStart(e, 'ArrowRight', 'ArrowRight')}
+              onTouchEnd={(e) => handlePressEnd(e, 'ArrowRight', 'ArrowRight')}
+              onMouseDown={(e) => handlePressStart(e, 'ArrowRight', 'ArrowRight')}
+              onMouseUp={(e) => handlePressEnd(e, 'ArrowRight', 'ArrowRight')}
+              className="w-16 h-16 rounded-2xl bg-slate-800 active:bg-cyan-500 border border-cyan-400 flex items-center justify-center text-white"
+            >
+              <ArrowRight className="w-7 h-7" />
+            </button>
+          </div>
+          <button
+            onTouchStart={(e) => handlePressStart(e, 'Space', ' ')}
+            onTouchEnd={(e) => handlePressEnd(e, 'Space', ' ')}
+            onMouseDown={(e) => handlePressStart(e, 'Space', ' ')}
+            onMouseUp={(e) => handlePressEnd(e, 'Space', ' ')}
+            className="flex-1 h-16 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 text-white font-black text-xs uppercase"
+          >
+            🚀 NITRO BOOST
+          </button>
+        </div>
+      )}
+
+      {/* GAME 19: BLOCK CRAFT ARENA */}
+      {gameId === 'block_craft_arena' && (
+        <div className="grid grid-cols-4 gap-2">
+          <button
+            onTouchStart={(e) => handlePressStart(e, 'ArrowLeft', 'ArrowLeft')}
+            onTouchEnd={(e) => handlePressEnd(e, 'ArrowLeft', 'ArrowLeft')}
+            onMouseDown={(e) => handlePressStart(e, 'ArrowLeft', 'ArrowLeft')}
+            onMouseUp={(e) => handlePressEnd(e, 'ArrowLeft', 'ArrowLeft')}
+            className="h-16 rounded-2xl bg-slate-800 active:bg-cyan-600 text-cyan-300 font-bold"
+          >
+            ◀
+          </button>
+          <button
+            onTouchStart={(e) => handlePressStart(e, 'KeyB', 'b')}
+            onTouchEnd={(e) => handlePressEnd(e, 'KeyB', 'b')}
+            onMouseDown={(e) => handlePressStart(e, 'KeyB', 'b')}
+            onMouseUp={(e) => handlePressEnd(e, 'KeyB', 'b')}
+            className="h-16 rounded-2xl bg-amber-800 active:bg-amber-600 text-amber-200 text-xs font-bold"
+          >
+            🧱 BLOC
+          </button>
+          <button
+            onTouchStart={(e) => handlePressStart(e, 'KeyE', 'e')}
+            onTouchEnd={(e) => handlePressEnd(e, 'KeyE', 'e')}
+            onMouseDown={(e) => handlePressStart(e, 'KeyE', 'e')}
+            onMouseUp={(e) => handlePressEnd(e, 'KeyE', 'e')}
+            className="h-16 rounded-2xl bg-slate-800 active:bg-yellow-600 text-yellow-300 text-xs font-bold"
+          >
+            🏹 ARC
+          </button>
+          <button
+            onTouchStart={(e) => handlePressStart(e, 'ArrowRight', 'ArrowRight')}
+            onTouchEnd={(e) => handlePressEnd(e, 'ArrowRight', 'ArrowRight')}
+            onMouseDown={(e) => handlePressStart(e, 'ArrowRight', 'ArrowRight')}
+            onMouseUp={(e) => handlePressEnd(e, 'ArrowRight', 'ArrowRight')}
+            className="h-16 rounded-2xl bg-slate-800 active:bg-cyan-600 text-cyan-300 font-bold"
+          >
+            ▶
+          </button>
+        </div>
+      )}
+
+      {/* GAME 20: NEON CYBER PONG */}
+      {gameId === 'neon_cyber_pong' && (
+        <div className="flex items-center justify-between gap-3">
+          <button
+            onTouchStart={(e) => handlePressStart(e, 'ArrowUp', 'ArrowUp')}
+            onTouchEnd={(e) => handlePressEnd(e, 'ArrowUp', 'ArrowUp')}
+            onMouseDown={(e) => handlePressStart(e, 'ArrowUp', 'ArrowUp')}
+            onMouseUp={(e) => handlePressEnd(e, 'ArrowUp', 'ArrowUp')}
+            className="flex-1 h-16 rounded-2xl bg-cyan-900/80 active:bg-cyan-500 text-white font-bold"
+          >
+            ▲ MONTER
+          </button>
+          <button
+            onTouchStart={(e) => handlePressStart(e, 'Space', ' ')}
+            onTouchEnd={(e) => handlePressEnd(e, 'Space', ' ')}
+            onMouseDown={(e) => handlePressStart(e, 'Space', ' ')}
+            onMouseUp={(e) => handlePressEnd(e, 'Space', ' ')}
+            className="flex-1 h-16 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-600 text-white font-bold text-xs uppercase"
+          >
+            ⚡ LASER SMASH
+          </button>
+          <button
+            onTouchStart={(e) => handlePressStart(e, 'ArrowDown', 'ArrowDown')}
+            onTouchEnd={(e) => handlePressEnd(e, 'ArrowDown', 'ArrowDown')}
+            onMouseDown={(e) => handlePressStart(e, 'ArrowDown', 'ArrowDown')}
+            onMouseUp={(e) => handlePressEnd(e, 'ArrowDown', 'ArrowDown')}
+            className="flex-1 h-16 rounded-2xl bg-cyan-900/80 active:bg-cyan-500 text-white font-bold"
+          >
+            ▼ DESCENDRE
+          </button>
+        </div>
+      )}
     </div>
   );
 }

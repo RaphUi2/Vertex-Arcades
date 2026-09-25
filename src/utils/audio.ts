@@ -150,6 +150,31 @@ class AudioManager {
     this.playTone([180], [0.08], 'triangle', 45, 0.25);
   }
 
+  // Damage sound
+  playDamage() {
+    this.playTone([220, 140, 80], [0.06, 0.08, 0.12], 'triangle', 40, 0.3);
+  }
+
+  // Attack / Slash sound
+  playAttack() {
+    this.playTone([440, 660, 880], [0.04, 0.04, 0.08], 'sawtooth', 300, 0.22);
+  }
+
+  // Sword swing
+  playSwordSwing() {
+    this.playTone([320, 580], [0.05, 0.08], 'sine', 180, 0.2);
+  }
+
+  // Bow arrow shoot
+  playBowShoot() {
+    this.playTone([400, 800], [0.03, 0.08], 'sine', 250, 0.2);
+  }
+
+  // Voxel Block break/place
+  playBlockBreak() {
+    this.playTone([240, 180], [0.04, 0.06], 'square', undefined, 0.18);
+  }
+
   // Explosive blast
   playExplosion() {
     this.playTone([260, 180, 90, 40], [0.05, 0.06, 0.08, 0.2], 'sawtooth', 25, 0.35);

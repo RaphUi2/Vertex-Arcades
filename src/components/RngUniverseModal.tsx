@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Sparkles, RefreshCw, Dice5, Shield, Check, Flame, Trophy, Coins, ArrowRightLeft, Play, Pause, Zap, Award, Trash2 } from 'lucide-react';
+import {
+  X, Sparkles, RefreshCw, Dice5, Shield, Check, Flame, Trophy,
+  Coins, ArrowRightLeft, Play, Pause, Zap, Award, Trash2, Beaker,
+  TrendingUp, Star, Filter, Heart
+} from 'lucide-react';
 import { audio } from '../utils/audio';
 import { RngUniverseItem, TradeRequest } from '../types';
 import { RNG_UNIVERSE_ITEMS } from '../gamesData';
@@ -26,39 +30,86 @@ export function RngUniverseModal({
   totalRolls,
   userVCoins
 }: RngUniverseModalProps) {
-  const [activeTab, setActiveTab] = useState<'roll' | 'inventory' | 'trades'>('roll');
+  const [activeTab, setActiveTab] = useState<'roll' | 'inventory' | 'potions' | 'trades'>('roll');
   const [selectedUniverse, setSelectedUniverse] = useState<string>('all');
   const [isRolling, setIsRolling] = useState(false);
   const [lastRolledItem, setLastRolledItem] = useState<RngUniverseItem | null>(null);
-  const [luckMultiplier, setLuckMultiplier] = useState(1);
+  const [luckCharges, setLuckCharges] = useState<{ multiplier: number; remainingRolls: number }>({
+    multiplier: 1,
+    remainingRolls: 0
+  });
   const [rollHistory, setRollHistory] = useState<RngUniverseItem[]>([]);
   const [fastRoll, setFastRoll] = useState(false);
   const [autoRoll, setAutoRoll] = useState(false);
   const [pityCounter, setPityCounter] = useState(0);
   const [reelPreviewItem, setReelPreviewItem] = useState<RngUniverseItem | null>(null);
-  const [tradeMessage, setTradeMessage] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const autoRollIntervalRef = useRef<any>(null);
   const reelAnimRef = useRef<any>(null);
 
-  // Perform clean, bug-free probabilistic RNG roll
+  const notify = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  // Current effective luck
+  const currentLuckMultiplier = luckCharges.remainingRolls > 0 ? luckCharges.multiplier : 1;
+
+  // True Fair Weighted Probability Selection Algorithm
+  const calculateFairRoll = (luck: number, currentPity: number): RngUniverseItem => {
+    // 1. Pity Rule: At 25 rolls, guarantee Epic or higher!
+    if (currentPity >= 25) {
+      const epicOrHigher = RNG_UNIVERSE_ITEMS.filter(i => i.chanceDenominator >= 500);
+      return epicOrHigher[Math.floor(Math.random() * epicOrHigher.length)];
+    }
+
+    // 2. Cumulative Weighted Distribution
+    // Base weight formula: Weight = 100,000 / (chanceDenominator^0.8)
+    // High rarity items get boosted by luck multiplier
+    const itemsWithWeights = RNG_UNIVERSE_ITEMS.map(item => {
+      let weight = 100000 / Math.pow(item.chanceDenominator, 0.85);
+
+      // Apply luck boost to rare/epic/legendary/mythic
+      if (item.chanceDenominator >= 200) {
+        weight *= luck;
+      } else if (item.chanceDenominator >= 50) {
+        weight *= Math.sqrt(luck);
+      }
+
+      return { item, weight };
+    });
+
+    const totalWeight = itemsWithWeights.reduce((acc, curr) => acc + curr.weight, 0);
+    const randomPick = Math.random() * totalWeight;
+
+    let cumulative = 0;
+    for (const entry of itemsWithWeights) {
+      cumulative += entry.weight;
+      if (randomPick <= cumulative) {
+        return entry.item;
+      }
+    }
+
+    return RNG_UNIVERSE_ITEMS[0];
+  };
+
+  // Perform Roll
   const performRoll = (instant = false) => {
     if (isRolling && !instant) return;
     setIsRolling(true);
 
-    const rollDuration = instant ? 100 : (fastRoll ? 250 : 650);
-
-    // Audio feedback
+    const rollDuration = instant ? 120 : fastRoll ? 300 : 750;
     audio.playRngTick();
 
-    // Animated fast cycling reel preview
+    // Horizontal reel simulation
     let stepCount = 0;
-    const maxSteps = instant ? 2 : (fastRoll ? 4 : 10);
+    const maxSteps = instant ? 2 : fastRoll ? 5 : 12;
     const intervalMs = Math.floor(rollDuration / maxSteps);
 
     reelAnimRef.current = setInterval(() => {
-      const randomItem = RNG_UNIVERSE_ITEMS[Math.floor(Math.random() * RNG_UNIVERSE_ITEMS.length)];
-      setReelPreviewItem(randomItem);
+      const randomPreview = RNG_UNIVERSE_ITEMS[Math.floor(Math.random() * RNG_UNIVERSE_ITEMS.length)];
+      setReelPreviewItem(randomPreview);
       audio.playRngTick();
       stepCount++;
       if (stepCount >= maxSteps) {
@@ -70,56 +121,39 @@ export function RngUniverseModal({
     setTimeout(() => {
       if (reelAnimRef.current) clearInterval(reelAnimRef.current);
 
-      let chosen: RngUniverseItem | null = null;
-      const currentPity = pityCounter + 1;
+      const nextPity = pityCounter + 1;
+      const chosen = calculateFairRoll(currentLuckMultiplier, nextPity);
 
-      // Pity Rule: At 30 rolls, guarantee Epic or better!
-      if (currentPity >= 30) {
-        const epicOrHigher = RNG_UNIVERSE_ITEMS.filter(i => i.chanceDenominator >= 800);
-        chosen = epicOrHigher[Math.floor(Math.random() * epicOrHigher.length)];
+      // Decrement luck charges if active
+      if (luckCharges.remainingRolls > 0) {
+        setLuckCharges(prev => ({
+          ...prev,
+          remainingRolls: Math.max(0, prev.remainingRolls - 1)
+        }));
+      }
+
+      // Reset or increment pity
+      if (chosen.chanceDenominator >= 500) {
         setPityCounter(0);
       } else {
-        // Sort items by rarity (rarest first)
-        const sortedRarest = [...RNG_UNIVERSE_ITEMS].sort((a, b) => b.chanceDenominator - a.chanceDenominator);
-
-        for (const item of sortedRarest) {
-          // Effective probability threshold
-          const effectiveChance = (1 / item.chanceDenominator) * luckMultiplier;
-          if (Math.random() < effectiveChance) {
-            chosen = item;
-            break;
-          }
-        }
-
-        // If no rare item won, select fairly among common and uncommon items
-        if (!chosen) {
-          const commonItems = RNG_UNIVERSE_ITEMS.filter(i => i.chanceDenominator <= 50);
-          chosen = commonItems[Math.floor(Math.random() * commonItems.length)];
-          setPityCounter(currentPity);
-        } else {
-          // Reset pity if player hit rare/legendary/mythic
-          if (chosen.chanceDenominator >= 800) {
-            setPityCounter(0);
-          } else {
-            setPityCounter(currentPity);
-          }
-        }
+        setPityCounter(nextPity >= 25 ? 0 : nextPity);
       }
 
       setIsRolling(false);
       setLastRolledItem(chosen);
       setReelPreviewItem(null);
-      setRollHistory(prev => [chosen!, ...prev.slice(0, 9)]);
+      setRollHistory(prev => [chosen, ...prev.slice(0, 7)]);
 
       if (chosen.chanceDenominator >= 5000) {
         audio.playMythicReveal();
-        // Pause auto-roll on rare drop to allow player to celebrate
         setAutoRoll(false);
+      } else if (chosen.chanceDenominator >= 500) {
+        audio.playWin();
       } else {
         audio.playCoin();
       }
 
-      // Update inventory and add V-Coins directly
+      // Update Inventory & VC
       const nextInv = { ...inventory, [chosen.id]: (inventory[chosen.id] || 0) + 1 };
       onInventoryUpdate(nextInv, chosen.vcoinWorth);
     }, rollDuration);
@@ -130,7 +164,7 @@ export function RngUniverseModal({
     if (autoRoll) {
       autoRollIntervalRef.current = setInterval(() => {
         performRoll(true);
-      }, 550);
+      }, 500);
     } else {
       if (autoRollIntervalRef.current) {
         clearInterval(autoRollIntervalRef.current);
@@ -141,16 +175,28 @@ export function RngUniverseModal({
       if (autoRollIntervalRef.current) clearInterval(autoRollIntervalRef.current);
       if (reelAnimRef.current) clearInterval(reelAnimRef.current);
     };
-  }, [autoRoll, luckMultiplier, inventory, pityCounter]);
+  }, [autoRoll, currentLuckMultiplier, inventory, pityCounter]);
 
-  // Dismantle an item for 60% of its V-Coin worth
-  const handleDismantle = (itemId: string) => {
+  // Buy Luck Potion
+  const handleBuyPotion = (multiplier: number, rolls: number, cost: number, name: string) => {
+    if (userVCoins < cost) {
+      notify('❌ V-Coins insuffisants !');
+      return;
+    }
+    audio.playWin();
+    setLuckCharges({ multiplier, remainingRolls: rolls });
+    onInventoryUpdate(inventory, -cost);
+    notify(`🧪 ${name} activée : ${multiplier}x Chance pendant ${rolls} tirages !`);
+  };
+
+  // Sell duplicate items
+  const handleSellItem = (itemId: string) => {
     const count = inventory[itemId] || 0;
     if (count <= 0) return;
     const item = RNG_UNIVERSE_ITEMS.find(i => i.id === itemId);
     if (!item) return;
 
-    const refund = Math.floor(item.vcoinWorth * 0.6);
+    const refund = Math.max(10, Math.floor(item.vcoinWorth * 0.7));
     const nextInv = { ...inventory };
     if (count === 1) {
       delete nextInv[itemId];
@@ -159,399 +205,400 @@ export function RngUniverseModal({
     }
     audio.playCoin();
     onInventoryUpdate(nextInv, refund);
-  };
-
-  // Trade handler with inventory verification
-  const handleExecuteTrade = (trade: TradeRequest) => {
-    // Check if player has all requested items
-    const missing = trade.requestedItemIds.find(id => (inventory[id] || 0) <= 0);
-    if (missing) {
-      const item = RNG_UNIVERSE_ITEMS.find(i => i.id === missing);
-      setTradeMessage(`Il vous manque l'objet requis : ${item ? item.name : missing}`);
-      setTimeout(() => setTradeMessage(null), 3500);
-      return;
-    }
-
-    // Process trade: deduct requested items, add offered items and offered V-Coins
-    const nextInv = { ...inventory };
-    for (const reqId of trade.requestedItemIds) {
-      if (nextInv[reqId] > 1) {
-        nextInv[reqId] -= 1;
-      } else {
-        delete nextInv[reqId];
-      }
-    }
-    for (const offId of trade.offeredItemIds) {
-      nextInv[offId] = (nextInv[offId] || 0) + 1;
-    }
-
-    audio.playWin();
-    onInventoryUpdate(nextInv, trade.offeredVCoins);
-    onAcceptTrade(trade.id);
-    setTradeMessage(`Échange réussi avec ${trade.traderName} ! +${trade.offeredVCoins} VC`);
-    setTimeout(() => setTradeMessage(null), 3500);
+    notify(`Vendu : 1x ${item.name} pour +${refund} VC !`);
   };
 
   if (!isOpen) return null;
 
-  const filteredItems = selectedUniverse === 'all'
-    ? RNG_UNIVERSE_ITEMS
-    : RNG_UNIVERSE_ITEMS.filter(i => i.universe === selectedUniverse);
-
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-2xl">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-4xl max-h-[92vh] bg-[#0c1020] border-2 border-cyan-500/60 rounded-3xl shadow-[0_0_60px_rgba(6,182,212,0.4)] flex flex-col overflow-hidden text-slate-100"
+          className="relative w-full max-w-4xl max-h-[92vh] bg-slate-900/90 border border-white/10 rounded-3xl shadow-[0_0_60px_rgba(6,182,212,0.35)] flex flex-col overflow-hidden text-slate-100 backdrop-blur-2xl"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-cyan-500/30 bg-[#080d1a]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-slate-950/60 backdrop-blur-md">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 border border-cyan-300 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(6,182,212,0.5)]">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 border border-cyan-300 flex items-center justify-center text-slate-950 text-2xl shadow-[0_0_20px_rgba(6,182,212,0.6)]">
                 🎲
               </div>
               <div>
-                <h2 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-indigo-300 font-mono">
-                  SANCTUAIRE RNG VERTEX
+                <h2 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-white to-blue-300 font-mono">
+                  SANCTUAIRE RNG STELLAIRE
                 </h2>
-                <p className="text-xs text-cyan-400 font-mono">
-                  Système probabiliste de reliques cosmiques & marché d'échange
+                <p className="text-xs text-slate-400 font-mono">
+                  Tirages de reliques, probabilités équilibrées & alchimie de chance
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="px-3.5 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-500 text-cyan-300 text-xs font-mono font-bold">
-                Tirages : {totalRolls} 🎲
+              {/* Active Luck Capsule */}
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-400 text-cyan-300 font-mono text-xs font-bold shadow-md">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-300 animate-spin" />
+                <span>
+                  {currentLuckMultiplier > 1
+                    ? `${currentLuckMultiplier}x Chance (${luckCharges.remainingRolls} restants)`
+                    : '1x Chance Normale'}
+                </span>
               </div>
+
+              {/* V-Coins Pill */}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-950/80 border border-amber-500 text-yellow-300 font-mono text-xs font-bold">
+                <Coins className="w-3.5 h-3.5 text-yellow-400" />
+                <span>{userVCoins.toLocaleString()} VC</span>
+              </div>
+
               <button
                 onClick={() => {
                   audio.playClick();
-                  setAutoRoll(false);
                   onClose();
                 }}
-                className="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center cursor-pointer transition-colors"
+                className="w-9 h-9 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 flex items-center justify-center cursor-pointer transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
           </div>
 
-          {/* Navigation Tabs */}
-          <div className="flex items-center gap-2 px-6 pt-4 border-b border-slate-800 bg-[#080d1a]/80">
-            <button
-              onClick={() => { audio.playClick(); setActiveTab('roll'); }}
-              className={`px-5 py-2.5 rounded-t-2xl font-bold text-xs uppercase transition-all cursor-pointer flex items-center gap-2 ${
-                activeTab === 'roll'
-                  ? 'bg-cyan-500 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.5)]'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <Dice5 className="w-4 h-4" /> Tirage RNG
-            </button>
-            <button
-              onClick={() => { audio.playClick(); setActiveTab('inventory'); }}
-              className={`px-5 py-2.5 rounded-t-2xl font-bold text-xs uppercase transition-all cursor-pointer flex items-center gap-2 ${
-                activeTab === 'inventory'
-                  ? 'bg-cyan-500 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.5)]'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <Trophy className="w-4 h-4" /> Ma Collection ({Object.values(inventory).reduce((a, b) => a + b, 0)})
-            </button>
-            <button
-              onClick={() => { audio.playClick(); setActiveTab('trades'); }}
-              className={`px-5 py-2.5 rounded-t-2xl font-bold text-xs uppercase transition-all cursor-pointer flex items-center gap-2 ${
-                activeTab === 'trades'
-                  ? 'bg-cyan-500 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.5)]'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              <ArrowRightLeft className="w-4 h-4" /> Marché d'Échange ({tradeRequests.length})
-            </button>
-          </div>
-
-          {/* Toast Notification in Modal */}
-          {tradeMessage && (
-            <div className="bg-cyan-950 border-b border-cyan-500 text-cyan-200 px-6 py-2 text-xs font-mono text-center font-bold">
-              {tradeMessage}
+          {/* Toast */}
+          {toastMessage && (
+            <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 px-5 py-2 rounded-full bg-cyan-600 text-white font-mono text-xs font-bold shadow-xl border border-cyan-300">
+              {toastMessage}
             </div>
           )}
 
-          {/* Body Content */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            {/* TAB 1: ROLL RNG */}
-            {activeTab === 'roll' && (
-              <div className="flex flex-col items-center justify-center space-y-6 py-2">
-                {/* Control bar: Luck, Speed, Pity */}
-                <div className="flex flex-wrap items-center justify-center gap-3 bg-slate-900/90 px-5 py-2.5 rounded-2xl border border-cyan-500/30">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-cyan-300 font-bold">🍀 Potion de Chance :</span>
-                    {[1, 2, 5].map(mult => (
-                      <button
-                        key={mult}
-                        onClick={() => { audio.playClick(); setLuckMultiplier(mult); }}
-                        className={`px-3 py-1 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer ${
-                          luckMultiplier === mult
-                            ? 'bg-emerald-500 text-slate-950 font-black shadow-[0_0_12px_rgba(34,197,94,0.6)]'
-                            : 'bg-slate-800 text-slate-400 hover:text-white'
-                        }`}
-                      >
-                        {mult}x Chance
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="w-px h-5 bg-slate-700 hidden sm:block" />
-
-                  {/* Pity Counter Display */}
-                  <div className="flex items-center gap-1.5 text-xs font-mono text-purple-300 bg-purple-950/60 px-3 py-1 rounded-xl border border-purple-500/40">
-                    <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-                    <span>Pitié Épique : {pityCounter}/30</span>
-                  </div>
-
-                  {/* Fast roll toggle */}
-                  <button
-                    onClick={() => {
-                      audio.playClick();
-                      setFastRoll(!fastRoll);
-                    }}
-                    className={`px-3 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
-                      fastRoll
-                        ? 'bg-cyan-500 text-slate-950 font-black'
-                        : 'bg-slate-800 text-slate-400'
-                    }`}
-                  >
-                    ⚡ Rapide : {fastRoll ? 'OUI' : 'NON'}
-                  </button>
-
-                  {/* Auto-roll toggle */}
-                  <button
-                    onClick={() => {
-                      audio.playClick();
-                      setAutoRoll(!autoRoll);
-                    }}
-                    className={`px-3.5 py-1 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                      autoRoll
-                        ? 'bg-rose-500 text-white font-black animate-pulse shadow-[0_0_12px_rgba(244,63,94,0.7)]'
-                        : 'bg-slate-800 text-slate-400'
-                    }`}
-                  >
-                    {autoRoll ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                    <span>Auto-Tirage</span>
-                  </button>
-                </div>
-
-                {/* The Big Rolling Wheel / Altar */}
-                <div className="relative w-72 h-72 sm:w-80 sm:h-80 rounded-full border-4 border-cyan-400/50 bg-gradient-to-b from-slate-900 to-[#080d1a] shadow-[0_0_50px_rgba(6,182,212,0.3)] flex flex-col items-center justify-center p-6 text-center overflow-hidden">
-                  {isRolling ? (
-                    <div className="flex flex-col items-center space-y-3">
-                      <div className="text-6xl animate-bounce">
-                        {reelPreviewItem ? (reelPreviewItem.universe === 'Fortnite' ? '⚡' : reelPreviewItem.universe === 'Minecraft' ? '🗡️' : '🔮') : '🌀'}
-                      </div>
-                      <p className="text-sm font-mono text-cyan-300 font-bold animate-pulse">
-                        {reelPreviewItem ? reelPreviewItem.name : 'Invocation Stellaire...'}
-                      </p>
-                      {reelPreviewItem && (
-                        <span className="text-xs text-yellow-400 font-mono">
-                          1 sur {reelPreviewItem.chanceDenominator.toLocaleString()}
-                        </span>
-                      )}
-                    </div>
-                  ) : lastRolledItem ? (
-                    <motion.div
-                      key={lastRolledItem.id + Math.random()}
-                      initial={{ scale: 0.7, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="flex flex-col items-center space-y-2"
-                    >
-                      <div className="text-6xl mb-1 filter drop-shadow-[0_0_20px_rgba(255,255,255,0.9)]">
-                        {lastRolledItem.universe === 'Fortnite' ? '⚡' : lastRolledItem.universe === 'Minecraft' ? '🗡️' : '🔮'}
-                      </div>
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase font-mono bg-cyan-500/20 text-cyan-300 border border-cyan-400">
-                        {lastRolledItem.universe} • 1 sur {lastRolledItem.chanceDenominator.toLocaleString()}
-                      </span>
-                      <h3 className="text-lg font-black text-white font-mono leading-tight">
-                        {lastRolledItem.name}
-                      </h3>
-                      <p className="text-[11px] text-slate-300 line-clamp-2 max-w-[220px]">
-                        {lastRolledItem.description}
-                      </p>
-                      <span className="text-xs font-mono font-bold text-yellow-300">
-                        +{lastRolledItem.vcoinWorth} VC
-                      </span>
-                    </motion.div>
-                  ) : (
-                    <div className="flex flex-col items-center space-y-2">
-                      <div className="text-6xl text-cyan-400 animate-pulse">✨</div>
-                      <p className="text-sm font-mono text-slate-300 font-bold">
-                        Appuyez pour déclencher l'onde RNG
-                      </p>
-                      <span className="text-xs text-cyan-400 font-mono">
-                        Pitié garantie à 30 tirages
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Big Roll Button */}
+          {/* iOS Segmented Navigation Bar */}
+          <div className="px-6 pt-4 pb-2 border-b border-white/5 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-950/70 border border-white/5">
+              {[
+                { id: 'roll', label: '🎲 Tirage & Roulette' },
+                { id: 'inventory', label: `🎒 Inventaire (${Object.keys(inventory).length})` },
+                { id: 'potions', label: '🧪 Potions de Chance' },
+                { id: 'trades', label: `🤝 Marché PNJ (${tradeRequests.length})` }
+              ].map(tab => (
                 <button
-                  disabled={isRolling}
-                  onClick={() => performRoll(false)}
-                  className="px-10 py-4 rounded-3xl bg-gradient-to-r from-cyan-500 via-sky-400 to-blue-600 hover:from-cyan-400 hover:to-blue-500 active:scale-95 disabled:opacity-50 text-slate-950 font-black text-base uppercase tracking-wider shadow-[0_0_35px_rgba(6,182,212,0.6)] cursor-pointer flex items-center gap-3 transition-all font-mono"
+                  key={tab.id}
+                  onClick={() => {
+                    audio.playClick();
+                    setActiveTab(tab.id as any);
+                  }}
+                  className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                    activeTab === tab.id
+                      ? 'bg-cyan-500 text-slate-950 shadow-md'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
                 >
-                  <Dice5 className="w-6 h-6 fill-current animate-bounce" />
-                  {isRolling ? 'TIRAGE EN COURS...' : 'LANCER LE TIRAGE RNG'}
+                  {tab.label}
                 </button>
+              ))}
+            </div>
 
-                {/* Recent Roll Strip */}
-                {rollHistory.length > 0 && (
-                  <div className="w-full max-w-lg">
-                    <p className="text-xs text-slate-400 font-mono mb-2">Historique récent :</p>
-                    <div className="flex gap-2 overflow-x-auto pb-2">
-                      {rollHistory.map((item, idx) => (
-                        <div
-                          key={idx}
-                          className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-mono flex items-center gap-1.5 whitespace-nowrap"
-                        >
-                          <span className="text-cyan-400 font-bold">{item.name}</span>
-                          <span className="text-slate-500 text-[10px]">({item.universe})</span>
-                        </div>
-                      ))}
+            {/* Pity Counter Tag */}
+            <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-slate-400">
+              <span>Pitié Épique :</span>
+              <strong className="text-cyan-300 font-bold">{pityCounter} / 25</strong>
+            </div>
+          </div>
+
+          {/* Tab 1: ROLL & ROULETTE */}
+          {activeTab === 'roll' && (
+            <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-between space-y-6">
+              {/* Animated Reel Display */}
+              <div className="w-full max-w-xl h-56 rounded-3xl bg-slate-950/90 border-2 border-cyan-500/40 p-6 flex flex-col items-center justify-center relative overflow-hidden shadow-2xl">
+                {/* Background Glow */}
+                <div
+                  className="absolute inset-0 opacity-20 filter blur-3xl transition-all"
+                  style={{
+                    backgroundColor:
+                      reelPreviewItem?.accentColor || lastRolledItem?.accentColor || '#06b6d4'
+                  }}
+                />
+
+                {isRolling ? (
+                  <div className="flex flex-col items-center space-y-3 z-10 animate-pulse">
+                    <div
+                      className="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl border-2 shadow-2xl"
+                      style={{
+                        backgroundColor: `${reelPreviewItem?.accentColor || '#06b6d4'}20`,
+                        borderColor: reelPreviewItem?.accentColor || '#06b6d4'
+                      }}
+                    >
+                      🎲
                     </div>
+                    <span className="text-base font-black text-cyan-300 font-mono">
+                      {reelPreviewItem?.name || 'TIRAGE EN COURS...'}
+                    </span>
+                    <span className="text-xs text-slate-400 font-mono">
+                      Probabilité : 1 sur {reelPreviewItem?.chanceDenominator.toLocaleString() || '...'}
+                    </span>
+                  </div>
+                ) : lastRolledItem ? (
+                  <div className="flex flex-col items-center space-y-2 z-10 text-center">
+                    <span className="px-3 py-0.5 rounded-full text-[10px] font-black uppercase font-mono tracking-wider"
+                      style={{
+                        backgroundColor: `${lastRolledItem.accentColor}25`,
+                        color: lastRolledItem.accentColor,
+                        border: `1px solid ${lastRolledItem.accentColor}`
+                      }}
+                    >
+                      {lastRolledItem.rarity} • 1 SUR {lastRolledItem.chanceDenominator.toLocaleString()}
+                    </span>
+                    <h3 className="text-xl font-black text-white font-mono">
+                      {lastRolledItem.name}
+                    </h3>
+                    <p className="text-xs text-slate-300 max-w-md line-clamp-2">
+                      {lastRolledItem.description}
+                    </p>
+                    <div className="flex items-center gap-3 pt-2 text-xs font-mono">
+                      <span className="text-yellow-400 font-bold">+{lastRolledItem.vcoinWorth} VC Récoltés</span>
+                      <span className="text-slate-400">Univers : {lastRolledItem.universe}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center space-y-2 z-10">
+                    <div className="text-4xl">✨</div>
+                    <h3 className="text-base font-bold text-white font-mono">Prêt pour le Tirage</h3>
+                    <p className="text-xs text-slate-400">
+                      Lancez la roulette pour découvrir des reliques mythiques !
+                    </p>
                   </div>
                 )}
               </div>
-            )}
 
-            {/* TAB 2: INVENTORY SHOWCASE */}
-            {activeTab === 'inventory' && (
-              <div className="space-y-4">
-                {/* Universe Filters */}
-                <div className="flex gap-2 overflow-x-auto pb-2">
-                  {['all', 'Metaverse', 'Fortnite', 'Minecraft'].map(u => (
-                    <button
-                      key={u}
-                      onClick={() => { audio.playClick(); setSelectedUniverse(u); }}
-                      className={`px-4 py-1.5 rounded-full text-xs font-mono font-bold transition-all cursor-pointer ${
-                        selectedUniverse === u
-                          ? 'bg-cyan-500 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.5)]'
-                          : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
-                      }`}
-                    >
-                      {u === 'all' ? 'Toutes les Reliques' : u}
-                    </button>
-                  ))}
+              {/* Roll Controls */}
+              <div className="w-full max-w-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <button
+                    onClick={() => setFastRoll(!fastRoll)}
+                    className={`flex-1 sm:flex-none px-4 py-2.5 rounded-2xl text-xs font-mono font-bold border transition-all cursor-pointer ${
+                      fastRoll
+                        ? 'bg-amber-500/20 text-yellow-300 border-amber-400'
+                        : 'bg-slate-900 text-slate-400 border-slate-700'
+                    }`}
+                  >
+                    ⚡ Rapide {fastRoll ? 'Activé' : 'Désactivé'}
+                  </button>
+
+                  <button
+                    onClick={() => setAutoRoll(!autoRoll)}
+                    className={`flex-1 sm:flex-none px-4 py-2.5 rounded-2xl text-xs font-mono font-bold border transition-all cursor-pointer ${
+                      autoRoll
+                        ? 'bg-rose-500/20 text-rose-300 border-rose-400'
+                        : 'bg-slate-900 text-slate-400 border-slate-700'
+                    }`}
+                  >
+                    🔄 Auto {autoRoll ? 'En cours' : 'Désactivé'}
+                  </button>
                 </div>
 
-                {/* Items Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredItems.map(item => {
-                    const ownedCount = inventory[item.id] || 0;
-                    const isOwned = ownedCount > 0;
+                <button
+                  onClick={() => performRoll()}
+                  disabled={isRolling}
+                  className="w-full sm:w-auto flex-1 py-4 px-8 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 hover:from-cyan-400 hover:to-blue-400 active:scale-98 text-slate-950 font-black text-sm uppercase tracking-wider font-mono shadow-[0_0_25px_rgba(6,182,212,0.6)] cursor-pointer disabled:opacity-50"
+                >
+                  🎲 TIRER UNE RELIQUE
+                </button>
+              </div>
 
-                    return (
-                      <div
-                        key={item.id}
-                        className={`p-4 rounded-2xl border transition-all flex flex-col justify-between ${
-                          isOwned
-                            ? 'bg-[#0f172a] border-cyan-500/50 shadow-lg'
-                            : 'bg-slate-950/40 border-slate-800 opacity-60'
-                        }`}
-                      >
-                        <div>
-                          <div className="flex items-start justify-between mb-2">
-                            <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase font-mono bg-cyan-500/20 text-cyan-300">
-                              {item.universe}
-                            </span>
-                            <span className="text-xs font-mono font-bold text-amber-400">
-                              {isOwned ? `x${ownedCount}` : 'Non possédé'}
-                            </span>
-                          </div>
-
-                          <h4 className="font-bold text-white text-sm mb-1">{item.name}</h4>
-                          <p className="text-xs text-slate-400 mb-3 leading-relaxed">{item.description}</p>
-                        </div>
-
-                        <div className="flex items-center justify-between text-[11px] font-mono border-t border-slate-800 pt-2 mt-2">
-                          <span className="text-slate-400">1/{item.chanceDenominator.toLocaleString()}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-yellow-400 font-bold">{item.vcoinWorth} VC</span>
-                            {isOwned && ownedCount > 1 && (
-                              <button
-                                onClick={() => handleDismantle(item.id)}
-                                title="Recycler un doublon pour des V-Coins"
-                                className="p-1 rounded bg-rose-950/80 hover:bg-rose-800 text-rose-300 border border-rose-600/40 text-[10px] flex items-center gap-0.5"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                                <span>+{Math.floor(item.vcoinWorth * 0.6)} VC</span>
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+              {/* Live Odds & Drop Table Preview */}
+              <div className="w-full max-w-xl p-4 rounded-2xl bg-slate-950/60 border border-white/5">
+                <h4 className="text-xs font-bold text-slate-300 font-mono mb-2 flex items-center justify-between">
+                  <span>Table des Probabilités Actuelles ({currentLuckMultiplier}x Chance) :</span>
+                  <span className="text-[10px] text-cyan-300">Tirages Totaux : {totalRolls}</span>
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono">
+                  <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300">
+                    Commun : <strong>~52%</strong>
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800 text-blue-300">
+                    Rare : <strong>~26%</strong>
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800 text-purple-300">
+                    Épique : <strong>~14%</strong>
+                  </div>
+                  <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800 text-yellow-300">
+                    Mythique : <strong>~4.5%</strong>
+                  </div>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* TAB 3: TRADING HUB */}
-            {activeTab === 'trades' && (
-              <div className="space-y-4">
-                <p className="text-xs text-slate-300">
-                  Des négociateurs et collectionneurs du Métaverse proposent des offres d'échange équitables :
+          {/* Tab 2: INVENTORY */}
+          {activeTab === 'inventory' && (
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-white font-mono">
+                  Objets Découverts ({Object.keys(inventory).length} uniques)
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Vendez vos doublons pour récupérer instantanément des V-Coins !
                 </p>
+              </div>
 
-                <div className="space-y-4">
-                  {tradeRequests.map(trade => {
-                    const hasRequired = trade.requestedItemIds.every(id => (inventory[id] || 0) > 0);
+              {Object.keys(inventory).length === 0 ? (
+                <div className="text-center py-16 text-slate-500 font-mono text-sm">
+                  Votre inventaire est vide. Lancez vos premiers tirages dans l'onglet Tirage !
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {Object.entries(inventory).map(([itemId, count]) => {
+                    const item = RNG_UNIVERSE_ITEMS.find(i => i.id === itemId);
+                    if (!item || count <= 0) return null;
 
                     return (
                       <div
-                        key={trade.id}
-                        className="p-5 rounded-2xl bg-[#0f172a] border border-cyan-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                        key={itemId}
+                        className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between gap-3 shadow-md"
                       >
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-white text-sm">{trade.traderName}</span>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono">
-                              {trade.traderTitle}
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span
+                              className="px-2 py-0.5 rounded text-[9px] font-black uppercase font-mono"
+                              style={{
+                                backgroundColor: `${item.accentColor}25`,
+                                color: item.accentColor
+                              }}
+                            >
+                              {item.rarity}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-mono">
+                              x{count}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-300 italic">"{trade.message}"</p>
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs font-mono text-cyan-400 pt-1">
-                            <span className="text-emerald-400 font-bold">
-                              Il donne : {trade.offeredItemIds.join(', ')} (+{trade.offeredVCoins} VC)
-                            </span>
-                            <span className="text-slate-500">•</span>
-                            <span className={hasRequired ? 'text-cyan-300' : 'text-rose-400 font-bold'}>
-                              Il demande : {trade.requestedItemIds.join(', ')} {hasRequired ? '✅' : '❌ (Manquant)'}
-                            </span>
-                          </div>
+                          <h4 className="font-bold text-white text-xs font-mono">{item.name}</h4>
+                          <span className="text-[10px] text-yellow-400 font-mono">
+                            Valeur : {item.vcoinWorth} VC
+                          </span>
                         </div>
 
                         <button
-                          onClick={() => handleExecuteTrade(trade)}
-                          disabled={!hasRequired}
-                          className={`px-6 py-2.5 rounded-xl font-black text-xs uppercase cursor-pointer transition-all whitespace-nowrap ${
-                            hasRequired
-                              ? 'bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 text-slate-950 shadow-[0_0_15px_rgba(34,197,94,0.4)]'
-                              : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-60'
-                          }`}
+                          onClick={() => handleSellItem(itemId)}
+                          className="px-3 py-1.5 rounded-xl bg-red-950/70 hover:bg-red-900 border border-red-500 text-red-300 text-[10px] font-mono font-bold cursor-pointer transition-colors"
                         >
-                          Accepter l'Échange
+                          Vendre ({Math.floor(item.vcoinWorth * 0.7)} VC)
                         </button>
                       </div>
                     );
                   })}
                 </div>
+              )}
+            </div>
+          )}
+
+          {/* Tab 3: POTIONS & LUCK ALCHEMY */}
+          {activeTab === 'potions' && (
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div>
+                <h3 className="text-base font-bold text-white font-mono">Laboratoire d'Alchimie</h3>
+                <p className="text-xs text-slate-300 mt-1">
+                  Achetez des élixirs pour démultiplier vos chances d'obtenir des reliques légendaires et mythiques !
+                </p>
               </div>
-            )}
-          </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Potion 1 */}
+                <div className="p-5 rounded-3xl bg-slate-950/80 border border-emerald-500/40 flex flex-col justify-between space-y-4 shadow-lg">
+                  <div>
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-2xl mb-3">
+                      🍀
+                    </div>
+                    <h4 className="font-bold text-white text-sm font-mono">Élixir Trèfle</h4>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Augmente vos chances de <strong>+50% (1.5x)</strong> pendant 15 tirages consécutifs.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleBuyPotion(1.5, 15, 75, 'Élixir Trèfle')}
+                    className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs font-mono uppercase cursor-pointer"
+                  >
+                    Acheter (75 VC)
+                  </button>
+                </div>
+
+                {/* Potion 2 */}
+                <div className="p-5 rounded-3xl bg-slate-950/80 border border-cyan-500/40 flex flex-col justify-between space-y-4 shadow-lg">
+                  <div>
+                    <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400 flex items-center justify-center text-2xl mb-3">
+                      ⚡
+                    </div>
+                    <h4 className="font-bold text-white text-sm font-mono">Potion Stellaire</h4>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Multiplie vos chances par <strong>2.5x</strong> pendant 25 tirages consécutifs.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleBuyPotion(2.5, 25, 180, 'Potion Stellaire')}
+                    className="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs font-mono uppercase cursor-pointer"
+                  >
+                    Acheter (180 VC)
+                  </button>
+                </div>
+
+                {/* Potion 3 */}
+                <div className="p-5 rounded-3xl bg-slate-950/80 border border-purple-500/40 flex flex-col justify-between space-y-4 shadow-lg">
+                  <div>
+                    <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-400 flex items-center justify-center text-2xl mb-3">
+                      🌌
+                    </div>
+                    <h4 className="font-bold text-white text-sm font-mono">Essence Céleste</h4>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Multiplie vos chances par <strong>4x</strong> pendant 40 tirages consécutifs !
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleBuyPotion(4, 40, 350, 'Essence Céleste')}
+                    className="w-full py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-black text-xs font-mono uppercase cursor-pointer"
+                  >
+                    Acheter (350 VC)
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tab 4: TRADES */}
+          {activeTab === 'trades' && (
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              <div>
+                <h3 className="text-sm font-bold text-white font-mono">Offres des PNJ et Collectionneurs</h3>
+                <p className="text-xs text-slate-300">
+                  Acceptez leurs offres d'échange pour gagner des V-Coins supplémentaires !
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                {tradeRequests.map((trade) => (
+                  <div
+                    key={trade.id}
+                    className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-bold text-white text-xs font-mono">{trade.traderName}</span>
+                        <span className="text-[10px] text-cyan-300 font-mono">({trade.traderTitle})</span>
+                      </div>
+                      <p className="text-xs text-slate-300 italic">"{trade.message}"</p>
+                      <div className="text-[11px] text-yellow-400 font-mono mt-1 font-bold">
+                        Offre : +{trade.offeredVCoins} V-Coins
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => onAcceptTrade(trade.id)}
+                      className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs font-mono uppercase cursor-pointer transition-all"
+                    >
+                      Accepter (+{trade.offeredVCoins} VC)
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </motion.div>
       </div>
     </AnimatePresence>
