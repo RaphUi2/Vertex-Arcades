@@ -140,6 +140,11 @@ class AudioManager {
     this.playTone([1046.5, 1318.51, 1567.98], [0.06, 0.06, 0.2], 'square', undefined, 0.18);
   }
 
+  // Level Up / Victory fanfare
+  playLevelUp() {
+    this.playTone([523.25, 659.25, 783.99, 1046.5], [0.08, 0.08, 0.08, 0.25], 'sine', undefined, 0.25);
+  }
+
   // Laser beam
   playLaser() {
     this.playTone([900], [0.12], 'sawtooth', 120, 0.16);

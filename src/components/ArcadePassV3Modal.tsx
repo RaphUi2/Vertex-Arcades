@@ -31,30 +31,38 @@ export function ArcadePassV3Modal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-2xl">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-4xl max-h-[92vh] bg-[#0f0c20] border-2 border-purple-500/60 rounded-3xl shadow-[0_0_60px_rgba(168,85,247,0.4)] flex flex-col overflow-hidden text-slate-100"
+          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          className="liquid-glass-container w-full max-w-4xl max-h-[92vh] rounded-3xl p-5 sm:p-7 flex flex-col justify-between overflow-hidden shadow-2xl relative border border-white/15 text-slate-100"
         >
+          {/* Top Specular Glint */}
+          <div className="absolute inset-x-12 top-0 h-[1px] bg-gradient-to-r from-transparent via-purple-300/50 to-transparent pointer-events-none" />
+
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-purple-500/30 bg-[#090715]">
+          <div className="flex items-center justify-between pb-4 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 border border-purple-400 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(168,85,247,0.5)]">
+              <div className="w-11 h-11 rounded-2xl bg-purple-500/20 border border-purple-400/50 flex items-center justify-center text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.35)] text-xl">
                 👑
               </div>
               <div>
-                <h2 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-200 to-indigo-300 font-mono">
-                  PASS ARCADE v3.0
-                </h2>
-                <p className="text-xs text-purple-400 font-mono">
-                  Saison 3 : Renaissance Métaverse • 50 Paliers Exclusifs
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-black text-white font-mono tracking-tight">
+                    PASS ARCADE LIQUID GLASS
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-400/30">
+                    SAISON 3
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300">
+                  50 Paliers Exclusifs • Titres, Auras, Couvre-chefs & V-Coins
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               {!passState.isPremium && (
                 <button
                   onClick={() => {
@@ -64,122 +72,145 @@ export function ArcadePassV3Modal({
                     }
                   }}
                   disabled={userVCoins < 1000}
-                  className="px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-xs uppercase cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.5)] disabled:opacity-40 font-mono"
+                  className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-xs uppercase cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.5)] disabled:opacity-40 font-mono transition-all active:scale-95"
                 >
-                  Débloquer Pass VIP (1 000 VC)
+                  Pass VIP (1 000 VC)
                 </button>
               )}
               <button
                 onClick={() => { audio.playClick(); onClose(); }}
-                className="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center cursor-pointer transition-colors"
+                className="w-9 h-9 rounded-full liquid-glass-pill text-slate-300 hover:text-white flex items-center justify-center cursor-pointer shadow-sm transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
 
           {/* Level Progress Banner */}
-          <div className="p-6 bg-[#16102a] border-b border-purple-900/60 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-purple-600/30 border border-purple-400 flex items-center justify-center font-black text-2xl text-purple-300 font-mono">
+          <div className="my-4 p-4 rounded-3xl liquid-glass-card border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl liquid-glass-pill border border-purple-400/60 flex items-center justify-center text-purple-300 font-mono font-black text-base shadow-[0_0_15px_rgba(168,85,247,0.3)]">
                 {currentLevel}
               </div>
               <div>
-                <span className="text-xs font-mono font-bold text-purple-300 uppercase">
-                  NIVEAU DU PASS
+                <span className="text-xs font-mono font-bold text-white uppercase tracking-wider block">
+                  Palier Actuel : Niveau {currentLevel} / 50
                 </span>
-                <div className="text-xs text-slate-300 font-mono mt-0.5">
-                  XP : {currentXp} / {xpPerLevel} ({Math.round(progressPct)}%)
-                </div>
+                <span className="text-[11px] font-mono text-slate-300">
+                  {currentXp} / {xpPerLevel} XP accumulés pour le niveau suivant
+                </span>
               </div>
             </div>
 
-            <div className="w-full sm:w-64 h-3 rounded-full bg-slate-900 overflow-hidden p-0.5 border border-slate-700">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300"
-                style={{ width: `${progressPct}%` }}
-              />
+            {/* XP Bar */}
+            <div className="w-full sm:w-64 space-y-1.5">
+              <div className="flex justify-between text-[10px] font-mono text-slate-400">
+                <span>Progression</span>
+                <span className="text-cyan-300 font-bold">{Math.round(progressPct)}%</span>
+              </div>
+              <div className="w-full h-2.5 rounded-full bg-slate-950/80 border border-white/10 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-purple-500 via-pink-400 to-cyan-300 transition-all duration-300 shadow-[0_0_10px_rgba(168,85,247,0.8)]"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
             </div>
           </div>
 
-          {/* Levels Track Grid */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {/* 50 Levels List */}
+          <div className="flex-1 overflow-y-auto space-y-3 pr-2 no-scrollbar">
             {PASS_LEVELS_V3.map((lvl) => {
-              const isLevelReached = currentLevel >= lvl.level;
-              const freeClaimed = passState.claimedFreeRewards.includes(lvl.level);
-              const premClaimed = passState.claimedPremiumRewards.includes(lvl.level);
-
-              const canClaimFree = isLevelReached && !freeClaimed;
-              const canClaimPrem = isLevelReached && passState.isPremium && !premClaimed;
+              const isUnlocked = currentLevel >= lvl.level;
+              const isFreeClaimed = passState.claimedFreeRewards.includes(lvl.level);
+              const isPremiumClaimed = passState.claimedPremiumRewards.includes(lvl.level);
+              const canClaimFree = isUnlocked && !isFreeClaimed;
+              const canClaimPremium = isUnlocked && passState.isPremium && !isPremiumClaimed;
 
               return (
                 <div
                   key={lvl.level}
-                  className={`p-4 rounded-3xl border transition-all flex flex-col sm:flex-row items-center justify-between gap-4 ${
-                    isLevelReached ? 'bg-[#181330] border-purple-500/50' : 'bg-[#0c0919] border-slate-800 opacity-60'
+                  className={`p-3.5 rounded-3xl transition-all border ${
+                    isUnlocked
+                      ? 'liquid-glass-card border-white/15'
+                      : 'bg-slate-950/40 border-white/5 opacity-55'
                   }`}
                 >
-                  <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <span className="w-10 h-10 rounded-xl bg-purple-900/60 border border-purple-500 text-purple-300 font-black font-mono flex items-center justify-center text-sm">
-                      {lvl.level}
-                    </span>
-                    <div>
-                      <h4 className="font-bold text-white text-sm font-mono">Palier {lvl.level}</h4>
-                      <p className="text-xs text-slate-400">Gratuit: {lvl.freeReward.label}</p>
-                    </div>
-                  </div>
-
-                  {/* Rewards Dual Track: Free & Premium */}
-                  <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                    {/* Free Track */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-bold text-cyan-300">
-                        {lvl.freeReward.label}
+                  <div className="flex items-center justify-between gap-4">
+                    {/* Level Number Pill */}
+                    <div className="flex items-center gap-3">
+                      <div className={`w-9 h-9 rounded-2xl flex items-center justify-center font-mono font-bold text-xs border ${
+                        isUnlocked ? 'liquid-glass-pill-active border-purple-400/80 text-white' : 'liquid-glass-pill text-slate-400'
+                      }`}>
+                        {lvl.level}
+                      </div>
+                      <span className="text-xs font-mono font-bold text-slate-300 hidden sm:inline">
+                        Niveau {lvl.level}
                       </span>
-                      {freeClaimed ? (
-                        <span className="p-1 rounded-lg bg-emerald-500/20 text-emerald-300"><Check className="w-4 h-4" /></span>
+                    </div>
+
+                    {/* Free Reward */}
+                    <div className="flex-1 p-2 rounded-2xl liquid-glass-pill border-white/5 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono font-black text-cyan-400 uppercase">GRATUIT :</span>
+                        <span className="text-xs font-mono text-white line-clamp-1">{lvl.freeReward.label}</span>
+                      </div>
+                      {isFreeClaimed ? (
+                        <span className="text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1">
+                          <Check className="w-3 h-3 stroke-[3]" /> Pris
+                        </span>
                       ) : canClaimFree ? (
                         <button
                           onClick={() => {
                             audio.playWin();
                             onClaimReward(lvl.level, false, lvl.freeReward.label, lvl.freeReward.type, lvl.freeReward.value);
                           }}
-                          className="px-3 py-1 rounded-xl bg-cyan-500 text-slate-950 font-black text-xs uppercase cursor-pointer font-mono"
+                          className="px-2.5 py-1 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 text-[10px] font-mono font-black uppercase cursor-pointer transition-all active:scale-95"
                         >
-                          Récupérer
+                          Réclamer
                         </button>
                       ) : (
-                        <span className="p-1 text-slate-600"><Lock className="w-4 h-4" /></span>
+                        <span className="text-[10px] font-mono text-slate-400">Verrouillé</span>
                       )}
                     </div>
 
-                    <div className="w-px h-6 bg-slate-800" />
-
-                    {/* Premium Track */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-bold text-amber-400 flex items-center gap-1">
-                        <Crown className="w-3 h-3 text-yellow-400" /> {lvl.premiumReward.label}
-                      </span>
-                      {premClaimed ? (
-                        <span className="p-1 rounded-lg bg-emerald-500/20 text-emerald-300"><Check className="w-4 h-4" /></span>
-                      ) : canClaimPrem ? (
+                    {/* VIP Reward */}
+                    <div className="flex-1 p-2 rounded-2xl liquid-glass-pill border-amber-400/20 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono font-black text-amber-400 uppercase flex items-center gap-1">
+                          <Crown className="w-3 h-3 text-amber-400" /> VIP :
+                        </span>
+                        <span className="text-xs font-mono text-amber-200 line-clamp-1">{lvl.premiumReward.label}</span>
+                      </div>
+                      {isPremiumClaimed ? (
+                        <span className="text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1">
+                          <Check className="w-3 h-3 stroke-[3]" /> Pris
+                        </span>
+                      ) : canClaimPremium ? (
                         <button
                           onClick={() => {
                             audio.playWin();
                             onClaimReward(lvl.level, true, lvl.premiumReward.label, lvl.premiumReward.type, lvl.premiumReward.value);
                           }}
-                          className="px-3 py-1 rounded-xl bg-yellow-400 text-slate-950 font-black text-xs uppercase cursor-pointer font-mono"
+                          className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 text-slate-950 text-[10px] font-mono font-black uppercase cursor-pointer transition-all active:scale-95"
                         >
-                          VIP
+                          Réclamer
                         </button>
                       ) : (
-                        <span className="p-1 text-slate-600"><Lock className="w-4 h-4" /></span>
+                        <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1">
+                          <Lock className="w-3 h-3" /> VIP
+                        </span>
                       )}
                     </div>
                   </div>
                 </div>
               );
             })}
+          </div>
+
+          {/* Footer Info */}
+          <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400">
+            <span>XP obtenue en jouant et en complétant des missions</span>
+            <span className="text-purple-400 font-bold">Pass Arcade Liquid Glass</span>
           </div>
         </motion.div>
       </div>

@@ -350,7 +350,7 @@ export function QuantumObby({ onFinish, onExit }: GameProps) {
         {gameState === 'ready' && (
           <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
             <h3 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 font-mono mb-2">
-              QUANTUM OBBY 3.0
+              QUANTUM VELOCITY 3.2
             </h3>
             <p className="text-slate-300 text-sm max-w-md mb-6">
               Traversez les plateformes mouvantes, esquivez les lasers et passez les 3 portails avant la fin du chronomètre !
@@ -362,7 +362,7 @@ export function QuantumObby({ onFinish, onExit }: GameProps) {
               onClick={startGame}
               className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-sm uppercase tracking-wider shadow-[0_0_25px_rgba(6,182,212,0.5)] transition-all cursor-pointer flex items-center gap-2"
             >
-              <Play className="w-5 h-5 fill-current" /> DÉMARRER L'OBBY
+              <Play className="w-5 h-5 fill-current" /> DÉMARRER LE PARCOURS
             </button>
           </div>
         )}
@@ -392,7 +392,7 @@ export function QuantumObby({ onFinish, onExit }: GameProps) {
         {gameState === 'won' && (
           <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
             <div className="text-5xl mb-2">🏆</div>
-            <h3 className="text-2xl font-black text-yellow-400 font-mono mb-2">OBBY COMPLÉTÉ !</h3>
+            <h3 className="text-2xl font-black text-yellow-400 font-mono mb-2">PARCOURS COMPLÉTÉ !</h3>
             <p className="text-slate-300 text-sm mb-4">Victoire royale : <strong className="text-yellow-300">{score} pts</strong> • +150 V-Coins bonus !</p>
             <div className="flex gap-3">
               <button

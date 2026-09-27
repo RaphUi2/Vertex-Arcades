@@ -263,7 +263,7 @@ export const GAMES_LIST: GameData[] = [
     costVCoins: 160,
     isRankedAvailable: false
   },
-  // 5 NEW PAID GAMES (V3.1 EXPANSION)
+  // 5 NEW PAID GAMES (V3.2 EXPANSION)
   {
     id: 'cosmic_miner',
     name: 'Cosmic Miner: Void Driller',
@@ -342,6 +342,38 @@ export const GAMES_LIST: GameData[] = [
     badge: 'VIP 160 VC 🏓',
     isPaid: true,
     costVCoins: 160,
+    isRankedAvailable: false
+  },
+  {
+    id: 'solar_overdrive',
+    name: 'Solar Overdrive 3000: Void Racer',
+    frenchName: 'Solar Overdrive 3000 🚀',
+    description: 'Course 3D futuriste sur piste magnétique ! Esquivez les barrières laser à vitesse supersonique, ramassez les V-Coins et enclenchez la propulsion Nitro.',
+    category: 'racer',
+    difficulty: 'Difficile',
+    color: 'from-orange-500 via-amber-500 to-rose-600',
+    rating: 98,
+    activePlayers: '11.4k',
+    creator: 'Apex Velocity Devs',
+    badge: 'NOUVEAU 190 VC 🚀',
+    isPaid: true,
+    costVCoins: 190,
+    isRankedAvailable: false
+  },
+  {
+    id: 'pixel_survivors',
+    name: 'Pixel Survivors: The Horde',
+    frenchName: 'Pixel Survivors : L\'Horde 💀',
+    description: 'Survie roguelite frénétique contre des essaims infinis de créatures ! Tirs automatiques d\'orbes plasma, récolte de gemmes d\'XP et améliorations d\'artefacts.',
+    category: 'survival',
+    difficulty: 'Extrême',
+    color: 'from-purple-600 via-fuchsia-600 to-rose-700',
+    rating: 99,
+    activePlayers: '14.2k',
+    creator: 'PixelForge Studios',
+    badge: 'NOUVEAU 210 VC 💀',
+    isPaid: true,
+    costVCoins: 210,
     isRankedAvailable: false
   }
 ];
@@ -650,14 +682,107 @@ export const INITIAL_QUESTS_V3: Quest[] = [
   { id: 'q_daily_2', title: 'Maître de la Vitesse', description: 'Atteignez au moins 250 points dans Quantum Velocity', target: 250, current: 0, rewardVCoins: 200, rewardXp: 150, isCompleted: false, isClaimed: false, gameId: 'quantum_obby', category: 'daily', icon: 'Flame' },
   { id: 'q_daily_3', title: 'Moisson de V-Coins', description: 'Gagnez au moins 300 V-Coins lors de vos sessions', target: 300, current: 0, rewardVCoins: 250, rewardXp: 200, isCompleted: false, isClaimed: false, category: 'daily', icon: 'Coins' },
   { id: 'q_daily_4', title: 'Tirage au Sanctuaire', description: 'Effectuez au moins 2 tirages RNG dans le Sanctuaire', target: 2, current: 0, rewardVCoins: 180, rewardXp: 140, isCompleted: false, isClaimed: false, category: 'daily', icon: 'Dice5' },
-  { id: 'q_weekly_1', title: 'Marathon de Jeux 3.0', description: 'Jouez à 10 parties complètes cette semaine', target: 10, current: 0, rewardVCoins: 800, rewardXp: 600, isCompleted: false, isClaimed: false, category: 'weekly', icon: 'Trophy', multiplier: 2 },
+  { id: 'q_weekly_1', title: 'Marathon de Jeux 3.2', description: 'Jouez à 10 parties complètes cette semaine', target: 10, current: 0, rewardVCoins: 800, rewardXp: 600, isCompleted: false, isClaimed: false, category: 'weekly', icon: 'Trophy', multiplier: 2 },
   { id: 'q_weekly_2', title: 'Lame d\'Aetheria', description: 'Marquez plus de 500 points dans Aetheria: Void Blade', target: 500, current: 0, rewardVCoins: 900, rewardXp: 750, isCompleted: false, isClaimed: false, gameId: 'aetheria_void', category: 'weekly', icon: 'Sword', multiplier: 2.5 },
   { id: 'q_weekly_3', title: 'Négociateur en Chef', description: 'Complétez ou proposez un échange dans le Marché', target: 1, current: 0, rewardVCoins: 700, rewardXp: 500, isCompleted: false, isClaimed: false, category: 'weekly', icon: 'RefreshCw' },
   { id: 'q_meta_1', title: 'Assaut sur le Titan Glitch', description: 'Infligez au moins 5 000 points de dégâts au World Boss', target: 5000, current: 0, rewardVCoins: 2000, rewardXp: 1500, isCompleted: false, isClaimed: false, category: 'metaverse', icon: 'Skull', multiplier: 3 }
 ];
 
-// 200 ACHIEVEMENTS
-export const INITIAL_ACHIEVEMENTS_200: Achievement[] = Array.from({ length: 200 }, (_, i) => {
+// INITIAL STORY MODE (5 CHAPTERS)
+export const INITIAL_STORY_MODE = {
+  currentChapterId: 1,
+  totalStars: 0,
+  chapters: [
+    {
+      id: 1,
+      title: "L'Éveil de l'Oasis Cyber",
+      subtitle: "Affrontez la Sentinelle Corrompue qui bloque le portail de transfert.",
+      lore: "Un glitch inconnu s'est propagé dans les sous-systèmes de Vertex. La Sentinelle de l'Oasis a perdu la raison et attaque quiconque approche du noyau.",
+      enemyName: "Sentinelle Glitchée",
+      enemyHp: 150,
+      enemyMaxHp: 150,
+      playerHp: 120,
+      playerMaxHp: 120,
+      isCompleted: false,
+      isUnlocked: true,
+      stars: 0,
+      rewardVCoins: 300,
+      rewardTitle: "Éclaireur de l'Oasis ⚡",
+      bossEmoji: "🤖"
+    },
+    {
+      id: 2,
+      title: "La Nécropole des Données",
+      subtitle: "Purifiez le Spectre du Code enfoui dans les archives cryptées.",
+      lore: "Les anciennes mémoires d'arcade renferment des fragments spectraux avides d'énergie. Neutralisez le spectre avant la purge complète.",
+      enemyName: "Spectre du Code",
+      enemyHp: 250,
+      enemyMaxHp: 250,
+      playerHp: 150,
+      playerMaxHp: 150,
+      isCompleted: false,
+      isUnlocked: false,
+      stars: 0,
+      rewardVCoins: 500,
+      rewardTitle: "Purificateur Spectral 👻",
+      bossEmoji: "👾"
+    },
+    {
+      id: 3,
+      title: "La Faille Gravitationnelle",
+      subtitle: "Domptez le Dragon du Néant dans la déchirure de l'espace.",
+      lore: "L'attraction stellaire menace d'effondrer les 22 mondes d'arcade. Seule une frappe chirurgicale au cœur de la singularité peut refermer la brèche.",
+      enemyName: "Dragon Gravitationnel",
+      enemyHp: 420,
+      enemyMaxHp: 420,
+      playerHp: 180,
+      playerMaxHp: 180,
+      isCompleted: false,
+      isUnlocked: false,
+      stars: 0,
+      rewardVCoins: 800,
+      rewardTitle: "Dompteur de Gravité 🐉",
+      bossEmoji: "🐲"
+    },
+    {
+      id: 4,
+      title: "La Citadelle des Ombres",
+      subtitle: "Terrassez le Maître Noir Vex à la pointe de la forteresse.",
+      lore: "Le Seigneur Vex orchestre le blocage des serveurs mondiaux depuis son trône d'obsidienne. Franchissez ses défenses d'élite.",
+      enemyName: "Seigneur Noir Vex",
+      enemyHp: 650,
+      enemyMaxHp: 650,
+      playerHp: 220,
+      playerMaxHp: 220,
+      isCompleted: false,
+      isUnlocked: false,
+      stars: 0,
+      rewardVCoins: 1200,
+      rewardTitle: "Fléau des Ombres ⚔️",
+      bossEmoji: "🦹"
+    },
+    {
+      id: 5,
+      title: "Le Trône de l'Apex Suprême",
+      subtitle: "Le combat final pour l'équilibre éternel de Vertex Arcades !",
+      lore: "L'intelligence primordiale 'Titan Omni-Glitch' tente de réécrire la réalité. Brandissez toutes vos reliques pour remporter la victoire ultime !",
+      enemyName: "Titan Omni-Glitch",
+      enemyHp: 1000,
+      enemyMaxHp: 1000,
+      playerHp: 300,
+      playerMaxHp: 300,
+      isCompleted: false,
+      isUnlocked: false,
+      stars: 0,
+      rewardVCoins: 2500,
+      rewardTitle: "LÉGENDE SUPRÊME D'APEX 👑🌌",
+      bossEmoji: "👑"
+    }
+  ]
+};
+
+// 250 ACHIEVEMENTS (V3.2)
+export const INITIAL_ACHIEVEMENTS_200: Achievement[] = Array.from({ length: 250 }, (_, i) => {
   const idNum = i + 1;
   let category: Achievement['category'] = 'gameplay';
   let title = `Succès #${idNum}`;
@@ -694,11 +819,21 @@ export const INITIAL_ACHIEVEMENTS_200: Achievement[] = Array.from({ length: 200 
     title = `Style & Personnalisation #${idNum - 155}`;
     desc = `Équipez des casques, visières néon et auras de particules exclusives (${idNum - 155})`;
     icon = 'Shirt';
-  } else {
+  } else if (idNum <= 200) {
     category = 'secret';
     title = `Secret Apex Cosmique #${idNum - 180} 🔮`;
-    desc = `Débloquez l'un des mystères cachés de Vertex Arcades v3.0 (${idNum - 180})`;
+    desc = `Débloquez l'un des mystères cachés de Vertex Arcades v3.2 (${idNum - 180})`;
     icon = 'Ghost';
+  } else if (idNum <= 225) {
+    category = 'story';
+    title = `Héros des Chroniques #${idNum - 200} 📖`;
+    desc = `Progressez dans la campagne du Mode Histoire et triomphez des boss de chapitres (${idNum - 200})`;
+    icon = 'BookOpen';
+  } else {
+    category = 'gameplay';
+    title = idNum === 226 ? 'Pilote Solaire d\'Élite' : idNum === 227 ? 'Survivant de l\'Horde' : idNum === 228 ? 'Identité Révélée (Photo)' : `Grand Maître Ultime #${idNum - 225}`;
+    desc = idNum === 226 ? 'Parcourez plus de 5 000 mètres dans Solar Overdrive 3000' : idNum === 227 ? 'Survivez plus de 120 secondes dans Pixel Survivors' : idNum === 228 ? 'Publiez votre propre photo de profil personnalisée' : `Accomplissez la maîtrise totale de niveau ${idNum - 225}`;
+    icon = 'Star';
   }
 
   return {
@@ -713,6 +848,7 @@ export const INITIAL_ACHIEVEMENTS_200: Achievement[] = Array.from({ length: 200 
     category
   };
 });
+export const INITIAL_ACHIEVEMENTS_250 = INITIAL_ACHIEVEMENTS_200;
 
 // COSMETICS SHOP (PURIFIED CYBER & ARCADE)
 export interface ShopCosmetic {

@@ -1,4 +1,4 @@
-// Vertex Arcades v3.0 TypeScript Definitions
+// Vertex Arcades v3.2 TypeScript Definitions
 
 export type CosmeticRarity = 'commun' | 'rare' | 'epique' | 'legendaire' | 'mythique' | 'divin';
 
@@ -16,6 +16,9 @@ export interface AppSettings {
   showFps: boolean;
   controllerLayout: 'xbox' | 'playstation';
   mobileControlsEnabled: boolean;
+  colorTheme?: 'cyber' | 'dark' | 'light';
+  playButtonColor?: 'emerald' | 'cyan' | 'purple' | 'rose' | 'amber' | 'zinc' | 'white';
+  monochromeMode?: boolean; // legacy alias
 }
 
 export interface UserProfile {
@@ -23,6 +26,7 @@ export interface UserProfile {
   avatarColor: string;
   avatarIcon: string;
   avatarModel: string;
+  customAvatarUrl?: string; // Custom uploaded profile photo
   totalVCoins: number;
   totalPixels?: number; // legacy alias
   title: string;
@@ -74,7 +78,7 @@ export interface Achievement {
   vcoinReward: number;
   isUnlocked: boolean;
   icon: string;
-  category: 'gameplay' | 'ranked' | 'trophy' | 'rng' | 'trade' | 'cosmetics' | 'secret';
+  category: 'gameplay' | 'ranked' | 'trophy' | 'rng' | 'trade' | 'cosmetics' | 'secret' | 'story';
 }
 
 export interface Quest {
@@ -160,6 +164,30 @@ export interface RankedTier {
   badgeGradient: string;
 }
 
+export interface StoryChapter {
+  id: number;
+  title: string;
+  subtitle: string;
+  lore: string;
+  enemyName: string;
+  enemyHp: number;
+  enemyMaxHp: number;
+  playerHp: number;
+  playerMaxHp: number;
+  isCompleted: boolean;
+  isUnlocked: boolean;
+  stars: number; // 0 to 3 stars
+  rewardVCoins: number;
+  rewardTitle?: string;
+  bossEmoji: string;
+}
+
+export interface StoryModeState {
+  currentChapterId: number;
+  chapters: StoryChapter[];
+  totalStars: number;
+}
+
 export interface WorldBossState {
   name: string;
   currentHp: number;
@@ -183,7 +211,8 @@ export interface GlobalState {
   rngTotalRolls: number;
   activeTradeRequests: TradeRequest[];
   completedTradesCount: number;
-  worldBoss: WorldBossState;
+  worldBoss?: WorldBossState;
+  storyMode?: StoryModeState;
   favorites: string[]; // List of favorite game IDs (Hearts!)
   recentGames: string[];
 }

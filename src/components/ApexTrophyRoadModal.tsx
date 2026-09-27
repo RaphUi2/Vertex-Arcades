@@ -23,46 +23,54 @@ export function ApexTrophyRoadModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-2xl">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-4xl max-h-[90vh] bg-[#0d1222] border-2 border-yellow-500/60 rounded-3xl shadow-[0_0_60px_rgba(234,179,8,0.4)] flex flex-col overflow-hidden text-slate-100"
+          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          className="liquid-glass-container w-full max-w-4xl max-h-[92vh] rounded-3xl p-5 sm:p-7 flex flex-col justify-between overflow-hidden shadow-2xl relative border border-white/15 text-slate-100"
         >
+          {/* Top Specular Glint */}
+          <div className="absolute inset-x-12 top-0 h-[1px] bg-gradient-to-r from-transparent via-amber-300/50 to-transparent pointer-events-none" />
+
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-yellow-500/30 bg-[#080d1a]">
+          <div className="flex items-center justify-between pb-4 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-yellow-400 via-amber-500 to-orange-600 border border-yellow-300 flex items-center justify-center text-slate-950 font-black text-2xl shadow-[0_0_20px_rgba(234,179,8,0.6)]">
+              <div className="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.35)] text-xl">
                 🏆
               </div>
               <div>
-                <h2 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-200 to-yellow-500 font-mono">
-                  LIGUE STELLAIRE APEX
-                </h2>
-                <p className="text-xs text-yellow-400 font-mono">
-                  Route des trophées et récompenses de prestige par paliers
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-black text-white font-mono tracking-tight">
+                    LIGUE STELLAIRE LIQUID GLASS
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">
+                    PALIERS APEX
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300">
+                  Route de progression des trophées & récompenses exclusives
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-950/90 border border-yellow-500 text-yellow-300 font-mono font-bold text-sm shadow-[0_0_15px_rgba(234,179,8,0.4)]">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl liquid-glass-pill text-yellow-300 font-mono font-bold text-xs shadow-sm">
                 <Trophy className="w-4 h-4 fill-current text-yellow-400" />
                 <span>{totalTrophies.toLocaleString()} 🏆</span>
               </div>
               <button
                 onClick={() => { audio.playClick(); onClose(); }}
-                className="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center cursor-pointer transition-colors"
+                className="w-9 h-9 rounded-full liquid-glass-pill text-slate-300 hover:text-white flex items-center justify-center cursor-pointer shadow-sm transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
 
           {/* Trophy Road Milestone Track */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            <div className="relative pl-6 sm:pl-10 space-y-8 before:absolute before:left-3 sm:before:left-5 before:top-4 before:bottom-4 before:w-1 before:bg-gradient-to-b before:from-yellow-400 before:via-amber-500 before:to-yellow-600">
+          <div className="flex-1 overflow-y-auto my-4 space-y-6 pr-2 no-scrollbar">
+            <div className="relative pl-6 sm:pl-10 space-y-6 before:absolute before:left-3 sm:before:left-5 before:top-4 before:bottom-4 before:w-1 before:bg-gradient-to-b before:from-amber-400 before:via-yellow-300 before:to-amber-500 before:shadow-[0_0_12px_rgba(245,158,11,0.6)]">
               {APEX_TROPHY_ROAD.map((node) => {
                 const isReached = totalTrophies >= node.trophiesRequired;
                 const isClaimed = claimedMilestones.includes(node.trophiesRequired);
@@ -72,70 +80,88 @@ export function ApexTrophyRoadModal({
                   <div key={node.trophiesRequired} className="relative flex items-center gap-4">
                     {/* Road Node Circle Badge */}
                     <div
-                      className={`absolute -left-6 sm:-left-10 w-9 h-9 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center font-bold text-sm z-10 transition-all ${
+                      className={`absolute -left-6 sm:-left-10 w-9 h-9 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center font-mono font-bold text-xs sm:text-sm z-10 transition-all ${
                         isClaimed
-                          ? 'bg-emerald-500 text-slate-950 border-2 border-emerald-300 shadow-[0_0_15px_rgba(34,197,94,0.6)]'
+                          ? 'bg-emerald-500/90 text-slate-950 border border-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.5)]'
                           : canClaim
-                          ? 'bg-yellow-400 text-slate-950 border-2 border-white animate-bounce shadow-[0_0_20px_rgba(250,204,21,0.8)]'
+                          ? 'bg-gradient-to-tr from-amber-400 to-yellow-300 text-slate-950 border-2 border-white animate-bounce shadow-[0_0_20px_rgba(250,204,21,0.8)]'
                           : isReached
-                          ? 'bg-amber-500 text-slate-950 border border-yellow-300'
-                          : 'bg-slate-900 text-slate-500 border border-slate-700'
+                          ? 'liquid-glass-pill text-yellow-300 border-amber-400/60'
+                          : 'liquid-glass-pill text-slate-500 opacity-40 border-white/5'
                       }`}
                     >
-                      {isClaimed ? <Check className="w-5 h-5 stroke-[3]" /> : <Trophy className="w-5 h-5" />}
+                      {isClaimed ? (
+                        <Check className="w-4 h-4 sm:w-5 sm:h-5 stroke-[3]" />
+                      ) : (
+                        <span>{node.badgeIcon}</span>
+                      )}
                     </div>
 
                     {/* Milestone Card */}
                     <div
-                      className={`flex-1 p-4 sm:p-5 rounded-2xl border transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+                      className={`flex-1 p-4 rounded-3xl transition-all border ${
                         canClaim
-                          ? 'bg-[#181d30] border-yellow-400 shadow-[0_0_25px_rgba(234,179,8,0.3)]'
+                          ? 'liquid-glass-card border-amber-400/80 shadow-[0_0_25px_rgba(245,158,11,0.3)] bg-gradient-to-r from-amber-500/10 via-transparent to-transparent'
                           : isClaimed
-                          ? 'bg-[#0a0f1c] border-slate-800 opacity-75'
-                          : 'bg-[#0f1426] border-slate-800'
+                          ? 'liquid-glass-card border-white/10 opacity-75'
+                          : isReached
+                          ? 'liquid-glass-card border-white/15'
+                          : 'bg-slate-950/40 border-white/5 opacity-50'
                       }`}
                     >
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs font-mono font-bold text-yellow-400 uppercase">
-                            {node.leagueName}
-                          </span>
-                          <span className="text-xs font-mono text-slate-400">
-                            • Palier {node.trophiesRequired} 🏆
-                          </span>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider">
+                              Palier {node.trophiesRequired.toLocaleString()} 🏆
+                            </span>
+                            <span className="text-xs text-slate-400">·</span>
+                            <span className="text-xs text-slate-300 font-mono">{node.leagueName}</span>
+                          </div>
+                          <h4 className="text-sm sm:text-base font-bold text-white font-mono mt-0.5 flex items-center gap-2">
+                            <Gift className="w-4 h-4 text-amber-400" /> {node.rewardLabel}
+                          </h4>
                         </div>
-                        <h4 className="font-bold text-white text-base">
-                          {node.rewardLabel}
-                        </h4>
-                      </div>
 
-                      {/* Action Button */}
-                      <div>
-                        {isClaimed ? (
-                          <span className="px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-xs font-bold border border-emerald-500/40 flex items-center gap-1">
-                            <Check className="w-3.5 h-3.5" /> Récupéré
-                          </span>
-                        ) : canClaim ? (
-                          <button
-                            onClick={() => {
-                              audio.playWin();
-                              onClaimMilestone(node.trophiesRequired, node.rewardLabel, node.rewardType, node.rewardValue);
-                            }}
-                            className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black text-xs uppercase cursor-pointer shadow-[0_0_20px_rgba(234,179,8,0.6)] animate-pulse transition-all font-mono"
-                          >
-                            RÉCUPÉRER 🎁
-                          </button>
-                        ) : (
-                          <span className="px-4 py-1.5 rounded-full bg-slate-900 text-slate-500 font-mono text-xs border border-slate-800">
-                            Verrouillé
-                          </span>
-                        )}
+                        {/* Claim Button */}
+                        <div>
+                          {isClaimed ? (
+                            <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
+                              <Check className="w-3.5 h-3.5 stroke-[3]" /> Réclamé
+                            </span>
+                          ) : canClaim ? (
+                            <button
+                              onClick={() => {
+                                audio.playWin();
+                                onClaimMilestone(
+                                  node.trophiesRequired,
+                                  node.rewardLabel,
+                                  node.rewardType,
+                                  node.rewardValue
+                                );
+                              }}
+                              className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-xs font-mono uppercase tracking-wider cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.5)] active:scale-95 transition-all"
+                            >
+                              Récupérer !
+                            </button>
+                          ) : (
+                            <span className="text-[11px] font-mono text-slate-400">
+                              Manque {(node.trophiesRequired - totalTrophies).toLocaleString()} 🏆
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
                 );
               })}
             </div>
+          </div>
+
+          {/* Footer Info */}
+          <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400">
+            <span>Route de 10 000 Trophées • Récompenses instantanées</span>
+            <span className="text-amber-400 font-bold">Ligue Stellaire Liquid Glass</span>
           </div>
         </motion.div>
       </div>

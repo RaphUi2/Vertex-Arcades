@@ -65,12 +65,9 @@ export function RngUniverseModal({
     }
 
     // 2. Cumulative Weighted Distribution
-    // Base weight formula: Weight = 100,000 / (chanceDenominator^0.8)
-    // High rarity items get boosted by luck multiplier
     const itemsWithWeights = RNG_UNIVERSE_ITEMS.map(item => {
       let weight = 100000 / Math.pow(item.chanceDenominator, 0.85);
 
-      // Apply luck boost to rare/epic/legendary/mythic
       if (item.chanceDenominator >= 200) {
         weight *= luck;
       } else if (item.chanceDenominator >= 50) {
@@ -98,105 +95,108 @@ export function RngUniverseModal({
   const performRoll = (instant = false) => {
     if (isRolling && !instant) return;
     setIsRolling(true);
+    audio.playClick();
 
-    const rollDuration = instant ? 120 : fastRoll ? 300 : 750;
-    audio.playRngTick();
+    // Consume 1 luck charge if active
+    let activeLuck = 1;
+    if (luckCharges.remainingRolls > 0) {
+      activeLuck = luckCharges.multiplier;
+      setLuckCharges(prev => ({
+        ...prev,
+        remainingRolls: Math.max(0, prev.remainingRolls - 1)
+      }));
+    }
 
-    // Horizontal reel simulation
-    let stepCount = 0;
-    const maxSteps = instant ? 2 : fastRoll ? 5 : 12;
-    const intervalMs = Math.floor(rollDuration / maxSteps);
+    // Determine the rolled item
+    const picked = calculateFairRoll(activeLuck, pityCounter);
 
-    reelAnimRef.current = setInterval(() => {
-      const randomPreview = RNG_UNIVERSE_ITEMS[Math.floor(Math.random() * RNG_UNIVERSE_ITEMS.length)];
-      setReelPreviewItem(randomPreview);
-      audio.playRngTick();
-      stepCount++;
-      if (stepCount >= maxSteps) {
-        clearInterval(reelAnimRef.current);
-        reelAnimRef.current = null;
-      }
-    }, intervalMs);
+    // Update Pity counter
+    if (picked.chanceDenominator >= 500) {
+      setPityCounter(0);
+    } else {
+      setPityCounter(p => p + 1);
+    }
 
-    setTimeout(() => {
-      if (reelAnimRef.current) clearInterval(reelAnimRef.current);
-
-      const nextPity = pityCounter + 1;
-      const chosen = calculateFairRoll(currentLuckMultiplier, nextPity);
-
-      // Decrement luck charges if active
-      if (luckCharges.remainingRolls > 0) {
-        setLuckCharges(prev => ({
-          ...prev,
-          remainingRolls: Math.max(0, prev.remainingRolls - 1)
-        }));
-      }
-
-      // Reset or increment pity
-      if (chosen.chanceDenominator >= 500) {
-        setPityCounter(0);
-      } else {
-        setPityCounter(nextPity >= 25 ? 0 : nextPity);
-      }
-
-      setIsRolling(false);
-      setLastRolledItem(chosen);
-      setReelPreviewItem(null);
-      setRollHistory(prev => [chosen, ...prev.slice(0, 7)]);
-
-      if (chosen.chanceDenominator >= 5000) {
-        audio.playMythicReveal();
-        setAutoRoll(false);
-      } else if (chosen.chanceDenominator >= 500) {
-        audio.playWin();
-      } else {
-        audio.playCoin();
-      }
-
-      // Update Inventory & VC
-      const nextInv = { ...inventory, [chosen.id]: (inventory[chosen.id] || 0) + 1 };
-      onInventoryUpdate(nextInv, chosen.vcoinWorth);
-    }, rollDuration);
+    if (instant || fastRoll) {
+      // Instant roll
+      finishRoll(picked);
+    } else {
+      // Animated Reel Spin (cycles rapidly through 12 random items before landing)
+      let step = 0;
+      const totalSteps = 14;
+      const interval = setInterval(() => {
+        const randomItem = RNG_UNIVERSE_ITEMS[Math.floor(Math.random() * RNG_UNIVERSE_ITEMS.length)];
+        setReelPreviewItem(randomItem);
+        audio.playClick();
+        step++;
+        if (step >= totalSteps) {
+          clearInterval(interval);
+          finishRoll(picked);
+        }
+      }, 70);
+      reelAnimRef.current = interval;
+    }
   };
 
-  // Auto-roll handler
+  const finishRoll = (item: RngUniverseItem) => {
+    setIsRolling(false);
+    setLastRolledItem(item);
+    setReelPreviewItem(null);
+
+    // Audio cue based on rarity
+    if (item.chanceDenominator >= 1000) {
+      audio.playWin();
+      notify(`🌟 TIRAGE DIVIN : ${item.name} (1 sur ${item.chanceDenominator.toLocaleString()}) !`);
+    } else if (item.chanceDenominator >= 200) {
+      audio.playLevelUp();
+      notify(`✨ Relique Rare : ${item.name} !`);
+    } else {
+      audio.playWin();
+    }
+
+    // Add to inventory
+    const nextInv = { ...inventory, [item.id]: (inventory[item.id] || 0) + 1 };
+    onInventoryUpdate(nextInv, item.vcoinWorth);
+
+    // Update history
+    setRollHistory(prev => [item, ...prev.slice(0, 19)]);
+  };
+
+  // Auto Roll management
   useEffect(() => {
     if (autoRoll) {
       autoRollIntervalRef.current = setInterval(() => {
         performRoll(true);
-      }, 500);
+      }, fastRoll ? 400 : 900);
     } else {
-      if (autoRollIntervalRef.current) {
-        clearInterval(autoRollIntervalRef.current);
-        autoRollIntervalRef.current = null;
-      }
+      if (autoRollIntervalRef.current) clearInterval(autoRollIntervalRef.current);
     }
     return () => {
       if (autoRollIntervalRef.current) clearInterval(autoRollIntervalRef.current);
       if (reelAnimRef.current) clearInterval(reelAnimRef.current);
     };
-  }, [autoRoll, currentLuckMultiplier, inventory, pityCounter]);
+  }, [autoRoll, fastRoll, pityCounter, luckCharges]);
 
-  // Buy Luck Potion
+  // Buy potion
   const handleBuyPotion = (multiplier: number, rolls: number, cost: number, name: string) => {
     if (userVCoins < cost) {
-      notify('❌ V-Coins insuffisants !');
+      audio.playDamage();
+      notify(`Fonds insuffisants ! Il vous faut ${cost} V-Coins.`);
       return;
     }
-    audio.playWin();
-    setLuckCharges({ multiplier, remainingRolls: rolls });
+    audio.playLevelUp();
     onInventoryUpdate(inventory, -cost);
-    notify(`🧪 ${name} activée : ${multiplier}x Chance pendant ${rolls} tirages !`);
+    setLuckCharges({ multiplier, remainingRolls: rolls });
+    notify(`Potion activée : ${name} ! ${multiplier}x Chance pendant ${rolls} tirages.`);
   };
 
-  // Sell duplicate items
+  // Sell Item for 70% refund
   const handleSellItem = (itemId: string) => {
-    const count = inventory[itemId] || 0;
-    if (count <= 0) return;
     const item = RNG_UNIVERSE_ITEMS.find(i => i.id === itemId);
-    if (!item) return;
+    const count = inventory[itemId] || 0;
+    if (!item || count <= 0) return;
 
-    const refund = Math.max(10, Math.floor(item.vcoinWorth * 0.7));
+    const refund = Math.floor(item.vcoinWorth * 0.7);
     const nextInv = { ...inventory };
     if (count === 1) {
       delete nextInv[itemId];
@@ -212,43 +212,51 @@ export function RngUniverseModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-2xl">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-2xl">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-4xl max-h-[92vh] bg-slate-900/90 border border-white/10 rounded-3xl shadow-[0_0_60px_rgba(6,182,212,0.35)] flex flex-col overflow-hidden text-slate-100 backdrop-blur-2xl"
+          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          className="liquid-glass-container w-full max-w-4xl max-h-[92vh] rounded-3xl p-5 sm:p-7 flex flex-col justify-between overflow-hidden shadow-2xl relative border border-white/15 text-slate-100"
         >
+          {/* Specular Top Glint */}
+          <div className="absolute inset-x-12 top-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent pointer-events-none" />
+
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-slate-950/60 backdrop-blur-md">
+          <div className="flex items-center justify-between pb-4 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 border border-cyan-300 flex items-center justify-center text-slate-950 text-2xl shadow-[0_0_20px_rgba(6,182,212,0.6)]">
+              <div className="w-11 h-11 rounded-2xl bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)] text-xl">
                 🎲
               </div>
               <div>
-                <h2 className="text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-white to-blue-300 font-mono">
-                  SANCTUAIRE RNG STELLAIRE
-                </h2>
-                <p className="text-xs text-slate-400 font-mono">
-                  Tirages de reliques, probabilités équilibrées & alchimie de chance
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-black text-white font-mono tracking-tight">
+                    SANCTUAIRE RNG LIQUID GLASS
+                  </h2>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
+                    v3.2
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300">
+                  Tirages de reliques cosmiques, probabilités équilibrées & alchimie de chance
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               {/* Active Luck Capsule */}
-              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-950/80 border border-cyan-400 text-cyan-300 font-mono text-xs font-bold shadow-md">
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full liquid-glass-pill text-cyan-300 font-mono text-xs font-bold shadow-sm">
                 <Sparkles className="w-3.5 h-3.5 text-cyan-300 animate-spin" />
                 <span>
                   {currentLuckMultiplier > 1
-                    ? `${currentLuckMultiplier}x Chance (${luckCharges.remainingRolls} restants)`
+                    ? `${currentLuckMultiplier}x Chance (${luckCharges.remainingRolls} tirages)`
                     : '1x Chance Normale'}
                 </span>
               </div>
 
               {/* V-Coins Pill */}
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-950/80 border border-amber-500 text-yellow-300 font-mono text-xs font-bold">
-                <Coins className="w-3.5 h-3.5 text-yellow-400" />
+              <div className="liquid-glass-vc flex items-center gap-1.5 px-3 py-1 rounded-xl text-yellow-300 text-xs font-mono font-bold shadow-sm">
+                <Coins className="w-3.5 h-3.5 fill-current text-yellow-400" />
                 <span>{userVCoins.toLocaleString()} VC</span>
               </div>
 
@@ -257,23 +265,23 @@ export function RngUniverseModal({
                   audio.playClick();
                   onClose();
                 }}
-                className="w-9 h-9 rounded-full bg-slate-800/80 hover:bg-slate-700 text-slate-300 flex items-center justify-center cursor-pointer transition-colors"
+                className="w-9 h-9 rounded-full liquid-glass-pill text-slate-300 hover:text-white flex items-center justify-center cursor-pointer shadow-sm transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
 
-          {/* Toast */}
+          {/* Toast Notification */}
           {toastMessage && (
-            <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 px-5 py-2 rounded-full bg-cyan-600 text-white font-mono text-xs font-bold shadow-xl border border-cyan-300">
+            <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 px-5 py-2 rounded-full bg-cyan-500 text-slate-950 font-mono text-xs font-black shadow-xl border border-cyan-300 animate-fade-in">
               {toastMessage}
             </div>
           )}
 
-          {/* iOS Segmented Navigation Bar */}
-          <div className="px-6 pt-4 pb-2 border-b border-white/5 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-950/70 border border-white/5">
+          {/* Liquid Glass Segmented Navigation Bar */}
+          <div className="pt-3 pb-2 flex items-center justify-between gap-2 border-b border-white/10">
+            <div className="flex items-center gap-1.5 p-1 rounded-2xl liquid-glass-pill border-white/10">
               {[
                 { id: 'roll', label: '🎲 Tirage & Roulette' },
                 { id: 'inventory', label: `🎒 Inventaire (${Object.keys(inventory).length})` },
@@ -286,10 +294,10 @@ export function RngUniverseModal({
                     audio.playClick();
                     setActiveTab(tab.id as any);
                   }}
-                  className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                  className={`px-3 sm:px-4 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                     activeTab === tab.id
-                      ? 'bg-cyan-500 text-slate-950 shadow-md'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-cyan-400 text-slate-950 shadow-md font-black'
+                      : 'text-slate-300 hover:text-white hover:bg-white/5'
                   }`}
                 >
                   {tab.label}
@@ -298,32 +306,35 @@ export function RngUniverseModal({
             </div>
 
             {/* Pity Counter Tag */}
-            <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-slate-400">
-              <span>Pitié Épique :</span>
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl liquid-glass-pill text-xs font-mono text-slate-300">
+              <span className="text-slate-400">Pitié Épique :</span>
               <strong className="text-cyan-300 font-bold">{pityCounter} / 25</strong>
             </div>
           </div>
 
           {/* Tab 1: ROLL & ROULETTE */}
           {activeTab === 'roll' && (
-            <div className="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-between space-y-6">
-              {/* Animated Reel Display */}
-              <div className="w-full max-w-xl h-56 rounded-3xl bg-slate-950/90 border-2 border-cyan-500/40 p-6 flex flex-col items-center justify-center relative overflow-hidden shadow-2xl">
-                {/* Background Glow */}
+            <div className="flex-1 overflow-y-auto my-3 flex flex-col items-center justify-between space-y-4 no-scrollbar">
+              {/* Animated Liquid Glass Reel Display */}
+              <div className="w-full max-w-xl h-56 rounded-3xl liquid-glass-card border border-white/20 p-6 flex flex-col items-center justify-center relative overflow-hidden shadow-2xl">
+                {/* Background Dynamic Ambient Aura */}
                 <div
-                  className="absolute inset-0 opacity-20 filter blur-3xl transition-all"
+                  className="absolute inset-0 opacity-25 filter blur-3xl transition-all duration-500 pointer-events-none"
                   style={{
                     backgroundColor:
                       reelPreviewItem?.accentColor || lastRolledItem?.accentColor || '#06b6d4'
                   }}
                 />
 
+                {/* Top Inner Specular Highlight */}
+                <div className="absolute inset-x-8 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
+
                 {isRolling ? (
                   <div className="flex flex-col items-center space-y-3 z-10 animate-pulse">
                     <div
-                      className="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl border-2 shadow-2xl"
+                      className="w-20 h-20 rounded-3xl flex items-center justify-center text-4xl border-2 shadow-2xl backdrop-blur-md"
                       style={{
-                        backgroundColor: `${reelPreviewItem?.accentColor || '#06b6d4'}20`,
+                        backgroundColor: `${reelPreviewItem?.accentColor || '#06b6d4'}25`,
                         borderColor: reelPreviewItem?.accentColor || '#06b6d4'
                       }}
                     >
@@ -332,13 +343,14 @@ export function RngUniverseModal({
                     <span className="text-base font-black text-cyan-300 font-mono">
                       {reelPreviewItem?.name || 'TIRAGE EN COURS...'}
                     </span>
-                    <span className="text-xs text-slate-400 font-mono">
+                    <span className="text-xs text-slate-300 font-mono">
                       Probabilité : 1 sur {reelPreviewItem?.chanceDenominator.toLocaleString() || '...'}
                     </span>
                   </div>
                 ) : lastRolledItem ? (
-                  <div className="flex flex-col items-center space-y-2 z-10 text-center">
-                    <span className="px-3 py-0.5 rounded-full text-[10px] font-black uppercase font-mono tracking-wider"
+                  <div className="flex flex-col items-center space-y-2 z-10 text-center animate-fade-in">
+                    <span
+                      className="px-3 py-1 rounded-full text-[10px] font-black uppercase font-mono tracking-wider backdrop-blur-md"
                       style={{
                         backgroundColor: `${lastRolledItem.accentColor}25`,
                         color: lastRolledItem.accentColor,
@@ -347,37 +359,38 @@ export function RngUniverseModal({
                     >
                       {lastRolledItem.rarity} • 1 SUR {lastRolledItem.chanceDenominator.toLocaleString()}
                     </span>
-                    <h3 className="text-xl font-black text-white font-mono">
+                    <h3 className="text-xl font-black text-white font-mono tracking-tight">
                       {lastRolledItem.name}
                     </h3>
-                    <p className="text-xs text-slate-300 max-w-md line-clamp-2">
+                    <p className="text-xs text-slate-200 max-w-md line-clamp-2">
                       {lastRolledItem.description}
                     </p>
-                    <div className="flex items-center gap-3 pt-2 text-xs font-mono">
+                    <div className="flex items-center gap-3 pt-1 text-xs font-mono">
                       <span className="text-yellow-400 font-bold">+{lastRolledItem.vcoinWorth} VC Récoltés</span>
-                      <span className="text-slate-400">Univers : {lastRolledItem.universe}</span>
+                      <span className="text-slate-400">·</span>
+                      <span className="text-cyan-300">Univers : {lastRolledItem.universe}</span>
                     </div>
                   </div>
                 ) : (
                   <div className="text-center space-y-2 z-10">
-                    <div className="text-4xl">✨</div>
-                    <h3 className="text-base font-bold text-white font-mono">Prêt pour le Tirage</h3>
-                    <p className="text-xs text-slate-400">
-                      Lancez la roulette pour découvrir des reliques mythiques !
+                    <div className="text-4xl animate-bounce">✨</div>
+                    <h3 className="text-base font-bold text-white font-mono">Prêt pour le Tirage Cosmique</h3>
+                    <p className="text-xs text-slate-300">
+                      Lancez la roulette pour découvrir des reliques mythiques et légendaires !
                     </p>
                   </div>
                 )}
               </div>
 
               {/* Roll Controls */}
-              <div className="w-full max-w-xl flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="w-full max-w-xl flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 w-full sm:w-auto">
                   <button
                     onClick={() => setFastRoll(!fastRoll)}
-                    className={`flex-1 sm:flex-none px-4 py-2.5 rounded-2xl text-xs font-mono font-bold border transition-all cursor-pointer ${
+                    className={`flex-1 sm:flex-none px-4 py-2.5 rounded-2xl text-xs font-mono font-bold transition-all cursor-pointer ${
                       fastRoll
-                        ? 'bg-amber-500/20 text-yellow-300 border-amber-400'
-                        : 'bg-slate-900 text-slate-400 border-slate-700'
+                        ? 'bg-amber-500/25 text-yellow-300 border border-amber-400/60 shadow-[0_0_12px_rgba(245,158,11,0.4)]'
+                        : 'liquid-glass-pill text-slate-300 hover:text-white'
                     }`}
                   >
                     ⚡ Rapide {fastRoll ? 'Activé' : 'Désactivé'}
@@ -385,10 +398,10 @@ export function RngUniverseModal({
 
                   <button
                     onClick={() => setAutoRoll(!autoRoll)}
-                    className={`flex-1 sm:flex-none px-4 py-2.5 rounded-2xl text-xs font-mono font-bold border transition-all cursor-pointer ${
+                    className={`flex-1 sm:flex-none px-4 py-2.5 rounded-2xl text-xs font-mono font-bold transition-all cursor-pointer ${
                       autoRoll
-                        ? 'bg-rose-500/20 text-rose-300 border-rose-400'
-                        : 'bg-slate-900 text-slate-400 border-slate-700'
+                        ? 'bg-rose-500/25 text-rose-300 border border-rose-400/60 shadow-[0_0_12px_rgba(244,63,94,0.4)]'
+                        : 'liquid-glass-pill text-slate-300 hover:text-white'
                     }`}
                   >
                     🔄 Auto {autoRoll ? 'En cours' : 'Désactivé'}
@@ -398,30 +411,30 @@ export function RngUniverseModal({
                 <button
                   onClick={() => performRoll()}
                   disabled={isRolling}
-                  className="w-full sm:w-auto flex-1 py-4 px-8 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 hover:from-cyan-400 hover:to-blue-400 active:scale-98 text-slate-950 font-black text-sm uppercase tracking-wider font-mono shadow-[0_0_25px_rgba(6,182,212,0.6)] cursor-pointer disabled:opacity-50"
+                  className="w-full sm:w-auto flex-1 py-3 px-8 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 active:scale-95 text-slate-950 font-black text-xs uppercase tracking-wider font-mono shadow-[0_0_25px_rgba(6,182,212,0.6)] cursor-pointer disabled:opacity-40"
                 >
                   🎲 TIRER UNE RELIQUE
                 </button>
               </div>
 
               {/* Live Odds & Drop Table Preview */}
-              <div className="w-full max-w-xl p-4 rounded-2xl bg-slate-950/60 border border-white/5">
+              <div className="w-full max-w-xl p-3.5 rounded-2xl liquid-glass-card border border-white/10">
                 <h4 className="text-xs font-bold text-slate-300 font-mono mb-2 flex items-center justify-between">
                   <span>Table des Probabilités Actuelles ({currentLuckMultiplier}x Chance) :</span>
                   <span className="text-[10px] text-cyan-300">Tirages Totaux : {totalRolls}</span>
                 </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono">
-                  <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300">
-                    Commun : <strong>~52%</strong>
+                  <div className="p-2 rounded-xl liquid-glass-pill text-slate-300 text-center">
+                    Commun : <strong className="text-white">~52%</strong>
                   </div>
-                  <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800 text-blue-300">
-                    Rare : <strong>~26%</strong>
+                  <div className="p-2 rounded-xl liquid-glass-pill text-blue-300 text-center">
+                    Rare : <strong className="text-white">~26%</strong>
                   </div>
-                  <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800 text-purple-300">
-                    Épique : <strong>~14%</strong>
+                  <div className="p-2 rounded-xl liquid-glass-pill text-purple-300 text-center">
+                    Épique : <strong className="text-white">~14%</strong>
                   </div>
-                  <div className="p-2 rounded-xl bg-slate-900/80 border border-slate-800 text-yellow-300">
-                    Mythique : <strong>~4.5%</strong>
+                  <div className="p-2 rounded-xl liquid-glass-pill text-yellow-300 text-center">
+                    Mythique : <strong className="text-white">~4.5%</strong>
                   </div>
                 </div>
               </div>
@@ -430,18 +443,18 @@ export function RngUniverseModal({
 
           {/* Tab 2: INVENTORY */}
           {activeTab === 'inventory' && (
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto my-3 space-y-4 no-scrollbar">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-white font-mono">
+                <h3 className="text-xs font-bold text-white font-mono uppercase tracking-wider">
                   Objets Découverts ({Object.keys(inventory).length} uniques)
                 </h3>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-300">
                   Vendez vos doublons pour récupérer instantanément des V-Coins !
                 </p>
               </div>
 
               {Object.keys(inventory).length === 0 ? (
-                <div className="text-center py-16 text-slate-500 font-mono text-sm">
+                <div className="text-center py-16 text-slate-400 font-mono text-xs">
                   Votre inventaire est vide. Lancez vos premiers tirages dans l'onglet Tirage !
                 </div>
               ) : (
@@ -453,7 +466,7 @@ export function RngUniverseModal({
                     return (
                       <div
                         key={itemId}
-                        className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between gap-3 shadow-md"
+                        className="p-3.5 rounded-2xl liquid-glass-card border border-white/10 flex items-center justify-between gap-3 shadow-md hover:border-cyan-400/40 transition-colors"
                       >
                         <div>
                           <div className="flex items-center gap-2 mb-1">
@@ -466,7 +479,7 @@ export function RngUniverseModal({
                             >
                               {item.rarity}
                             </span>
-                            <span className="text-[10px] text-slate-400 font-mono">
+                            <span className="text-[10px] text-slate-300 font-mono">
                               x{count}
                             </span>
                           </div>
@@ -478,7 +491,7 @@ export function RngUniverseModal({
 
                         <button
                           onClick={() => handleSellItem(itemId)}
-                          className="px-3 py-1.5 rounded-xl bg-red-950/70 hover:bg-red-900 border border-red-500 text-red-300 text-[10px] font-mono font-bold cursor-pointer transition-colors"
+                          className="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/50 text-rose-300 text-[10px] font-mono font-bold cursor-pointer transition-colors active:scale-95"
                         >
                           Vendre ({Math.floor(item.vcoinWorth * 0.7)} VC)
                         </button>
@@ -492,67 +505,69 @@ export function RngUniverseModal({
 
           {/* Tab 3: POTIONS & LUCK ALCHEMY */}
           {activeTab === 'potions' && (
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto my-3 space-y-4 no-scrollbar">
               <div>
-                <h3 className="text-base font-bold text-white font-mono">Laboratoire d'Alchimie</h3>
-                <p className="text-xs text-slate-300 mt-1">
+                <h3 className="text-xs font-bold text-white font-mono uppercase tracking-wider">
+                  Laboratoire d'Alchimie
+                </h3>
+                <p className="text-xs text-slate-300 mt-0.5">
                   Achetez des élixirs pour démultiplier vos chances d'obtenir des reliques légendaires et mythiques !
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {/* Potion 1 */}
-                <div className="p-5 rounded-3xl bg-slate-950/80 border border-emerald-500/40 flex flex-col justify-between space-y-4 shadow-lg">
+                <div className="p-5 rounded-3xl liquid-glass-card border border-emerald-400/40 flex flex-col justify-between space-y-4 shadow-lg hover:border-emerald-400/70 transition-all">
                   <div>
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-2xl mb-3">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/60 flex items-center justify-center text-2xl mb-3 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
                       🍀
                     </div>
                     <h4 className="font-bold text-white text-sm font-mono">Élixir Trèfle</h4>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs text-slate-300 mt-1">
                       Augmente vos chances de <strong>+50% (1.5x)</strong> pendant 15 tirages consécutifs.
                     </p>
                   </div>
                   <button
                     onClick={() => handleBuyPotion(1.5, 15, 75, 'Élixir Trèfle')}
-                    className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs font-mono uppercase cursor-pointer"
+                    className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs font-mono uppercase cursor-pointer active:scale-95 transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)]"
                   >
                     Acheter (75 VC)
                   </button>
                 </div>
 
                 {/* Potion 2 */}
-                <div className="p-5 rounded-3xl bg-slate-950/80 border border-cyan-500/40 flex flex-col justify-between space-y-4 shadow-lg">
+                <div className="p-5 rounded-3xl liquid-glass-card border border-cyan-400/40 flex flex-col justify-between space-y-4 shadow-lg hover:border-cyan-400/70 transition-all">
                   <div>
-                    <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400 flex items-center justify-center text-2xl mb-3">
+                    <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/60 flex items-center justify-center text-2xl mb-3 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
                       ⚡
                     </div>
                     <h4 className="font-bold text-white text-sm font-mono">Potion Stellaire</h4>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs text-slate-300 mt-1">
                       Multiplie vos chances par <strong>2.5x</strong> pendant 25 tirages consécutifs.
                     </p>
                   </div>
                   <button
                     onClick={() => handleBuyPotion(2.5, 25, 180, 'Potion Stellaire')}
-                    className="w-full py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs font-mono uppercase cursor-pointer"
+                    className="w-full py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black text-xs font-mono uppercase cursor-pointer active:scale-95 transition-all shadow-[0_0_15px_rgba(6,182,212,0.4)]"
                   >
                     Acheter (180 VC)
                   </button>
                 </div>
 
                 {/* Potion 3 */}
-                <div className="p-5 rounded-3xl bg-slate-950/80 border border-purple-500/40 flex flex-col justify-between space-y-4 shadow-lg">
+                <div className="p-5 rounded-3xl liquid-glass-card border border-purple-400/40 flex flex-col justify-between space-y-4 shadow-lg hover:border-purple-400/70 transition-all">
                   <div>
-                    <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-400 flex items-center justify-center text-2xl mb-3">
+                    <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-400/60 flex items-center justify-center text-2xl mb-3 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
                       🌌
                     </div>
                     <h4 className="font-bold text-white text-sm font-mono">Essence Céleste</h4>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs text-slate-300 mt-1">
                       Multiplie vos chances par <strong>4x</strong> pendant 40 tirages consécutifs !
                     </p>
                   </div>
                   <button
                     onClick={() => handleBuyPotion(4, 40, 350, 'Essence Céleste')}
-                    className="w-full py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-black text-xs font-mono uppercase cursor-pointer"
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-black text-xs font-mono uppercase cursor-pointer active:scale-95 transition-all shadow-[0_0_15px_rgba(168,85,247,0.4)]"
                   >
                     Acheter (350 VC)
                   </button>
@@ -563,9 +578,11 @@ export function RngUniverseModal({
 
           {/* Tab 4: TRADES */}
           {activeTab === 'trades' && (
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto my-3 space-y-4 no-scrollbar">
               <div>
-                <h3 className="text-sm font-bold text-white font-mono">Offres des PNJ et Collectionneurs</h3>
+                <h3 className="text-xs font-bold text-white font-mono uppercase tracking-wider">
+                  Offres des PNJ et Collectionneurs
+                </h3>
                 <p className="text-xs text-slate-300">
                   Acceptez leurs offres d'échange pour gagner des V-Coins supplémentaires !
                 </p>
@@ -575,7 +592,7 @@ export function RngUniverseModal({
                 {tradeRequests.map((trade) => (
                   <div
                     key={trade.id}
-                    className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                    className="p-4 rounded-2xl liquid-glass-card border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:border-cyan-400/40 transition-colors"
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1">
@@ -590,7 +607,7 @@ export function RngUniverseModal({
 
                     <button
                       onClick={() => onAcceptTrade(trade.id)}
-                      className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs font-mono uppercase cursor-pointer transition-all"
+                      className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs font-mono uppercase cursor-pointer transition-all active:scale-95 shadow-[0_0_15px_rgba(16,185,129,0.35)]"
                     >
                       Accepter (+{trade.offeredVCoins} VC)
                     </button>
@@ -599,6 +616,12 @@ export function RngUniverseModal({
               </div>
             </div>
           )}
+
+          {/* Modal Footer Info */}
+          <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400">
+            <span>Probabilités certifiées équitables • Pitié garantie à 25 tirages</span>
+            <span className="text-cyan-400 font-bold">Sanctuaire RNG Liquid Glass v3.2</span>
+          </div>
         </motion.div>
       </div>
     </AnimatePresence>

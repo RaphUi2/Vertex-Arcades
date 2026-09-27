@@ -4,17 +4,18 @@ import {
   Zap, Trophy, Sparkles, Heart, Search, Play, X, Coins,
   Settings, Gamepad2, Volume2, VolumeX, Crown, Target, ShoppingBag,
   ArrowRightLeft, Skull, Flame, Check, Shield, Lock, User, Award,
-  Menu, ChevronRight, Plus, Star, Compass, Layers, Radio
+  Menu, ChevronRight, Plus, Star, Compass, Layers, Radio, BookOpen
 } from 'lucide-react';
 
 import { audio } from './utils/audio';
 import { useGamepad } from './utils/gamepad';
-import { GlobalState, GameStats, UserProfile, Quest, RngUniverseItem } from './types';
+import { GlobalState, GameStats, UserProfile, Quest, RngUniverseItem, StoryModeState } from './types';
 import {
   GAMES_LIST,
   INITIAL_ACHIEVEMENTS_200,
   INITIAL_QUESTS_V3,
   INITIAL_TRADE_REQUESTS,
+  INITIAL_STORY_MODE,
   NEW_COSMETICS_SHOP,
   RANKED_GAMES_IDS,
   ShopCosmetic
@@ -24,17 +25,16 @@ import {
 import { GameCardIllustration } from './components/GameCardIllustration';
 import { RngUniverseModal } from './components/RngUniverseModal';
 import { ApexTrophyRoadModal } from './components/ApexTrophyRoadModal';
-import { RankedV3Modal } from './components/RankedV3Modal';
 import { ProfileCreatorModal } from './components/ProfileCreatorModal';
 import { QuestsV3Modal } from './components/QuestsV3Modal';
-import { MetaverseForgeModal } from './components/MetaverseForgeModal';
+import { StoryModeModal } from './components/StoryModeModal';
 import { AchievementsV3Modal } from './components/AchievementsV3Modal';
 import { ShopV3Modal } from './components/ShopV3Modal';
 import { SettingsV3Modal } from './components/SettingsV3Modal';
 import { ArcadePassV3Modal } from './components/ArcadePassV3Modal';
 import { MobileGameControls } from './components/MobileGameControls';
 
-// 20 Games
+// 22 Games
 import { QuantumObby } from './games/QuantumObby';
 import { AetheriaVoid } from './games/AetheriaVoid';
 import { TitanCore } from './games/TitanCore';
@@ -55,6 +55,18 @@ import { ShadowShinobi } from './games/ShadowShinobi';
 import { SpeedRunners2099 } from './games/SpeedRunners2099';
 import { BlockCraftArena } from './games/BlockCraftArena';
 import { NeonCyberPong } from './games/NeonCyberPong';
+import { SolarOverdrive } from './games/SolarOverdrive';
+import { PixelSurvivors } from './games/PixelSurvivors';
+
+const PLAY_BUTTON_STYLES: Record<string, string> = {
+  emerald: 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 shadow-[0_0_20px_rgba(20,184,166,0.35)] border border-emerald-300/40',
+  cyan: 'bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 hover:from-cyan-300 hover:to-blue-400 text-slate-950 shadow-[0_0_20px_rgba(6,182,212,0.45)] border border-cyan-300/50',
+  purple: 'bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white shadow-[0_0_20px_rgba(168,85,247,0.45)] border border-purple-300/50',
+  rose: 'bg-gradient-to-r from-rose-500 via-red-500 to-orange-500 hover:from-rose-400 hover:to-orange-400 text-white shadow-[0_0_20px_rgba(244,63,94,0.45)] border border-rose-300/50',
+  amber: 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.45)] border border-amber-300/60',
+  zinc: 'bg-gradient-to-r from-zinc-800 via-zinc-900 to-black hover:from-zinc-700 hover:to-zinc-900 text-white shadow-[0_0_20px_rgba(0,0,0,0.7)] border border-white/30',
+  white: 'bg-gradient-to-r from-white via-slate-100 to-slate-200 hover:from-slate-100 hover:to-white text-slate-950 font-black shadow-[0_0_20px_rgba(255,255,255,0.5)] border border-white'
+};
 
 export default function App() {
   const [state, setState] = useState<GlobalState>(() => {
@@ -75,8 +87,8 @@ export default function App() {
           avatarModel: 'cyber_agent',
           totalVCoins: 1250,
           totalPixels: 1250,
-          title: 'VÉTÉRAN VERTEX 3.1',
-          unlockedTitles: ['VÉTÉRAN VERTEX 3.1'],
+          title: 'VÉTÉRAN VERTEX 3.2',
+          unlockedTitles: ['VÉTÉRAN VERTEX 3.2'],
           unlockedAvatarIcons: ['Crown', 'Zap', 'Star'],
           activeAura: 'none',
           unlockedAuras: ['none'],
@@ -86,8 +98,8 @@ export default function App() {
           unlockedFrames: ['frame_neon_cyan'],
           activeHat: 'hat_cap_pro',
           unlockedHats: ['hat_cap_pro'],
-          bio: 'Prêt pour la version 3.1 ! Explorateur d\'expériences et champion de l\'arène.',
-          selectedTags: ['Pro Gamer', 'Obby King', 'Trader'],
+          bio: 'Prêt pour la version 3.2 ! Explorateur d\'expériences et champion de l\'arène.',
+          selectedTags: ['Pro Gamer', 'Speedrunner', 'Trader'],
           unlockedGames: [],
           luckMultiplier: 1
         },
@@ -110,7 +122,8 @@ export default function App() {
           scanlines: false,
           hapticVibration: true,
           showFps: false,
-          controllerLayout: 'xbox'
+          controllerLayout: 'xbox',
+          colorTheme: 'cyber'
         },
         rankPoints: 240,
         totalTrophies: 120,
@@ -119,17 +132,52 @@ export default function App() {
         rngTotalRolls: 5,
         activeTradeRequests: INITIAL_TRADE_REQUESTS,
         completedTradesCount: 0,
-        worldBoss: {
-          name: 'TITAN GLITCH OMNI',
-          currentHp: 850000,
-          maxHp: 1000000,
-          stage: 1,
-          playerTotalDamage: 6500,
-          claimedMilestones: []
-        },
+        storyMode: INITIAL_STORY_MODE,
         favorites: ['quantum_obby', 'titan_core', 'shadow_shinobi'],
         recentGames: []
       };
+    }
+
+    if (parsed.profile) {
+      if (parsed.profile.title && (/roblox/i.test(parsed.profile.title) || /3\.0/i.test(parsed.profile.title))) {
+        parsed.profile.title = 'VÉTÉRAN VERTEX 3.2';
+      }
+      if (Array.isArray(parsed.profile.unlockedTitles)) {
+        parsed.profile.unlockedTitles = parsed.profile.unlockedTitles.map((t: string) =>
+          (/roblox/i.test(t) || /3\.0/i.test(t)) ? 'VÉTÉRAN VERTEX 3.2' : t
+        );
+        if (!parsed.profile.unlockedTitles.includes('VÉTÉRAN VERTEX 3.2')) {
+          parsed.profile.unlockedTitles.push('VÉTÉRAN VERTEX 3.2');
+        }
+      }
+      if (parsed.profile.bio && /roblox/i.test(parsed.profile.bio)) {
+        parsed.profile.bio = parsed.profile.bio.replace(/roblox/gi, 'Vertex');
+      }
+      if (Array.isArray(parsed.profile.selectedTags)) {
+        parsed.profile.selectedTags = parsed.profile.selectedTags.map((t: string) =>
+          /obby/i.test(t) ? 'Speedrunner' : t
+        );
+      }
+    }
+
+    if (!parsed.storyMode) {
+      parsed.storyMode = INITIAL_STORY_MODE;
+    }
+    if (!parsed.achievements || parsed.achievements.length < 250) {
+      parsed.achievements = INITIAL_ACHIEVEMENTS_200;
+    }
+    if (!parsed.settings) {
+      parsed.settings = {} as any;
+    }
+    if (!parsed.settings.colorTheme) {
+      parsed.settings.colorTheme = 'cyber';
+      parsed.settings.monochromeMode = false;
+    }
+    // Ensure all 22 games have stats
+    for (const g of GAMES_LIST) {
+      if (!parsed.stats[g.id]) {
+        parsed.stats[g.id] = { plays: 0, highScore: 0 };
+      }
     }
 
     return parsed;
@@ -146,10 +194,9 @@ export default function App() {
   // Modals state
   const [showRngModal, setShowRngModal] = useState(false);
   const [showTrophyModal, setShowTrophyModal] = useState(false);
-  const [showRankedModal, setShowRankedModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showQuestsModal, setShowQuestsModal] = useState(false);
-  const [showForgeModal, setShowForgeModal] = useState(false);
+  const [showStoryModal, setShowStoryModal] = useState(false);
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
   const [showShopModal, setShowShopModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -191,10 +238,9 @@ export default function App() {
       setIsDrawerOpen(false);
       setShowRngModal(false);
       setShowTrophyModal(false);
-      setShowRankedModal(false);
       setShowProfileModal(false);
       setShowQuestsModal(false);
-      setShowForgeModal(false);
+      setShowStoryModal(false);
       setShowAchievementsModal(false);
       setShowShopModal(false);
       setShowSettingsModal(false);
@@ -369,8 +415,11 @@ export default function App() {
     return matchesCategory && matchesSearch;
   });
 
+  const currentTheme = state.settings.colorTheme || (state.settings.monochromeMode ? 'dark' : 'cyber');
+  const themeClass = currentTheme === 'dark' ? 'theme-dark' : currentTheme === 'light' ? 'theme-light' : 'theme-cyber';
+
   return (
-    <div className="relative min-h-screen bg-[#070913] text-slate-100 flex flex-col justify-between overflow-x-hidden font-sans select-none antialiased">
+    <div className={`relative min-h-screen ${themeClass} text-slate-100 flex flex-col justify-between overflow-x-hidden font-sans select-none antialiased transition-colors duration-300`}>
       {/* 1. iOS Glass Toast Notification */}
       <AnimatePresence>
         {notification && (
@@ -398,10 +447,14 @@ export default function App() {
         >
           <div className="relative">
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-lg border border-cyan-400/80 shadow-[0_0_12px_rgba(6,182,212,0.3)]"
-              style={{ backgroundColor: state.profile.avatarColor }}
+              className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center text-lg border border-cyan-400/80 shadow-[0_0_12px_rgba(6,182,212,0.3)]"
+              style={{ backgroundColor: state.profile.customAvatarUrl ? 'transparent' : state.profile.avatarColor }}
             >
-              {state.profile.avatarModel === 'cyber_ninja' ? '🥷' : state.profile.avatarModel === 'blocky_knight' ? '🛡️' : '🧑‍🚀'}
+              {state.profile.customAvatarUrl ? (
+                <img src={state.profile.customAvatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+              ) : (
+                state.profile.avatarModel === 'cyber_ninja' ? '🥷' : state.profile.avatarModel === 'blocky_knight' ? '🛡️' : '🧑‍🚀'
+              )}
             </div>
             {/* Live Online Status Dot */}
             <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-400 border-2 border-slate-950 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
@@ -428,27 +481,30 @@ export default function App() {
           </div>
         </div>
 
-        {/* Center: SLEEK MONOCHROME GAMEPAD LOGO (NO TEXT) */}
+        {/* Center: SLEEK MONOCHROME GAMEPAD LOGO WITH VERSION 3.2 */}
         <div
           onClick={() => { audio.playWin(); }}
-          className="w-10 h-10 rounded-2xl liquid-glass-pill hover:border-cyan-400/70 flex items-center justify-center transition-all cursor-pointer group shadow-sm active:scale-95"
-          title="Vertex Arcades"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-2xl liquid-glass-pill hover:border-cyan-400/70 transition-all cursor-pointer group shadow-sm active:scale-95"
+          title="Vertex Arcades v3.2"
         >
           <Gamepad2 className="w-5 h-5 text-cyan-400 filter drop-shadow-[0_0_8px_rgba(6,182,212,0.9)] group-hover:scale-110 transition-transform" />
+          <span className="font-mono font-black text-xs text-white tracking-wider flex items-center gap-1.5">
+            VERTEX <span className="px-1.5 py-0.5 rounded-md text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">v3.2</span>
+          </span>
         </div>
 
-        {/* Right: Compact VC Bubble + 3-Bars Menu Button */}
-        <div className="flex items-center gap-2.5">
-          {/* Compact Golden Liquid Glass VC Bubble */}
+        {/* Right: Small & Discreet VC Badge + 3-Bars Menu Button */}
+        <div className="flex items-center gap-2">
+          {/* Small Golden Liquid Glass VC Badge */}
           <div
             onClick={() => { audio.playClick(); setShowShopModal(true); }}
-            className="liquid-glass-vc flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-yellow-300 text-[11px] font-mono font-bold cursor-pointer group shadow-sm active:scale-95 transition-all"
+            className="liquid-glass-vc flex items-center gap-1 px-2 py-0.5 rounded-lg text-yellow-300 text-[10px] font-mono font-bold cursor-pointer group shadow-sm active:scale-95 transition-all"
             title="Votre solde V-Coins (Cliquer pour recharger)"
           >
-            <Coins className="w-3.5 h-3.5 fill-current text-yellow-400 group-hover:rotate-12 transition-transform" />
+            <Coins className="w-2.5 h-2.5 fill-current text-yellow-400 group-hover:rotate-12 transition-transform" />
             <span>{currentVCoins.toLocaleString()} VC</span>
-            <div className="w-4 h-4 rounded-md bg-amber-400/30 flex items-center justify-center text-yellow-200 group-hover:bg-amber-400/50 transition-colors">
-              <Plus className="w-2.5 h-2.5 stroke-[3]" />
+            <div className="w-3.5 h-3.5 rounded bg-amber-400/30 flex items-center justify-center text-yellow-200 group-hover:bg-amber-400/50 transition-colors">
+              <Plus className="w-2 h-2 stroke-[3]" />
             </div>
           </div>
 
@@ -498,7 +554,7 @@ export default function App() {
                       <h3 className="text-sm font-black text-white font-mono tracking-wider flex items-center gap-2">
                         HUB VERTEX
                         <span className="px-1.5 py-0.2 rounded text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
-                          v3.1
+                          v3.2
                         </span>
                       </h3>
                       <p className="text-[11px] text-slate-400 font-sans">Toutes les expériences & fonctionnalités</p>
@@ -519,10 +575,14 @@ export default function App() {
                 >
                   <div className="flex items-center gap-3">
                     <div 
-                      className="w-11 h-11 rounded-xl flex items-center justify-center text-xl border border-cyan-400/60 shadow-inner"
-                      style={{ backgroundColor: state.profile.avatarColor }}
+                      className="w-11 h-11 rounded-xl overflow-hidden flex items-center justify-center text-xl border border-cyan-400/60 shadow-inner"
+                      style={{ backgroundColor: state.profile.customAvatarUrl ? 'transparent' : state.profile.avatarColor }}
                     >
-                      {state.profile.avatarModel === 'cyber_ninja' ? '🥷' : state.profile.avatarModel === 'blocky_knight' ? '🛡️' : '🧑‍🚀'}
+                      {state.profile.customAvatarUrl ? (
+                        <img src={state.profile.customAvatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                      ) : (
+                        state.profile.avatarModel === 'cyber_ninja' ? '🥷' : state.profile.avatarModel === 'blocky_knight' ? '🛡️' : '🧑‍🚀'
+                      )}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -533,12 +593,12 @@ export default function App() {
                           VIP Niv. {state.arcadePass.level}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 text-[10px] font-mono text-slate-300 mt-1">
+                      <div className="flex items-center gap-2.5 text-[9px] font-mono text-slate-300 mt-1">
                         <span className="text-yellow-400 font-bold flex items-center gap-1">
-                          <Trophy className="w-3 h-3 fill-current" /> {state.totalTrophies}
+                          <Trophy className="w-2.5 h-2.5 fill-current" /> {state.totalTrophies}
                         </span>
                         <span className="text-amber-300 font-bold flex items-center gap-1">
-                          <Coins className="w-3 h-3 fill-current" /> {currentVCoins.toLocaleString()} VC
+                          <Coins className="w-2.5 h-2.5 fill-current" /> {currentVCoins.toLocaleString()} VC
                         </span>
                       </div>
                     </div>
@@ -558,8 +618,8 @@ export default function App() {
                         {
                           id: 'games',
                           title: 'Catalogue des Jeux',
-                          subtitle: '20 Expériences (3 Gratuits • 17 VIP)',
-                          badge: '20 JEUX',
+                          subtitle: '22 Expériences Originales (3 Gratuits • 19 VIP)',
+                          badge: '22 JEUX',
                           badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/30',
                           icon: <Gamepad2 className="w-4 h-4 text-cyan-400" />,
                           iconBg: 'bg-cyan-500/10 border-cyan-400/30',
@@ -576,14 +636,14 @@ export default function App() {
                           action: () => { setShowRngModal(true); setIsDrawerOpen(false); }
                         },
                         {
-                          id: 'ranked',
-                          title: 'Mode Classé v3.1',
-                          subtitle: 'Compétition, 3 Épreuves & Ladder Mondial',
-                          badge: 'SAISON 1',
-                          badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-400/30',
-                          icon: <Flame className="w-4 h-4 text-rose-400" />,
-                          iconBg: 'bg-rose-500/10 border-rose-400/30',
-                          action: () => { setShowRankedModal(true); setIsDrawerOpen(false); }
+                          id: 'story',
+                          title: 'Mode Histoire : Chroniques',
+                          subtitle: 'Campagne stellaire, 5 Chapitres & Boss',
+                          badge: '5 CHAPITRES',
+                          badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/30',
+                          icon: <BookOpen className="w-4 h-4 text-cyan-400" />,
+                          iconBg: 'bg-cyan-500/10 border-cyan-400/30',
+                          action: () => { setShowStoryModal(true); setIsDrawerOpen(false); }
                         }
                       ].map((item) => (
                         <button
@@ -651,14 +711,14 @@ export default function App() {
                           action: () => { setShowQuestsModal(true); setIsDrawerOpen(false); }
                         },
                         {
-                          id: 'boss',
-                          title: 'Titan Raid & Forge',
-                          subtitle: 'Combat de boss mondial & transmutation',
-                          badge: `BOSS V3`,
-                          badgeColor: 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-400/30',
-                          icon: <Skull className="w-4 h-4 text-fuchsia-400" />,
-                          iconBg: 'bg-fuchsia-500/10 border-fuchsia-400/30',
-                          action: () => { setShowForgeModal(true); setIsDrawerOpen(false); }
+                          id: 'achievements',
+                          title: '250 Succès d\'Arcade',
+                          subtitle: 'Défis de gameplay, Histoire & V-Coins',
+                          badge: '250 SUCCÈS',
+                          badgeColor: 'bg-yellow-500/20 text-yellow-300 border-yellow-400/30',
+                          icon: <Award className="w-4 h-4 text-yellow-400" />,
+                          iconBg: 'bg-yellow-500/10 border-yellow-400/30',
+                          action: () => { setShowAchievementsModal(true); setIsDrawerOpen(false); }
                         }
                       ].map((item) => (
                         <button
@@ -778,7 +838,7 @@ export default function App() {
                   </button>
                 </div>
                 <span className="text-[10px] text-slate-400 font-mono">
-                  Vertex Arcades v3.1
+                  Vertex Arcades v3.2
                 </span>
               </div>
             </motion.div>
@@ -800,11 +860,10 @@ export default function App() {
               { id: 'favorites', label: 'Favoris ❤️' },
               { id: 'free', label: 'Gratuits ⚡' },
               { id: 'paid', label: 'VIP V-Coins 💎' },
-              { id: 'ranked', label: 'Classé 🏆' },
               { id: 'action', label: 'Action' },
               { id: 'survival', label: 'Survie' },
               { id: 'racer', label: 'Course' },
-              { id: 'platformer', label: 'Obby' },
+              { id: 'platformer', label: 'Plateforme' },
               { id: 'tycoon', label: 'Tycoon' },
               { id: 'rhythm', label: 'Rythme' }
             ].map(cat => {
@@ -988,7 +1047,7 @@ export default function App() {
                     onClick={() => handleTryLaunchGame(game.id)}
                     className={`w-full py-2.5 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg font-mono relative overflow-hidden ${
                       isUnlocked
-                        ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 shadow-[0_0_20px_rgba(20,184,166,0.35)] border border-emerald-300/40'
+                        ? (PLAY_BUTTON_STYLES[state.settings.playButtonColor || 'emerald'] || PLAY_BUTTON_STYLES.emerald)
                         : 'bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.35)] border border-yellow-300/40'
                     }`}
                   >
@@ -1012,10 +1071,10 @@ export default function App() {
         </div>
       </main>
 
-      {/* 6. Active Game Overlay Cabinet (All 20 Games) */}
+      {/* 6. Active Game Overlay Cabinet (All 22 Games - Expanded Immersive Screen) */}
       {activeGameId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-6 bg-slate-950/95 backdrop-blur-2xl overflow-y-auto">
-          <div className="relative w-full max-w-5xl my-auto py-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-3 bg-slate-950/95 backdrop-blur-2xl overflow-y-auto">
+          <div className="relative w-full max-w-[98vw] xl:max-w-7xl h-[92vh] flex flex-col justify-between my-auto py-1">
             {activeGameId === 'quantum_obby' && (
               <QuantumObby
                 onFinish={(sc, b) => handleFinishGame('quantum_obby', sc, b)}
@@ -1137,6 +1196,53 @@ export default function App() {
                 onExit={() => setActiveGameId(null)}
               />
             )}
+            {/* 2 BRAND NEW V3.2 PAID GAMES */}
+            {activeGameId === 'solar_overdrive' && (
+              <div className="relative w-full h-full flex flex-col">
+                <div className="flex justify-end p-2">
+                  <button
+                    onClick={() => setActiveGameId(null)}
+                    className="px-4 py-1.5 rounded-xl liquid-glass-pill text-xs font-mono font-bold text-slate-300 hover:text-white flex items-center gap-1.5 cursor-pointer shadow-md"
+                  >
+                    <X className="w-3.5 h-3.5" /> Quitter
+                  </button>
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <SolarOverdrive
+                    onScoreSubmit={(sc) => handleFinishGame('solar_overdrive', sc, 100)}
+                    onVCoinsEarned={(vc) => {
+                      setState(prev => ({
+                        ...prev,
+                        profile: { ...prev.profile, totalVCoins: prev.profile.totalVCoins + vc }
+                      }));
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+            {activeGameId === 'pixel_survivors' && (
+              <div className="relative w-full h-full flex flex-col">
+                <div className="flex justify-end p-2">
+                  <button
+                    onClick={() => setActiveGameId(null)}
+                    className="px-4 py-1.5 rounded-xl liquid-glass-pill text-xs font-mono font-bold text-slate-300 hover:text-white flex items-center gap-1.5 cursor-pointer shadow-md"
+                  >
+                    <X className="w-3.5 h-3.5" /> Quitter
+                  </button>
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <PixelSurvivors
+                    onScoreSubmit={(sc) => handleFinishGame('pixel_survivors', sc, 100)}
+                    onVCoinsEarned={(vc) => {
+                      setState(prev => ({
+                        ...prev,
+                        profile: { ...prev.profile, totalVCoins: prev.profile.totalVCoins + vc }
+                      }));
+                    }}
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Mobile / Touch Ergonomic Controls */}
             <MobileGameControls
@@ -1232,16 +1338,6 @@ export default function App() {
         }}
       />
 
-      <RankedV3Modal
-        isOpen={showRankedModal}
-        onClose={() => setShowRankedModal(false)}
-        rankPoints={state.rankPoints}
-        onLaunchRankedGame={(gameId) => {
-          setShowRankedModal(false);
-          setActiveGameId(gameId);
-        }}
-      />
-
       <ProfileCreatorModal
         isOpen={showProfileModal}
         onClose={() => setShowProfileModal(false)}
@@ -1274,36 +1370,29 @@ export default function App() {
         }}
       />
 
-      <MetaverseForgeModal
-        isOpen={showForgeModal}
-        onClose={() => setShowForgeModal(false)}
-        worldBoss={state.worldBoss}
-        onDealBossDamage={(dmg) => {
-          setState(prev => ({
-            ...prev,
-            profile: { ...prev.profile, totalVCoins: Math.max(0, prev.profile.totalVCoins - 30) },
-            worldBoss: {
-              ...prev.worldBoss,
-              currentHp: Math.max(0, prev.worldBoss.currentHp - dmg),
-              playerTotalDamage: prev.worldBoss.playerTotalDamage + dmg
-            }
-          }));
-          notify(`Frappe directe au Boss : -${dmg} PV !`);
-        }}
-        inventory={state.rngInventory}
-        onFuseArtifact={() => {
-          setState(prev => ({
-            ...prev,
-            profile: {
-              ...prev.profile,
-              luckMultiplier: 2,
-              totalVCoins: prev.profile.totalVCoins + 500
-            }
-          }));
-          notify(`Fusion réussie : Relique Stellaire Forgée (+2x Chance & +500 VC) !`);
-        }}
-        userVCoins={currentVCoins}
-      />
+      {showStoryModal && state.storyMode && (
+        <StoryModeModal
+          storyState={state.storyMode}
+          onUpdateStory={(updated) => {
+            setState(prev => ({ ...prev, storyMode: updated }));
+          }}
+          onEarnVCoins={(coins) => {
+            setState(prev => ({
+              ...prev,
+              profile: { ...prev.profile, totalVCoins: prev.profile.totalVCoins + coins }
+            }));
+            notify(`Victoire de Chapitre : +${coins} V-Coins !`);
+          }}
+          onEarnTrophies={(tr) => {
+            setState(prev => ({
+              ...prev,
+              totalTrophies: prev.totalTrophies + tr
+            }));
+            notify(`+${tr} Trophées remportés !`);
+          }}
+          onClose={() => setShowStoryModal(false)}
+        />
+      )}
 
       <AchievementsV3Modal
         isOpen={showAchievementsModal}
