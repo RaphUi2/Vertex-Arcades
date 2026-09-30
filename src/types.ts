@@ -43,10 +43,20 @@ export interface UserProfile {
   activeHat: string;
   unlockedHats: string[];
   bio: string;
-  selectedTags: string[]; // Up to 6 active from 50+ description tags
+  selectedTags: string[]; // Up to 8 active description tags
   unlockedGames: string[]; // Paid games unlocked with V-Coins
   luckMultiplier: number; // Bonus RNG luck
   activeFusionArtifact?: string;
+
+  // Social & Friends Preparation Fields
+  socialStatus?: 'ready_for_duel' | 'looking_for_squad' | 'tryhard' | 'chill' | 'grinding_achievements' | 'dnd' | 'afk';
+  socialCustomStatus?: string; // Custom mood or quote shown to friends
+  gamerPlaystyle?: 'tryhard' | 'chill' | 'speedrunner' | 'completionist' | 'teamplayer' | 'collector';
+  favoriteGameId?: string; // Signature game ('cyber_runner_2099', 'cosmic_defender', 'pixel_dungeon_quest', 'titan_pinball_titan', 'quantum_strike')
+  preferredControl?: 'touch' | 'keyboard' | 'gamepad' | 'all';
+  voiceChatPreference?: 'open' | 'push_to_talk' | 'listening_only' | 'no_mic';
+  socialCardTheme?: 'cyan' | 'fuchsia' | 'emerald' | 'amber' | 'purple' | 'gold';
+  friendCode?: string;
 }
 
 export interface GameStats {

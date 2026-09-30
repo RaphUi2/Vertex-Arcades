@@ -138,9 +138,17 @@ export interface Translations {
   navProfileTitle: string;
   navProfileSub: string;
   navProfileBadge: string;
+  navFriendsTitle: string;
+  navFriendsSub: string;
+  navFriendsBadge: string;
   navSettingsTitle: string;
   navSettingsSub: string;
   navSettingsBadge: string;
+  themeTitle: string;
+  themeSubtitle: string;
+  themeCyber: string;
+  themeDark: string;
+  themeLight: string;
 
   owned: string;
   free: string;
@@ -303,9 +311,17 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     navProfileTitle: 'My Profile & Bio',
     navProfileSub: 'Customize avatar, photo, tags & badges',
     navProfileBadge: 'PROFILE',
+    navFriendsTitle: 'Friends & Social',
+    navFriendsSub: 'Multiplayer, squads, duels & live chat',
+    navFriendsBadge: 'Coming Soon!',
     navSettingsTitle: 'Settings & Audio',
     navSettingsSub: 'Sound, language, controllers & options',
     navSettingsBadge: 'SETTINGS',
+    themeTitle: 'Visual Theme',
+    themeSubtitle: 'Choose between Cyber Neon, Pure Dark and Pure Light themes',
+    themeCyber: 'Cyber Neon',
+    themeDark: 'Obsidian Black',
+    themeLight: 'Pure White',
 
     owned: 'ACQUIRED',
     free: 'FREE',
@@ -467,9 +483,17 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     navProfileTitle: 'Mon Profil & Bio',
     navProfileSub: 'Personnaliser photo, tags et badges',
     navProfileBadge: 'PROFIL',
+    navFriendsTitle: 'Amis',
+    navFriendsSub: 'Multijoueur, escouades & chat',
+    navFriendsBadge: 'Coming Soon!',
     navSettingsTitle: 'Paramètres & Audio',
     navSettingsSub: 'Audio, langues, manettes & contrôles',
     navSettingsBadge: 'RÉGLAGES',
+    themeTitle: 'Thème Visuel',
+    themeSubtitle: 'Basculez entre Cyber Néon, Noir Obsidienne et Blanc Pur',
+    themeCyber: 'Cyber Néon',
+    themeDark: 'Noir Obsidienne',
+    themeLight: 'Blanc Pur',
 
     owned: 'ACQUIS',
     free: 'GRATUIT',
@@ -631,9 +655,17 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     navProfileTitle: 'Mi Perfil y Bio',
     navProfileSub: 'Personalizar foto, etiquetas y medallas',
     navProfileBadge: 'PERFIL',
+    navFriendsTitle: 'Amigos',
+    navFriendsSub: 'Multijugador, escuadras y chat',
+    navFriendsBadge: 'Coming Soon!',
     navSettingsTitle: 'Ajustes y Audio',
     navSettingsSub: 'Audio, idiomas, mandos y controles',
     navSettingsBadge: 'AJUSTES',
+    themeTitle: 'Tema Visual',
+    themeSubtitle: 'Elige entre Cyber Neón, Negro Obsidiana y Blanco Puro',
+    themeCyber: 'Cyber Neón',
+    themeDark: 'Negro Obsidiana',
+    themeLight: 'Blanco Puro',
 
     owned: 'ADQUIRIDO',
     free: 'GRATIS',

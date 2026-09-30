@@ -5,7 +5,7 @@ import {
   Settings, Gamepad2, Volume2, VolumeX, Crown, Target, ShoppingBag,
   ArrowRightLeft, Skull, Flame, Check, Shield, Lock, User, Award,
   Menu, ChevronRight, Plus, Star, Compass, Layers, Radio, BookOpen,
-  Filter, SlidersHorizontal, ArrowLeft
+  Filter, SlidersHorizontal, ArrowLeft, Users, Palette, Moon, Sun
 } from 'lucide-react';
 
 import { audio } from './utils/audio';
@@ -32,6 +32,7 @@ import { StoryModeModal } from './components/StoryModeModal';
 import { AchievementsV3Modal } from './components/AchievementsV3Modal';
 import { SettingsV3Modal } from './components/SettingsV3Modal';
 import { ArcadePassV3Modal } from './components/ArcadePassV3Modal';
+import { FriendsComingSoonModal } from './components/FriendsComingSoonModal';
 
 // 5 Modern Games
 import { CyberRunner2099 } from './games/CyberRunner2099';
@@ -81,9 +82,17 @@ export default function App() {
           activeHat: 'hat_cap_pro',
           unlockedHats: ['hat_cap_pro'],
           bio: 'Champion des arènes et explorateur de mondes arcade.',
-          selectedTags: ['Pro Gamer', 'Speedrunner', 'Trader'],
+          selectedTags: ['Pro Gamer', 'Speedrunner', 'Trader', 'Dodge Master'],
           unlockedGames: [],
-          luckMultiplier: 1
+          luckMultiplier: 1,
+          socialStatus: 'ready_for_duel',
+          socialCustomStatus: 'Prêt pour défier mes amis sur le Hub !',
+          gamerPlaystyle: 'speedrunner',
+          favoriteGameId: 'cyber_runner_2099',
+          preferredControl: 'gamepad',
+          voiceChatPreference: 'open',
+          socialCardTheme: 'cyan',
+          friendCode: 'VERTEX#8492'
         },
         stats: GAMES_LIST.reduce((acc, g) => {
           acc[g.id] = { plays: 0, highScore: 0 };
@@ -219,6 +228,7 @@ export default function App() {
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showPassModal, setShowPassModal] = useState(false);
+  const [showFriendsModal, setShowFriendsModal] = useState(false);
 
   // Paid game prompt modal state
   const [paidGamePrompt, setPaidGamePrompt] = useState<string | null>(null);
@@ -272,6 +282,7 @@ export default function App() {
       setShowAchievementsModal(false);
       setShowSettingsModal(false);
       setShowPassModal(false);
+      setShowFriendsModal(false);
       setPaidGamePrompt(null);
     } else if (action === 'A') {
       if (selectedGameForDetail) {
@@ -309,6 +320,7 @@ export default function App() {
           setShowAchievementsModal(false);
           setShowSettingsModal(false);
           setShowPassModal(false);
+          setShowFriendsModal(false);
         }
       }
     };
@@ -481,6 +493,13 @@ export default function App() {
   const currentLang: Language = state.settings.language || 'en';
   const t = getTranslation(currentLang);
 
+  // Synchronize document theme classes & body background for seamless Noir/Blanc/Cyber feel
+  useEffect(() => {
+    document.documentElement.classList.remove('theme-dark', 'theme-light', 'theme-cyber');
+    document.documentElement.classList.add(themeClass);
+    document.body.style.backgroundColor = currentTheme === 'light' ? '#eef1f5' : currentTheme === 'dark' ? '#07080b' : '#080b14';
+  }, [currentTheme, themeClass]);
+
   return (
     <div className={`relative min-h-screen ${themeClass} text-slate-100 flex flex-col justify-between overflow-x-hidden font-sans select-none antialiased transition-colors duration-300`}>
       {/* 1. iOS Glass Toast Notification */}
@@ -525,12 +544,22 @@ export default function App() {
           </div>
 
           <div className="text-left">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <span className="text-xs font-black text-white font-mono group-hover:text-cyan-300 transition-colors">
                 {state.profile.username}
               </span>
-              <span className="hidden md:inline-block px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
-                Niv. {state.arcadePass.level}
+              {state.profile.socialStatus && (
+                <span className="px-1.5 py-0.2 rounded-md text-[9px] font-mono font-bold bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-400/30">
+                  {state.profile.socialStatus === 'ready_for_duel' ? '⚔️' :
+                   state.profile.socialStatus === 'looking_for_squad' ? '🚀' :
+                   state.profile.socialStatus === 'tryhard' ? '🏆' :
+                   state.profile.socialStatus === 'chill' ? '☕' :
+                   state.profile.socialStatus === 'grinding_achievements' ? '🎯' :
+                   state.profile.socialStatus === 'dnd' ? '⛔' : '💤'}
+                </span>
+              )}
+              <span className="hidden md:inline-block px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
+                Niv.{state.arcadePass.level}
               </span>
             </div>
             <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono mt-0.5">
@@ -652,6 +681,16 @@ export default function App() {
                         <span className="text-xs font-black text-white font-mono group-hover:text-cyan-300 transition-colors">
                           {state.profile.username}
                         </span>
+                        {state.profile.socialStatus && (
+                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-400/30 font-bold">
+                            {state.profile.socialStatus === 'ready_for_duel' ? '⚔️ 1v1' :
+                             state.profile.socialStatus === 'looking_for_squad' ? '🚀 Escouade' :
+                             state.profile.socialStatus === 'tryhard' ? '🏆 Record' :
+                             state.profile.socialStatus === 'chill' ? '☕ Chill' :
+                             state.profile.socialStatus === 'grinding_achievements' ? '🎯 Succès' :
+                             state.profile.socialStatus === 'dnd' ? '⛔ Occupé' : '💤 Pause'}
+                          </span>
+                        )}
                         <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-cyan-500/25 text-cyan-300 border border-cyan-400/30 font-bold">
                           VIP {t.level} {state.arcadePass.level}
                         </span>
@@ -664,6 +703,11 @@ export default function App() {
                           <Coins className="w-2.5 h-2.5 fill-current" /> {currentVCoins.toLocaleString()} VC
                         </span>
                       </div>
+                      {state.profile.socialCustomStatus && (
+                        <div className="text-[10px] text-slate-400 italic font-sans truncate max-w-[200px] mt-0.5">
+                          "{state.profile.socialCustomStatus}"
+                        </div>
+                      )}
                     </div>
                   </div>
                   <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-cyan-300 group-hover:translate-x-0.5 transition-all" />
@@ -829,6 +873,16 @@ export default function App() {
                           action: () => { setShowProfileModal(true); setIsDrawerOpen(false); }
                         },
                         {
+                          id: 'friends',
+                          title: t.navFriendsTitle || 'Amis',
+                          subtitle: t.navFriendsSub || 'Multijoueur, escouades & chat',
+                          badge: 'Coming Soon!',
+                          badgeColor: 'bg-fuchsia-500/25 text-fuchsia-300 border-fuchsia-400/50 font-black animate-pulse',
+                          icon: <Users className="w-4 h-4 text-fuchsia-400" />,
+                          iconBg: 'bg-fuchsia-500/10 border-fuchsia-400/30',
+                          action: () => { setShowFriendsModal(true); setIsDrawerOpen(false); }
+                        },
+                        {
                           id: 'settings',
                           title: t.navSettingsTitle,
                           subtitle: t.navSettingsSub,
@@ -868,21 +922,68 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Drawer Footer with Quick Controls */}
-              <div className="pt-5 border-t border-white/10 mt-6 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={toggleSound}
-                    className="p-2 rounded-xl liquid-glass-pill text-xs font-mono text-slate-300 hover:text-white flex items-center gap-1.5 cursor-pointer"
-                    title={t.toggleSound}
-                  >
-                    {state.settings.sfxEnabled ? <Volume2 className="w-3.5 h-3.5 text-cyan-400" /> : <VolumeX className="w-3.5 h-3.5 text-slate-500" />}
-                    <span>{state.settings.sfxEnabled ? t.soundOn : t.soundOff}</span>
-                  </button>
+              {/* Drawer Footer with Quick Controls & Theme Switcher */}
+              <div className="pt-4 border-t border-white/10 mt-6 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={toggleSound}
+                      className="p-2 rounded-xl liquid-glass-pill text-xs font-mono text-slate-300 hover:text-white flex items-center gap-1.5 cursor-pointer"
+                      title={t.toggleSound}
+                    >
+                      {state.settings.sfxEnabled ? <Volume2 className="w-3.5 h-3.5 text-cyan-400" /> : <VolumeX className="w-3.5 h-3.5 text-slate-500" />}
+                      <span>{state.settings.sfxEnabled ? t.soundOn : t.soundOff}</span>
+                    </button>
+                  </div>
+
+                  {/* Quick Theme Switcher Pill (Cyber / Noir / Blanc) */}
+                  <div className="flex items-center p-1 rounded-xl liquid-glass-pill border border-white/10 gap-1 text-[11px] font-mono">
+                    <button
+                      onClick={() => {
+                        audio.playClick();
+                        setState(prev => ({ ...prev, settings: { ...prev.settings, colorTheme: 'cyber' } }));
+                        notify("Thème Cyber activé");
+                      }}
+                      className={`px-2 py-1 rounded-lg transition-all cursor-pointer ${
+                        currentTheme === 'cyber' ? 'bg-cyan-500/30 text-cyan-300 font-bold border border-cyan-400/40' : 'text-slate-400 hover:text-white'
+                      }`}
+                      title="Thème Cyber Néon"
+                    >
+                      Cyber
+                    </button>
+                    <button
+                      onClick={() => {
+                        audio.playClick();
+                        setState(prev => ({ ...prev, settings: { ...prev.settings, colorTheme: 'dark' } }));
+                        notify("Thème Noir Obsidienne activé");
+                      }}
+                      className={`px-2 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
+                        currentTheme === 'dark' ? 'bg-zinc-800 text-white font-bold border border-white/30' : 'text-slate-400 hover:text-white'
+                      }`}
+                      title="Thème Noir Obsidienne"
+                    >
+                      <Moon className="w-3 h-3" /> Noir
+                    </button>
+                    <button
+                      onClick={() => {
+                        audio.playClick();
+                        setState(prev => ({ ...prev, settings: { ...prev.settings, colorTheme: 'light' } }));
+                        notify("Thème Blanc Pur activé");
+                      }}
+                      className={`px-2 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
+                        currentTheme === 'light' ? 'bg-slate-200 text-slate-900 font-bold border border-slate-300' : 'text-slate-400 hover:text-white'
+                      }`}
+                      title="Thème Blanc Pur"
+                    >
+                      <Sun className="w-3 h-3" /> Blanc
+                    </button>
+                  </div>
                 </div>
-                <span className="text-[10px] text-slate-400 font-mono">
-                  Vertex Arcades
-                </span>
+
+                <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                  <span>Hub Vertex</span>
+                  <span>Vertex Arcades</span>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -1328,6 +1429,7 @@ export default function App() {
         }}
         totalTrophies={state.totalTrophies}
         rankPoints={state.rankPoints}
+        onShowToast={(msg) => notify(msg)}
       />
 
       <QuestsV3Modal
@@ -1428,6 +1530,15 @@ export default function App() {
           notify(`Pass Arcade VIP débloqué avec succès ! 👑`);
         }}
         userVCoins={currentVCoins}
+      />
+
+      {/* 8. Friends Coming Soon Modal */}
+      <FriendsComingSoonModal
+        isOpen={showFriendsModal}
+        onClose={() => setShowFriendsModal(false)}
+        username={state.profile.username}
+        onShowToast={(msg) => notify(msg)}
+        language={currentLang}
       />
     </div>
   );

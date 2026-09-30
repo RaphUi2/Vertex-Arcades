@@ -217,7 +217,83 @@ export function SettingsV3Modal({
               </div>
             </div>
 
-            {/* 4. Play Button Customization Color */}
+            {/* 4. Thèmes d'Interface : Cyber, Noir Obsidienne, Blanc Pur */}
+            <div className="p-4 rounded-3xl liquid-glass-card border border-white/10 space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold text-cyan-300 uppercase tracking-wider font-mono flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-cyan-400" /> {t.themeTitle} :
+                </h3>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 font-bold uppercase">
+                  {settings.colorTheme === 'dark' ? t.themeDark : settings.colorTheme === 'light' ? t.themeLight : t.themeCyber}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-300">
+                {t.themeSubtitle}
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+                {[
+                  {
+                    id: 'cyber' as const,
+                    name: t.themeCyber,
+                    desc: currentLang === 'en' ? 'Neon Matrix & Cyan' : currentLang === 'es' ? 'Neón Matrix y Cian' : 'Néon Matrix & Cyan',
+                    icon: <Sparkles className="w-4 h-4 text-cyan-400" />,
+                    previewBg: 'bg-[#080b14] border-cyan-400/50',
+                    dot: 'bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]'
+                  },
+                  {
+                    id: 'dark' as const,
+                    name: t.themeDark,
+                    desc: currentLang === 'en' ? 'Deep Obsidian Black' : currentLang === 'es' ? 'Negro Obsidiana Puro' : 'Noir Profond & Verre Fumé',
+                    icon: <Moon className="w-4 h-4 text-slate-300" />,
+                    previewBg: 'bg-[#050608] border-white/40',
+                    dot: 'bg-zinc-100 shadow-[0_0_8px_rgba(255,255,255,0.6)]'
+                  },
+                  {
+                    id: 'light' as const,
+                    name: t.themeLight,
+                    desc: currentLang === 'en' ? 'Pure White Ceramic' : currentLang === 'es' ? 'Blanco Puro Cerámica' : 'Blanc Céramique Épuré',
+                    icon: <Sun className="w-4 h-4 text-amber-500" />,
+                    previewBg: 'bg-[#eef1f5] border-slate-300',
+                    dot: 'bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.6)]'
+                  }
+                ].map(themeItem => {
+                  const isSelected = (settings.colorTheme || 'cyber') === themeItem.id;
+                  return (
+                    <button
+                      key={themeItem.id}
+                      onClick={() => {
+                        audio.playClick();
+                        onUpdateSettings({ ...settings, colorTheme: themeItem.id });
+                      }}
+                      className={`p-3 rounded-2xl border text-left flex flex-col justify-between transition-all cursor-pointer relative group ${
+                        isSelected
+                          ? 'liquid-glass-pill-active border-cyan-400 shadow-lg scale-[1.02]'
+                          : 'liquid-glass-pill text-slate-300 hover:text-white'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between w-full mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-7 h-7 rounded-xl ${themeItem.previewBg} border flex items-center justify-center shadow-inner`}>
+                            {themeItem.icon}
+                          </div>
+                          <span className="font-mono font-bold text-xs text-white">{themeItem.name}</span>
+                        </div>
+                        {isSelected && (
+                          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between text-[10px] text-slate-400 font-sans">
+                        <span>{themeItem.desc}</span>
+                        <span className={`w-2.5 h-2.5 rounded-full ${themeItem.dot}`} />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 5. Play Button Customization Color */}
             <div className="p-4 rounded-3xl liquid-glass-card border border-white/10 space-y-3">
               <h3 className="text-xs font-bold text-cyan-300 uppercase tracking-wider font-mono flex items-center gap-2">
                 <Play className="w-4 h-4 text-emerald-400" /> {t.playBtnColor} :
