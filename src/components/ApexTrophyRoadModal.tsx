@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trophy, Sparkles, Check, Gift, Crown, Shield, Award, Zap, Coins } from 'lucide-react';
 import { audio } from '../utils/audio';
 import { APEX_TROPHY_ROAD } from '../gamesData';
+import { Language, getTranslation } from '../utils/i18n';
 
 interface TrophyRoadModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface TrophyRoadModalProps {
   totalTrophies: number;
   claimedMilestones: number[];
   onClaimMilestone: (trophiesRequired: number, rewardLabel: string, rewardType: string, rewardValue: any) => void;
+  language?: Language;
 }
 
 export function ApexTrophyRoadModal({
@@ -17,8 +19,11 @@ export function ApexTrophyRoadModal({
   onClose,
   totalTrophies,
   claimedMilestones,
-  onClaimMilestone
+  onClaimMilestone,
+  language = 'en'
 }: TrophyRoadModalProps) {
+  const t = getTranslation(language);
+
   if (!isOpen) return null;
 
   return (
@@ -41,15 +46,15 @@ export function ApexTrophyRoadModal({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-black text-white font-mono tracking-tight">
-                    LIGUE STELLAIRE LIQUID GLASS
+                  <h2 className="text-lg font-black text-white font-mono tracking-tight uppercase">
+                    {t.trophyLeague}
                   </h2>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30">
-                    PALIERS APEX
+                    25 000 🏆 MAX
                   </span>
                 </div>
                 <p className="text-xs text-slate-300">
-                  Route de progression des trophées & récompenses exclusives
+                  {t.trophyRoadSubtitle}
                 </p>
               </div>
             </div>
@@ -113,7 +118,7 @@ export function ApexTrophyRoadModal({
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider">
-                              Palier {node.trophiesRequired.toLocaleString()} 🏆
+                              {language === 'en' ? 'Tier' : language === 'es' ? 'Nivel' : 'Palier'} {node.trophiesRequired.toLocaleString()} 🏆
                             </span>
                             <span className="text-xs text-slate-400">·</span>
                             <span className="text-xs text-slate-300 font-mono">{node.leagueName}</span>
@@ -127,7 +132,7 @@ export function ApexTrophyRoadModal({
                         <div>
                           {isClaimed ? (
                             <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
-                              <Check className="w-3.5 h-3.5 stroke-[3]" /> Réclamé
+                              <Check className="w-3.5 h-3.5 stroke-[3]" /> {t.claimed}
                             </span>
                           ) : canClaim ? (
                             <button
@@ -142,11 +147,13 @@ export function ApexTrophyRoadModal({
                               }}
                               className="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-xs font-mono uppercase tracking-wider cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.5)] active:scale-95 transition-all"
                             >
-                              Récupérer !
+                              {t.claim} !
                             </button>
                           ) : (
                             <span className="text-[11px] font-mono text-slate-400">
-                              Manque {(node.trophiesRequired - totalTrophies).toLocaleString()} 🏆
+                              {language === 'en' ? `Needs ${(node.trophiesRequired - totalTrophies).toLocaleString()} 🏆` :
+                               language === 'es' ? `Faltan ${(node.trophiesRequired - totalTrophies).toLocaleString()} 🏆` :
+                               `Manque ${(node.trophiesRequired - totalTrophies).toLocaleString()} 🏆`}
                             </span>
                           )}
                         </div>
@@ -160,8 +167,12 @@ export function ApexTrophyRoadModal({
 
           {/* Footer Info */}
           <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400">
-            <span>Route de 10 000 Trophées • Récompenses instantanées</span>
-            <span className="text-amber-400 font-bold">Ligue Stellaire Liquid Glass</span>
+            <span>
+              {language === 'en' ? '25,000 Trophies Road • 250 Milestones (Every 100 🏆)' :
+               language === 'es' ? 'Camino de 25.000 Trofeos • 250 Recompensas (cada 100 🏆)' :
+               'Route de 25 000 Trophées • 250 Récompenses (tous les 100 🏆)'}
+            </span>
+            <span className="text-amber-400 font-bold">{t.trophyLeague}</span>
           </div>
         </motion.div>
       </div>

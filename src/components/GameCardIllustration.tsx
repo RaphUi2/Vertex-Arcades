@@ -1,411 +1,524 @@
-import React from 'react';
+import React, { useId } from 'react';
 
 interface IllustrationProps {
   gameId: string;
+  aspect?: '1:1' | '16:9';
   className?: string;
 }
 
-export function GameCardIllustration({ gameId, className = 'w-full h-44' }: IllustrationProps) {
+export function GameCardIllustration({ gameId, aspect = '1:1', className = 'w-full h-full' }: IllustrationProps) {
+  const isWide = aspect === '16:9';
+  const viewBox = isWide ? '0 0 640 360' : '0 0 320 320';
+  const rawId = useId();
+  const uid = rawId.replace(/[^a-zA-Z0-9_-]/g, '_');
+
   switch (gameId) {
-    case 'quantum_obby':
+    // -------------------------------------------------------------------------
+    // 1. RUNNER (Cyber Runner)
+    // -------------------------------------------------------------------------
+    case 'cyber_runner_2099':
       return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-950 via-slate-950 to-blue-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
+        <div className={`relative overflow-hidden bg-gradient-to-b from-slate-950 via-cyan-950/40 to-slate-950 flex items-center justify-center ${className}`}>
+          <svg className="w-full h-full object-cover select-none" viewBox={viewBox} fill="none" preserveAspectRatio="xMidYMid slice">
             <defs>
-              <linearGradient id="q_grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#06b6d4" />
-                <stop offset="100%" stopColor="#3b82f6" />
+              <linearGradient id={`${uid}_cr_sky`} x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#030712" />
+                <stop offset="60%" stopColor="#083344" />
+                <stop offset="100%" stopColor="#0e7490" />
               </linearGradient>
-              <radialGradient id="q_sun" cx="50%" cy="30%" r="50%">
-                <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.4" />
+              <radialGradient id={`${uid}_cr_sun`} cx="50%" cy="40%" r="40%">
+                <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.8" />
+                <stop offset="50%" stopColor="#06b6d4" stopOpacity="0.4" />
                 <stop offset="100%" stopColor="transparent" />
               </radialGradient>
+              <linearGradient id={`${uid}_cr_road`} x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#0e7490" stopOpacity="0.2" />
+                <stop offset="100%" stopColor="#082f49" />
+              </linearGradient>
             </defs>
-            <rect width="320" height="180" fill="url(#q_sun)" />
-            {/* Horizon Grid */}
-            <path d="M0 180 L130 90 L190 90 L320 180 Z" fill="#091122" opacity="0.9" />
-            <line x1="0" y1="180" x2="130" y2="90" stroke="#06b6d4" strokeWidth="1.5" opacity="0.6" />
-            <line x1="320" y1="180" x2="190" y2="90" stroke="#06b6d4" strokeWidth="1.5" opacity="0.6" />
-            {/* Floating Neon Platforms */}
-            <rect x="25" y="125" width="70" height="14" rx="4" fill="#06b6d4" filter="drop-shadow(0 0 12px #06b6d4)" />
-            <rect x="125" y="95" width="80" height="14" rx="4" fill="#3b82f6" filter="drop-shadow(0 0 12px #3b82f6)" />
-            <rect x="225" y="65" width="70" height="14" rx="4" fill="#06b6d4" filter="drop-shadow(0 0 12px #06b6d4)" />
-            {/* Vertical Laser Hazards */}
-            <line x1="105" y1="20" x2="105" y2="155" stroke="#ef4444" strokeWidth="3.5" filter="drop-shadow(0 0 10px #ef4444)" />
-            <line x1="215" y1="10" x2="215" y2="140" stroke="#ef4444" strokeWidth="3.5" filter="drop-shadow(0 0 10px #ef4444)" />
-            {/* Cyber Jumper in Action */}
-            <circle cx="160" cy="52" r="7" fill="#fde047" filter="drop-shadow(0 0 8px #fde047)" />
-            <rect x="153" y="62" width="14" height="22" rx="3" fill="#fde047" />
-            <path d="M150 84 L144 98 M170 84 L176 98" stroke="#fde047" strokeWidth="3" strokeLinecap="round" />
-            {/* Portal Gate */}
-            <ellipse cx="265" cy="50" rx="16" ry="28" fill="#8b5cf6" opacity="0.75" filter="drop-shadow(0 0 16px #8b5cf6)" />
+
+            {/* Cyber sky & glowing neon sun */}
+            <rect width="100%" height="100%" fill={`url(#${uid}_cr_sky)`} />
+            <circle cx={isWide ? 320 : 160} cy={isWide ? 130 : 110} r={isWide ? 90 : 65} fill={`url(#${uid}_cr_sun)`} />
+
+            {/* Distant Cyber City Skyline */}
+            {isWide ? (
+              <path
+                d="M0,210 L30,210 L30,160 L60,160 L60,190 L100,190 L100,140 L130,140 L130,200 L180,200 L180,150 L210,150 L210,185 L260,185 L260,130 L290,130 L290,205 L350,205 L350,135 L380,135 L380,180 L430,180 L430,145 L460,145 L460,195 L510,195 L510,155 L550,155 L550,185 L590,185 L590,140 L640,140 L640,210 Z"
+                fill="#041b29"
+                opacity="0.8"
+              />
+            ) : (
+              <path
+                d="M0,190 L20,190 L20,145 L40,145 L40,170 L70,170 L70,130 L95,130 L95,180 L130,180 L130,140 L150,140 L150,175 L180,175 L180,125 L205,125 L205,185 L245,185 L245,135 L270,135 L270,175 L320,175 L320,190 Z"
+                fill="#041b29"
+                opacity="0.8"
+              />
+            )}
+
+            {/* 3D Perspective Road */}
+            {isWide ? (
+              <>
+                <polygon points="260,200 380,200 640,360 0,360" fill={`url(#${uid}_cr_road)`} />
+                <line x1="260" y1="200" x2="0" y2="360" stroke="#06b6d4" strokeWidth="2.5" />
+                <line x1="380" y1="200" x2="640" y2="360" stroke="#06b6d4" strokeWidth="2.5" />
+                <line x1="300" y1="200" x2="210" y2="360" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="10,8" />
+                <line x1="340" y1="200" x2="430" y2="360" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="10,8" />
+                <line x1="320" y1="200" x2="320" y2="360" stroke="#22d3ee" strokeWidth="2" strokeDasharray="16,10" />
+                <line x1="240" y1="225" x2="400" y2="225" stroke="#06b6d4" strokeWidth="1" opacity="0.4" />
+                <line x1="200" y1="260" x2="440" y2="260" stroke="#06b6d4" strokeWidth="1.5" opacity="0.6" />
+                <line x1="140" y1="305" x2="500" y2="305" stroke="#06b6d4" strokeWidth="2" opacity="0.8" />
+              </>
+            ) : (
+              <>
+                <polygon points="120,180 200,180 320,320 0,320" fill={`url(#${uid}_cr_road)`} />
+                <line x1="120" y1="180" x2="0" y2="320" stroke="#06b6d4" strokeWidth="2" />
+                <line x1="200" y1="180" x2="320" y2="320" stroke="#06b6d4" strokeWidth="2" />
+                <line x1="145" y1="180" x2="105" y2="320" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="8,6" />
+                <line x1="175" y1="180" x2="215" y2="320" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="8,6" />
+                <line x1="160" y1="180" x2="160" y2="320" stroke="#22d3ee" strokeWidth="2" strokeDasharray="12,8" />
+                <line x1="100" y1="205" x2="220" y2="205" stroke="#06b6d4" strokeWidth="1" opacity="0.4" />
+                <line x1="75" y1="240" x2="245" y2="240" stroke="#06b6d4" strokeWidth="1.5" opacity="0.6" />
+                <line x1="40" y1="280" x2="280" y2="280" stroke="#06b6d4" strokeWidth="2" opacity="0.8" />
+              </>
+            )}
+
+            {/* Runner Silhouette in Mid-air Leap */}
+            {isWide ? (
+              <g transform="translate(305, 175)">
+                <path d="M-40,25 Q-10,22 15,18" stroke="#38bdf8" strokeWidth="3" opacity="0.8" strokeLinecap="round" />
+                <path d="M-55,35 Q-20,30 10,28" stroke="#06b6d4" strokeWidth="2" opacity="0.6" strokeLinecap="round" />
+                <path d="M-30,45 Q0,40 25,35" stroke="#22d3ee" strokeWidth="2.5" opacity="0.7" strokeLinecap="round" />
+                <circle cx="15" cy="5" r="7" fill="#22d3ee" />
+                <rect x="18" y="4" width="6" height="3" rx="1.5" fill="#fde047" />
+                <path d="M12,12 L22,17 L16,35 L8,30 Z" fill="#06b6d4" />
+                <path d="M16,35 L28,45 L36,43" stroke="#22d3ee" strokeWidth="4" strokeLinecap="round" />
+                <path d="M10,32 L-2,44 L-12,42" stroke="#0891b2" strokeWidth="3.5" strokeLinecap="round" />
+                <path d="M14,16 L-2,12 L-10,20" stroke="#0891b2" strokeWidth="3.5" strokeLinecap="round" />
+                <path d="M20,18 L32,22 L40,16" stroke="#22d3ee" strokeWidth="3.5" strokeLinecap="round" />
+              </g>
+            ) : (
+              <g transform="translate(145, 160)">
+                <path d="M-30,25 Q-5,22 15,18" stroke="#38bdf8" strokeWidth="3" opacity="0.8" strokeLinecap="round" />
+                <path d="M-45,35 Q-15,30 10,28" stroke="#06b6d4" strokeWidth="2" opacity="0.6" strokeLinecap="round" />
+                <circle cx="15" cy="5" r="7" fill="#22d3ee" />
+                <rect x="18" y="4" width="6" height="3" rx="1.5" fill="#fde047" />
+                <path d="M12,12 L22,17 L16,35 L8,30 Z" fill="#06b6d4" />
+                <path d="M16,35 L28,45 L36,43" stroke="#22d3ee" strokeWidth="4" strokeLinecap="round" />
+                <path d="M10,32 L-2,44 L-12,42" stroke="#0891b2" strokeWidth="3.5" strokeLinecap="round" />
+                <path d="M14,16 L-2,12 L-10,20" stroke="#0891b2" strokeWidth="3.5" strokeLinecap="round" />
+                <path d="M20,18 L32,22 L40,16" stroke="#22d3ee" strokeWidth="3.5" strokeLinecap="round" />
+              </g>
+            )}
+
+            {/* Cyber speed orbs */}
+            <circle cx={isWide ? 220 : 70} cy={isWide ? 270 : 250} r="6" fill="#fde047" opacity="0.9" />
+            <circle cx={isWide ? 420 : 250} cy={isWide ? 260 : 235} r="7" fill="#22d3ee" opacity="0.9" />
+            <circle cx={isWide ? 380 : 200} cy={isWide ? 290 : 275} r="5" fill="#a855f7" opacity="0.9" />
           </svg>
         </div>
       );
 
-    case 'aetheria_void':
+    // -------------------------------------------------------------------------
+    // 2. COSMIC
+    // -------------------------------------------------------------------------
+    case 'cosmic_defender':
       return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-950 via-slate-950 to-indigo-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            <circle cx="160" cy="90" r="65" fill="#581c87" opacity="0.5" filter="drop-shadow(0 0 30px #a855f7)" />
-            {/* Crescent Moon */}
-            <path d="M250 30 A 30 30 0 0 0 230 80 A 35 35 0 0 1 250 30 Z" fill="#e879f9" opacity="0.8" filter="drop-shadow(0 0 15px #e879f9)" />
-            {/* Dual Katana Neon Arc Slashes */}
-            <path d="M30 150 Q 160 15 290 95" stroke="#38bdf8" strokeWidth="7" strokeLinecap="round" filter="drop-shadow(0 0 16px #38bdf8)" />
-            <path d="M50 165 Q 160 45 270 120" stroke="#c084fc" strokeWidth="4" strokeLinecap="round" opacity="0.85" filter="drop-shadow(0 0 12px #c084fc)" />
-            {/* Ninja Silhouette with Scarf */}
-            <circle cx="140" cy="85" r="10" fill="#0f172a" />
-            <path d="M132 95 L148 95 L152 135 L128 135 Z" fill="#0f172a" />
-            <path d="M145 92 Q 185 85 205 105" stroke="#f43f5e" strokeWidth="4" strokeLinecap="round" filter="drop-shadow(0 0 8px #f43f5e)" />
-            <line x1="145" y1="90" x2="220" y2="40" stroke="#e879f9" strokeWidth="5" strokeLinecap="round" filter="drop-shadow(0 0 12px #e879f9)" />
+        <div className={`relative overflow-hidden bg-gradient-to-b from-slate-950 via-indigo-950/50 to-slate-950 flex items-center justify-center ${className}`}>
+          <svg className="w-full h-full object-cover select-none" viewBox={viewBox} fill="none" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id={`${uid}_cd_space`} x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#020617" />
+                <stop offset="50%" stopColor="#0f172a" />
+                <stop offset="100%" stopColor="#1e1b4b" />
+              </linearGradient>
+              <radialGradient id={`${uid}_cd_nebula`} cx="70%" cy="30%" r="50%">
+                <stop offset="0%" stopColor="#6366f1" stopOpacity="0.4" />
+                <stop offset="60%" stopColor="#4f46e5" stopOpacity="0.15" />
+                <stop offset="100%" stopColor="transparent" />
+              </radialGradient>
+              <linearGradient id={`${uid}_cd_ship_body`} x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#38bdf8" />
+                <stop offset="50%" stopColor="#2563eb" />
+                <stop offset="100%" stopColor="#1d4ed8" />
+              </linearGradient>
+            </defs>
+
+            {/* Deep Space & Nebula */}
+            <rect width="100%" height="100%" fill={`url(#${uid}_cd_space)`} />
+            <circle cx={isWide ? 440 : 220} cy={isWide ? 100 : 90} r={isWide ? 140 : 95} fill={`url(#${uid}_cd_nebula)`} />
+
+            {/* Distant stars */}
+            <g fill="#ffffff">
+              <circle cx={isWide ? 80 : 35} cy="45" r="1.5" opacity="0.8" />
+              <circle cx={isWide ? 150 : 80} cy="120" r="1" opacity="0.6" />
+              <circle cx={isWide ? 220 : 130} cy="60" r="1.2" opacity="0.9" />
+              <circle cx={isWide ? 380 : 190} cy="40" r="1" opacity="0.7" />
+              <circle cx={isWide ? 510 : 250} cy="140" r="1.8" opacity="0.9" />
+              <circle cx={isWide ? 580 : 290} cy="75" r="1.2" opacity="0.5" />
+              <circle cx={isWide ? 110 : 50} cy="220" r="1.5" opacity="0.6" />
+              <circle cx={isWide ? 550 : 270} cy="260" r="1" opacity="0.8" />
+              <circle cx={isWide ? 290 : 160} cy="300" r="1.4" opacity="0.7" />
+            </g>
+
+            {isWide && (
+              <circle cx="580" cy="380" r="160" fill="#1e1b4b" stroke="#4338ca" strokeWidth="2" opacity="0.7" />
+            )}
+
+            {/* Enemy Alien Swarm */}
+            <g transform={isWide ? 'translate(320, 60)' : 'translate(160, 50)'}>
+              <polygon points="0,0 -16,-20 0,-14 16,-20" fill="#f43f5e" stroke="#fda4af" strokeWidth="1.5" />
+              <circle cx="0" cy="-10" r="3" fill="#fde047" />
+              <polygon points="-40,15 -52,-2 -40,3 -28,-2" fill="#e11d48" stroke="#f43f5e" strokeWidth="1" />
+              <polygon points="-75,32 -85,18 -75,22 -65,18" fill="#be123c" stroke="#e11d48" strokeWidth="1" />
+              <polygon points="40,15 28,-2 40,3 52,-2" fill="#e11d48" stroke="#f43f5e" strokeWidth="1" />
+              <polygon points="75,32 65,18 75,22 85,18" fill="#be123c" stroke="#e11d48" strokeWidth="1" />
+            </g>
+
+            {/* Plasma Laser Cannons & Starfighter */}
+            <g transform={isWide ? 'translate(320, 200)' : 'translate(160, 185)'}>
+              <line x1="-22" y1="10" x2="-22" y2="-90" stroke="#38bdf8" strokeWidth="3.5" strokeLinecap="round" />
+              <line x1="-22" y1="10" x2="-22" y2="-90" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" />
+              <line x1="22" y1="10" x2="22" y2="-90" stroke="#38bdf8" strokeWidth="3.5" strokeLinecap="round" />
+              <line x1="22" y1="10" x2="22" y2="-90" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" />
+
+              <polygon points="-12,70 0,110 12,70" fill="#06b6d4" opacity="0.85" />
+              <polygon points="-6,70 0,95 6,70" fill="#ffffff" />
+
+              <polygon points="0,0 -48,60 -24,65 0,35 24,65 48,60" fill={`url(#${uid}_cd_ship_body)`} stroke="#7dd3fc" strokeWidth="1.5" />
+              <polygon points="0,-25 -14,40 0,50 14,40" fill="#0284c7" stroke="#38bdf8" strokeWidth="1.5" />
+              <ellipse cx="0" cy="15" rx="5" ry="12" fill="#38bdf8" stroke="#ffffff" strokeWidth="1" />
+              <rect x="-49" y="42" width="4" height="18" rx="2" fill="#fde047" />
+              <rect x="45" y="42" width="4" height="18" rx="2" fill="#fde047" />
+            </g>
           </svg>
         </div>
       );
 
-    case 'titan_core':
+    // -------------------------------------------------------------------------
+    // 3. DUNGEON
+    // -------------------------------------------------------------------------
+    case 'pixel_dungeon_quest':
       return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-red-950 via-slate-950 to-orange-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Colossal Mech Chassis */}
-            <rect x="115" y="45" width="90" height="85" rx="14" fill="#e11d48" stroke="#fca5a5" strokeWidth="3" filter="drop-shadow(0 0 20px rgba(225,29,72,0.6))" />
-            <circle cx="160" cy="78" r="18" fill="#38bdf8" filter="drop-shadow(0 0 18px #38bdf8)" />
-            {/* Gatling Cannons & Lasers */}
-            <rect x="75" y="65" width="40" height="15" rx="5" fill="#475569" stroke="#94a3b8" strokeWidth="1.5" />
-            <rect x="205" y="65" width="40" height="15" rx="5" fill="#475569" stroke="#94a3b8" strokeWidth="1.5" />
-            <line x1="75" y1="72" x2="10" y2="72" stroke="#fbbf24" strokeWidth="5" strokeLinecap="round" filter="drop-shadow(0 0 10px #fbbf24)" />
-            <line x1="245" y1="72" x2="310" y2="72" stroke="#fbbf24" strokeWidth="5" strokeLinecap="round" filter="drop-shadow(0 0 10px #fbbf24)" />
-            {/* Heavy Shoulders */}
-            <polygon points="105,45 80,75 115,75" fill="#be123c" />
-            <polygon points="215,45 240,75 205,75" fill="#be123c" />
+        <div className={`relative overflow-hidden bg-gradient-to-b from-stone-950 via-emerald-950/40 to-stone-950 flex items-center justify-center ${className}`}>
+          <svg className="w-full h-full object-cover select-none" viewBox={viewBox} fill="none" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id={`${uid}_pd_wall`} x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#0c1214" />
+                <stop offset="100%" stopColor="#06221c" />
+              </linearGradient>
+              <radialGradient id={`${uid}_pd_torch`} cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.8" />
+                <stop offset="50%" stopColor="#d97706" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="transparent" />
+              </radialGradient>
+              <linearGradient id={`${uid}_pd_blade`} x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#a7f3d0" />
+                <stop offset="50%" stopColor="#10b981" />
+                <stop offset="100%" stopColor="#047857" />
+              </linearGradient>
+            </defs>
+
+            {/* Subterranean chamber background */}
+            <rect width="100%" height="100%" fill={`url(#${uid}_pd_wall)`} />
+
+            {/* Brick Stone Wall Texture */}
+            {isWide ? (
+              <g stroke="#0f2b23" strokeWidth="1" opacity="0.6">
+                <line x1="0" y1="60" x2="640" y2="60" />
+                <line x1="0" y1="120" x2="640" y2="120" />
+                <line x1="0" y1="180" x2="640" y2="180" />
+                <line x1="0" y1="240" x2="640" y2="240" />
+                <line x1="80" y1="0" x2="80" y2="60" />
+                <line x1="200" y1="0" x2="200" y2="60" />
+                <line x1="360" y1="0" x2="360" y2="60" />
+                <line x1="500" y1="0" x2="500" y2="60" />
+                <line x1="140" y1="60" x2="140" y2="120" />
+                <line x1="280" y1="60" x2="280" y2="120" />
+                <line x1="440" y1="60" x2="440" y2="120" />
+                <line x1="580" y1="60" x2="580" y2="120" />
+                <line x1="90" y1="120" x2="90" y2="180" />
+                <line x1="220" y1="120" x2="220" y2="180" />
+                <line x1="380" y1="120" x2="380" y2="180" />
+                <line x1="520" y1="120" x2="520" y2="180" />
+              </g>
+            ) : (
+              <g stroke="#0f2b23" strokeWidth="1" opacity="0.6">
+                <line x1="0" y1="50" x2="320" y2="50" />
+                <line x1="0" y1="100" x2="320" y2="100" />
+                <line x1="0" y1="150" x2="320" y2="150" />
+                <line x1="0" y1="200" x2="320" y2="200" />
+                <line x1="50" y1="0" x2="50" y2="50" />
+                <line x1="150" y1="0" x2="150" y2="50" />
+                <line x1="250" y1="0" x2="250" y2="50" />
+                <line x1="100" y1="50" x2="100" y2="100" />
+                <line x1="200" y1="50" x2="200" y2="100" />
+                <line x1="300" y1="50" x2="300" y2="100" />
+              </g>
+            )}
+
+            {/* Glowing Gothic Archway in Center */}
+            <path
+              d={isWide ? "M230,360 L230,170 Q320,80 410,170 L410,360 Z" : "M95,320 L95,150 Q160,70 225,150 L225,320 Z"}
+              fill="#03110d"
+              stroke="#10b981"
+              strokeWidth="2.5"
+            />
+            <path
+              d={isWide ? "M245,360 L245,180 Q320,105 395,180 L395,360 Z" : "M108,320 L108,160 Q160,90 212,160 L212,320 Z"}
+              fill="#064e3b"
+              opacity="0.8"
+            />
+
+            {/* Torch Light Left & Right */}
+            {isWide ? (
+              <>
+                <circle cx="150" cy="140" r="45" fill={`url(#${uid}_pd_torch)`} />
+                <rect x="146" y="145" width="8" height="24" fill="#78350f" rx="2" />
+                <path d="M145,145 Q150,125 155,145 Z" fill="#f59e0b" />
+
+                <circle cx="490" cy="140" r="45" fill={`url(#${uid}_pd_torch)`} />
+                <rect x="486" y="145" width="8" height="24" fill="#78350f" rx="2" />
+                <path d="M485,145 Q490,125 495,145 Z" fill="#f59e0b" />
+              </>
+            ) : (
+              <>
+                <circle cx="55" cy="120" r="35" fill={`url(#${uid}_pd_torch)`} />
+                <rect x="52" y="125" width="6" height="20" fill="#78350f" rx="2" />
+                <path d="M51,125 Q55,108 59,125 Z" fill="#f59e0b" />
+
+                <circle cx="265" cy="120" r="35" fill={`url(#${uid}_pd_torch)`} />
+                <rect x="262" y="125" width="6" height="20" fill="#78350f" rx="2" />
+                <path d="M261,125 Q265,108 269,125 Z" fill="#f59e0b" />
+              </>
+            )}
+
+            {/* Heroic Runic Broadsword & Golden Relic */}
+            <g transform={isWide ? 'translate(320, 230)' : 'translate(160, 210)'}>
+              <circle cx="0" cy="0" r="42" fill="#10b981" opacity="0.15" />
+              <circle cx="0" cy="0" r="36" stroke="#34d399" strokeWidth="1.5" strokeDasharray="6,4" opacity="0.7" />
+
+              <g transform="rotate(-30)">
+                <polygon points="-6,-60 0,-75 6,-60 5,10 -5,10" fill={`url(#${uid}_pd_blade)`} stroke="#a7f3d0" strokeWidth="1.5" />
+                <rect x="-18" y="10" width="36" height="7" rx="3" fill="#d97706" stroke="#fbbf24" strokeWidth="1" />
+                <rect x="-4" y="17" width="8" height="15" rx="1" fill="#78350f" />
+                <circle cx="0" cy="35" r="5" fill="#f59e0b" stroke="#fde68a" strokeWidth="1" />
+              </g>
+
+              <g transform="translate(18, 30)">
+                <rect x="-24" y="-8" width="48" height="26" rx="4" fill="#92400e" stroke="#f59e0b" strokeWidth="2" />
+                <rect x="-26" y="-14" width="52" height="10" rx="3" fill="#b45309" stroke="#fbbf24" strokeWidth="2" />
+                <circle cx="0" cy="3" r="4" fill="#fde047" stroke="#78350f" strokeWidth="1.5" />
+              </g>
+            </g>
           </svg>
         </div>
       );
 
-    case 'cyber_heist':
+    // -------------------------------------------------------------------------
+    // 4. PINBALL
+    // -------------------------------------------------------------------------
+    case 'titan_pinball_titan':
       return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-950 via-slate-950 to-yellow-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Vault Door Inset */}
-            <circle cx="160" cy="90" r="60" fill="#1e293b" stroke="#f59e0b" strokeWidth="7" filter="drop-shadow(0 0 20px rgba(245,158,11,0.5))" />
-            <circle cx="160" cy="90" r="35" fill="#0f172a" stroke="#fbbf24" strokeWidth="4" />
-            <rect x="154" y="65" width="12" height="50" rx="3" fill="#f59e0b" />
-            <rect x="135" y="84" width="50" height="12" rx="3" fill="#f59e0b" />
-            {/* Laser Tripwires */}
-            <line x1="20" y1="35" x2="300" y2="145" stroke="#ef4444" strokeWidth="3" filter="drop-shadow(0 0 10px #ef4444)" />
-            <line x1="20" y1="145" x2="300" y2="35" stroke="#ef4444" strokeWidth="3" filter="drop-shadow(0 0 10px #ef4444)" />
-            {/* Sparkles */}
-            <circle cx="140" cy="85" r="9" fill="#facc15" filter="drop-shadow(0 0 10px #facc15)" />
-            <circle cx="180" cy="95" r="9" fill="#facc15" filter="drop-shadow(0 0 10px #facc15)" />
+        <div className={`relative overflow-hidden bg-gradient-to-b from-slate-950 via-amber-950/40 to-slate-950 flex items-center justify-center ${className}`}>
+          <svg className="w-full h-full object-cover select-none" viewBox={viewBox} fill="none" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id={`${uid}_tp_table`} x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#180c04" />
+                <stop offset="60%" stopColor="#291508" />
+                <stop offset="100%" stopColor="#0f0702" />
+              </linearGradient>
+              <linearGradient id={`${uid}_tp_ball`} x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ffffff" />
+                <stop offset="40%" stopColor="#e2e8f0" />
+                <stop offset="100%" stopColor="#64748b" />
+              </linearGradient>
+            </defs>
+
+            {/* Playfield Base */}
+            <rect width="100%" height="100%" fill={`url(#${uid}_tp_table)`} />
+
+            {/* Table Neon Borders */}
+            {isWide ? (
+              <path
+                d="M120,360 L120,80 Q320,10 520,80 L520,360"
+                stroke="#f59e0b"
+                strokeWidth="4"
+                fill="none"
+                opacity="0.85"
+              />
+            ) : (
+              <path
+                d="M40,320 L40,60 Q160,10 280,60 L280,320"
+                stroke="#f59e0b"
+                strokeWidth="3.5"
+                fill="none"
+                opacity="0.85"
+              />
+            )}
+
+            {/* Radiant Bumper Rings */}
+            <g transform={isWide ? 'translate(320, 140)' : 'translate(160, 120)'}>
+              <circle cx="0" cy="-45" r="22" fill="#7c2d12" stroke="#f97316" strokeWidth="3" />
+              <circle cx="0" cy="-45" r="14" fill="#ea580c" stroke="#fde047" strokeWidth="2" />
+              <circle cx="0" cy="-45" r="6" fill="#fde047" />
+
+              <circle cx="-55" cy="20" r="20" fill="#7c2d12" stroke="#f97316" strokeWidth="3" />
+              <circle cx="-55" cy="20" r="12" fill="#ea580c" stroke="#fde047" strokeWidth="2" />
+              <circle cx="-55" cy="20" r="5" fill="#fde047" />
+
+              <circle cx="55" cy="20" r="20" fill="#7c2d12" stroke="#f97316" strokeWidth="3" />
+              <circle cx="55" cy="20" r="12" fill="#ea580c" stroke="#fde047" strokeWidth="2" />
+              <circle cx="55" cy="20" r="5" fill="#fde047" />
+
+              <polygon points="0,-15 -8,0 8,0" fill="#fde047" opacity="0.9" />
+              <polygon points="-30,30 -38,42 -22,42" fill="#38bdf8" opacity="0.9" />
+              <polygon points="30,30 22,42 38,42" fill="#38bdf8" opacity="0.9" />
+            </g>
+
+            {/* Neon Wireform Ball Ramp Tracks */}
+            {isWide ? (
+              <>
+                <path d="M160,300 C180,180 220,100 320,90" stroke="#38bdf8" strokeWidth="2.5" fill="none" opacity="0.7" />
+                <path d="M480,300 C460,180 420,100 320,90" stroke="#38bdf8" strokeWidth="2.5" fill="none" opacity="0.7" />
+              </>
+            ) : (
+              <>
+                <path d="M70,270 C85,160 110,85 160,80" stroke="#38bdf8" strokeWidth="2" fill="none" opacity="0.7" />
+                <path d="M250,270 C235,160 210,85 160,80" stroke="#38bdf8" strokeWidth="2" fill="none" opacity="0.7" />
+              </>
+            )}
+
+            {/* Chrome Pinball with Streak */}
+            <g transform={isWide ? 'translate(370, 200)' : 'translate(195, 175)'}>
+              <path d="M-40,40 Q-20,20 0,0" stroke="#fbbf24" strokeWidth="7" strokeLinecap="round" opacity="0.7" />
+              <path d="M-30,30 Q-15,15 0,0" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" opacity="0.9" />
+              <circle cx="0" cy="0" r="14" fill={`url(#${uid}_tp_ball)`} stroke="#ffffff" strokeWidth="2" />
+              <circle cx="-4" cy="-4" r="4" fill="#ffffff" />
+            </g>
+
+            {/* Flippers */}
+            <g transform={isWide ? 'translate(320, 310)' : 'translate(160, 280)'}>
+              <g transform="rotate(-15, -45, 0)">
+                <polygon points="-45,-6 10, -2 8, 8 -45, 6" fill="#ea580c" stroke="#fde047" strokeWidth="2" />
+                <circle cx="-45" cy="0" r="6" fill="#fde047" />
+              </g>
+              <g transform="rotate(15, 45, 0)">
+                <polygon points="45,-6 -10, -2 -8, 8 45, 6" fill="#ea580c" stroke="#fde047" strokeWidth="2" />
+                <circle cx="45" cy="0" r="6" fill="#fde047" />
+              </g>
+            </g>
           </svg>
         </div>
       );
 
-    case 'nebula_strike':
+    // -------------------------------------------------------------------------
+    // 5. LASER
+    // -------------------------------------------------------------------------
+    case 'quantum_strike':
       return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-950 via-slate-950 to-cyan-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Alien Mothership */}
-            <polygon points="160,25 210,55 110,55" fill="#06b6d4" stroke="#22d3ee" strokeWidth="2" filter="drop-shadow(0 0 15px #06b6d4)" />
-            <circle cx="160" cy="45" r="8" fill="#f43f5e" />
-            {/* Alien Swarm */}
-            <rect x="60" y="70" width="24" height="16" rx="4" fill="#a855f7" filter="drop-shadow(0 0 8px #a855f7)" />
-            <rect x="110" y="70" width="24" height="16" rx="4" fill="#a855f7" filter="drop-shadow(0 0 8px #a855f7)" />
-            <rect x="186" y="70" width="24" height="16" rx="4" fill="#a855f7" filter="drop-shadow(0 0 8px #a855f7)" />
-            <rect x="236" y="70" width="24" height="16" rx="4" fill="#a855f7" filter="drop-shadow(0 0 8px #a855f7)" />
-            {/* Player Defender Spacecraft */}
-            <polygon points="160,125 180,165 140,165" fill="#38bdf8" stroke="#7dd3fc" strokeWidth="2" filter="drop-shadow(0 0 15px #38bdf8)" />
-            {/* Dual Missiles */}
-            <line x1="150" y1="120" x2="150" y2="85" stroke="#facc15" strokeWidth="3.5" strokeLinecap="round" filter="drop-shadow(0 0 8px #facc15)" />
-            <line x1="170" y1="120" x2="170" y2="85" stroke="#facc15" strokeWidth="3.5" strokeLinecap="round" filter="drop-shadow(0 0 8px #facc15)" />
-          </svg>
-        </div>
-      );
+        <div className={`relative overflow-hidden bg-gradient-to-b from-slate-950 via-purple-950/40 to-slate-950 flex items-center justify-center ${className}`}>
+          <svg className="w-full h-full object-cover select-none" viewBox={viewBox} fill="none" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id={`${uid}_qs_hud_bg`} x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#090514" />
+                <stop offset="60%" stopColor="#1e0b36" />
+                <stop offset="100%" stopColor="#090514" />
+              </linearGradient>
+              <radialGradient id={`${uid}_qs_core_glow`} cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#c084fc" stopOpacity="0.9" />
+                <stop offset="50%" stopColor="#9333ea" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="transparent" />
+              </radialGradient>
+              <linearGradient id={`${uid}_qs_beam`} x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#06b6d4" />
+                <stop offset="50%" stopColor="#e879f9" />
+                <stop offset="100%" stopColor="#f43f5e" />
+              </linearGradient>
+            </defs>
 
-    case 'chrono_shift':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-950 via-slate-950 to-teal-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Quantum Clockwork Gears */}
-            <circle cx="160" cy="90" r="55" stroke="#14b8a6" strokeWidth="5" strokeDasharray="12 8" fill="none" filter="drop-shadow(0 0 15px #14b8a6)" />
-            <circle cx="160" cy="90" r="35" stroke="#2dd4bf" strokeWidth="3" fill="none" />
-            <circle cx="160" cy="90" r="8" fill="#5eead4" />
-            {/* Clock Hands */}
-            <line x1="160" y1="90" x2="160" y2="48" stroke="#fde047" strokeWidth="4" strokeLinecap="round" filter="drop-shadow(0 0 8px #fde047)" />
-            <line x1="160" y1="90" x2="195" y2="105" stroke="#fde047" strokeWidth="3.5" strokeLinecap="round" />
-            {/* Hourglass Aura */}
-            <path d="M120 40 L200 40 L160 90 L200 140 L120 140 L160 90 Z" stroke="#0d9488" strokeWidth="2" fill="none" opacity="0.4" />
-          </svg>
-        </div>
-      );
+            {/* Tactical grid background */}
+            <rect width="100%" height="100%" fill={`url(#${uid}_qs_hud_bg)`} />
 
-    case 'robo_tycoon':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-950 via-slate-950 to-amber-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Conveyor Belt System */}
-            <rect x="25" y="105" width="270" height="26" rx="6" fill="#334155" stroke="#f97316" strokeWidth="2.5" />
-            <line x1="40" y1="118" x2="280" y2="118" stroke="#fbbf24" strokeWidth="3" strokeDasharray="8 8" />
-            {/* Dropper Extractor */}
-            <rect x="45" y="30" width="55" height="55" rx="10" fill="#ea580c" stroke="#fed7aa" strokeWidth="2" />
-            {/* Golden Mineral Cubes */}
-            <rect x="125" y="93" width="18" height="18" rx="4" fill="#fbbf24" filter="drop-shadow(0 0 8px #fbbf24)" />
-            <rect x="190" y="93" width="18" height="18" rx="4" fill="#fbbf24" filter="drop-shadow(0 0 8px #fbbf24)" />
-            {/* Plasma Smelter Furnace */}
-            <rect x="235" y="40" width="60" height="80" rx="10" fill="#c2410c" stroke="#f97316" strokeWidth="2" />
-            <circle cx="265" cy="75" r="14" fill="#fde047" filter="drop-shadow(0 0 12px #fde047)" />
-          </svg>
-        </div>
-      );
+            {/* Coordinate Grid lines */}
+            <g stroke="#7c3aed" strokeWidth="0.8" opacity="0.35">
+              {isWide ? (
+                <>
+                  <line x1="80" y1="0" x2="80" y2="360" />
+                  <line x1="160" y1="0" x2="160" y2="360" />
+                  <line x1="240" y1="0" x2="240" y2="360" />
+                  <line x1="320" y1="0" x2="320" y2="360" stroke="#a855f7" strokeWidth="1.5" />
+                  <line x1="400" y1="0" x2="400" y2="360" />
+                  <line x1="480" y1="0" x2="480" y2="360" />
+                  <line x1="560" y1="0" x2="560" y2="360" />
 
-    case 'shadow_dungeon':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-950 via-slate-950 to-stone-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Dungeon Archway */}
-            <path d="M70 180 L70 90 Q 160 20 250 90 L250 180 Z" fill="#1c1917" stroke="#78716c" strokeWidth="3" />
-            {/* Torch Flames */}
-            <circle cx="85" cy="95" r="7" fill="#f97316" filter="drop-shadow(0 0 10px #f97316)" />
-            <circle cx="235" cy="95" r="7" fill="#f97316" filter="drop-shadow(0 0 10px #f97316)" />
-            {/* Glowing Red Eyes in Darkness */}
-            <circle cx="150" cy="110" r="4" fill="#ef4444" filter="drop-shadow(0 0 6px #ef4444)" />
-            <circle cx="170" cy="110" r="4" fill="#ef4444" filter="drop-shadow(0 0 6px #ef4444)" />
-            {/* Loot Chest */}
-            <rect x="135" y="140" width="50" height="30" rx="4" fill="#d97706" stroke="#fde047" strokeWidth="2" />
-            <circle cx="160" cy="155" r="4" fill="#fde047" />
-          </svg>
-        </div>
-      );
+                  <line x1="0" y1="60" x2="640" y2="60" />
+                  <line x1="0" y1="120" x2="640" y2="120" />
+                  <line x1="0" y1="180" x2="640" y2="180" stroke="#a855f7" strokeWidth="1.5" />
+                  <line x1="0" y1="240" x2="640" y2="240" />
+                  <line x1="0" y1="300" x2="640" y2="300" />
+                </>
+              ) : (
+                <>
+                  <line x1="80" y1="0" x2="80" y2="320" />
+                  <line x1="160" y1="0" x2="160" y2="320" stroke="#a855f7" strokeWidth="1.5" />
+                  <line x1="240" y1="0" x2="240" y2="320" />
 
-    case 'hyper_drift':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-fuchsia-950 via-slate-950 to-pink-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Neon Synthwave Grid Floor */}
-            <path d="M40 180 L130 50 L190 50 L280 180 Z" fill="#090616" />
-            <line x1="160" y1="50" x2="160" y2="180" stroke="#e879f9" strokeWidth="3.5" strokeDasharray="14 14" />
-            {/* Drift Car Angled with Tire Smoke */}
-            <rect x="125" y="95" width="70" height="36" rx="8" fill="#ec4899" transform="rotate(-14 160 110)" stroke="#f472b6" strokeWidth="2.5" />
-            <circle cx="110" cy="130" r="16" fill="#d946ef" opacity="0.6" filter="drop-shadow(0 0 12px #d946ef)" />
-            <circle cx="205" cy="132" r="18" fill="#d946ef" opacity="0.6" filter="drop-shadow(0 0 12px #d946ef)" />
-            {/* Headlights beams */}
-            <polygon points="120,95 20,80 40,140" fill="#fde047" opacity="0.35" filter="drop-shadow(0 0 15px #fde047)" />
-          </svg>
-        </div>
-      );
+                  <line x1="0" y1="80" x2="320" y2="80" />
+                  <line x1="0" y1="160" x2="320" y2="160" stroke="#a855f7" strokeWidth="1.5" />
+                  <line x1="0" y1="240" x2="320" y2="240" />
+                </>
+              )}
+            </g>
 
-    case 'pixel_forge':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-950 via-slate-950 to-lime-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Floating Island with Voxel Blocks */}
-            <rect x="60" y="110" width="200" height="40" rx="6" fill="#65a30d" stroke="#a3e635" strokeWidth="2" />
-            <rect x="80" y="80" width="30" height="30" fill="#84cc16" stroke="#bef264" strokeWidth="2" />
-            <rect x="110" y="70" width="30" height="40" fill="#0284c7" stroke="#38bdf8" strokeWidth="2" />
-            <rect x="140" y="55" width="40" height="55" fill="#e11d48" stroke="#f43f5e" strokeWidth="2" />
-            <rect x="180" y="75" width="35" height="35" fill="#f59e0b" stroke="#fde047" strokeWidth="2" />
-            {/* Golden Pickaxe */}
-            <line x1="220" y1="40" x2="250" y2="85" stroke="#78350f" strokeWidth="4" strokeLinecap="round" />
-            <polygon points="210,35 240,30 230,55" fill="#fbbf24" stroke="#fde047" strokeWidth="2" />
-          </svg>
-        </div>
-      );
+            {/* Concentric HUD Reticle in center */}
+            <g transform={isWide ? 'translate(320, 180)' : 'translate(160, 160)'}>
+              <circle cx="0" cy="0" r={isWide ? 100 : 85} stroke="#c084fc" strokeWidth="1.5" strokeDasharray="14,8" opacity="0.6" />
+              <circle cx="0" cy="0" r={isWide ? 75 : 62} stroke="#a855f7" strokeWidth="2" strokeDasharray="30,12" opacity="0.8" />
+              <circle cx="0" cy="0" r={isWide ? 45 : 38} stroke="#e879f9" strokeWidth="2.5" />
 
-    case 'gravity_surge':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-sky-950 via-slate-950 to-indigo-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Ceiling and Floor Spikes */}
-            <polygon points="40,0 60,30 80,0 100,30 120,0 140,30 160,0 180,30 200,0 220,30 240,0 260,30 280,0" fill="#38bdf8" filter="drop-shadow(0 0 10px #38bdf8)" />
-            <polygon points="40,180 60,150 80,180 100,150 120,180 140,150 160,180 180,150 200,180 220,150 240,180 260,150 280,180" fill="#38bdf8" filter="drop-shadow(0 0 10px #38bdf8)" />
-            {/* Gravity Inversion Cube */}
-            <rect x="145" y="75" width="30" height="30" rx="6" fill="#0284c7" stroke="#38bdf8" strokeWidth="3" filter="drop-shadow(0 0 15px #38bdf8)" />
-            <polygon points="160,82 152,95 168,95" fill="#facc15" />
-          </svg>
-        </div>
-      );
+              {/* Laser Core */}
+              <circle cx="0" cy="0" r="24" fill={`url(#${uid}_qs_core_glow)`} />
+              <circle cx="0" cy="0" r="10" fill="#ffffff" />
 
-    case 'synth_rider':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-pink-950 via-slate-950 to-rose-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Beat Highway Rails */}
-            <line x1="30" y1="180" x2="160" y2="30" stroke="#f43f5e" strokeWidth="4" />
-            <line x1="290" y1="180" x2="160" y2="30" stroke="#06b6d4" strokeWidth="4" />
-            {/* Rhythm Target Orbs */}
-            <circle cx="105" cy="115" r="16" fill="#f43f5e" filter="drop-shadow(0 0 15px #f43f5e)" />
-            <circle cx="215" cy="115" r="16" fill="#06b6d4" filter="drop-shadow(0 0 15px #06b6d4)" />
-            <circle cx="160" cy="70" r="12" fill="#fbbf24" filter="drop-shadow(0 0 12px #fbbf24)" />
-          </svg>
-        </div>
-      );
+              {/* Precision Bracket Tick Marks */}
+              <path d="M-60,-20 L-60,-60 L-20,-60" stroke="#38bdf8" strokeWidth="2.5" fill="none" />
+              <path d="M60,-20 L60,-60 L20,-60" stroke="#38bdf8" strokeWidth="2.5" fill="none" />
+              <path d="M-60,20 L-60,60 L-20,60" stroke="#38bdf8" strokeWidth="2.5" fill="none" />
+              <path d="M60,20 L60,60 L20,60" stroke="#38bdf8" strokeWidth="2.5" fill="none" />
 
-    case 'biohazard_defense':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-green-950 via-slate-950 to-emerald-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Biohazard Symbol Glow */}
-            <circle cx="160" cy="90" r="45" stroke="#22c55e" strokeWidth="4" fill="none" filter="drop-shadow(0 0 15px #22c55e)" />
-            <polygon points="160,50 175,80 145,80" fill="#22c55e" />
-            <circle cx="160" cy="90" r="12" fill="#86efac" />
-            {/* Plasma Defensive Turret */}
-            <rect x="60" y="130" width="40" height="30" rx="6" fill="#15803d" />
-            <line x1="100" y1="140" x2="150" y2="120" stroke="#4ade80" strokeWidth="4" strokeLinecap="round" filter="drop-shadow(0 0 8px #4ade80)" />
-          </svg>
-        </div>
-      );
+              {/* Laser crosshair arms */}
+              <line x1="-120" y1="0" x2="-55" y2="0" stroke="#e879f9" strokeWidth="2" />
+              <line x1="55" y1="0" x2="120" y2="0" stroke="#e879f9" strokeWidth="2" />
+              <line x1="0" y1="-100" x2="0" y2="-50" stroke="#e879f9" strokeWidth="2" />
+              <line x1="0" y1="50" x2="0" y2="100" stroke="#e879f9" strokeWidth="2" />
 
-    case 'skybound_wings':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-sky-950 via-slate-950 to-blue-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Clouds */}
-            <ellipse cx="80" cy="130" rx="50" ry="20" fill="#38bdf8" opacity="0.3" />
-            <ellipse cx="240" cy="140" rx="60" ry="25" fill="#38bdf8" opacity="0.3" />
-            {/* Jet Glider Wings */}
-            <polygon points="160,50 240,110 180,105 160,95 140,105 80,110" fill="#0284c7" stroke="#38bdf8" strokeWidth="2.5" filter="drop-shadow(0 0 15px #38bdf8)" />
-            <circle cx="160" cy="75" r="8" fill="#fde047" />
-          </svg>
-        </div>
-      );
+              {/* High-voltage Beam */}
+              <line x1="-140" y1="120" x2="140" y2="-120" stroke={`url(#${uid}_qs_beam)`} strokeWidth="4" strokeLinecap="round" />
+              <line x1="-140" y1="120" x2="140" y2="-120" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" />
 
-    case 'glitch_hunter':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-950 via-slate-950 to-cyan-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Glitch Shift Blocks */}
-            <rect x="70" y="50" width="80" height="30" fill="#14b8a6" opacity="0.8" filter="drop-shadow(-4 0 0 #f43f5e)" />
-            <rect x="170" y="80" width="80" height="30" fill="#06b6d4" opacity="0.8" filter="drop-shadow(4 0 0 #3b82f6)" />
-            <text x="160" y="100" fill="#ffffff" fontFamily="monospace" fontWeight="900" fontSize="24" textAnchor="middle">
-              0101_GLITCH
-            </text>
-          </svg>
-        </div>
-      );
+              {/* Hit Spark Particles */}
+              <circle cx="20" cy="-20" r="3" fill="#fde047" />
+              <circle cx="-15" cy="18" r="2.5" fill="#38bdf8" />
+              <circle cx="35" cy="-30" r="2" fill="#f43f5e" />
+            </g>
 
-    case 'cosmic_miner':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-950 via-slate-950 to-blue-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Asteroid Surface */}
-            <circle cx="160" cy="210" r="140" fill="#1e1b4b" stroke="#38bdf8" strokeWidth="3" />
-            {/* Drill Laser Miner Rig */}
-            <rect x="140" y="45" width="40" height="55" rx="8" fill="#0284c7" stroke="#38bdf8" strokeWidth="3" filter="drop-shadow(0 0 15px #38bdf8)" />
-            <polygon points="160,120 148,100 172,100" fill="#f59e0b" filter="drop-shadow(0 0 10px #f59e0b)" />
-            {/* Extracted Crystals */}
-            <rect x="70" y="75" width="26" height="26" rx="4" fill="#fbbf24" filter="drop-shadow(0 0 10px #fbbf24)" />
-            <rect x="220" y="55" width="30" height="30" rx="6" fill="#38bdf8" filter="drop-shadow(0 0 12px #38bdf8)" />
-          </svg>
-        </div>
-      );
-
-    case 'shadow_shinobi':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-950 via-slate-950 to-pink-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Rooftop Pagoda & Blood Moon */}
-            <rect x="0" y="120" width="320" height="60" fill="#0f172a" />
-            <line x1="0" y1="120" x2="320" y2="120" stroke="#c084fc" strokeWidth="3.5" />
-            <circle cx="160" cy="55" r="40" fill="#f43f5e" opacity="0.45" filter="drop-shadow(0 0 30px #f43f5e)" />
-            {/* Shuriken Swarm */}
-            <path d="M100 105 Q 160 40 230 85" stroke="#e879f9" strokeWidth="5" strokeLinecap="round" filter="drop-shadow(0 0 12px #e879f9)" />
-            <polygon points="80,50 85,60 95,60 87,68 90,78 80,72 70,78 73,68 65,60 75,60" fill="#c084fc" />
-            <polygon points="240,40 245,50 255,50 247,58 250,68 240,62 230,68 233,58 225,50 235,50" fill="#c084fc" />
-          </svg>
-        </div>
-      );
-
-    case 'speed_runners_2099':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-sky-950 via-slate-950 to-indigo-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Magnetic Track */}
-            <polygon points="160,40 20,180 300,180" fill="#0c4a6e" opacity="0.7" />
-            <line x1="160" y1="40" x2="160" y2="180" stroke="#38bdf8" strokeWidth="4" strokeDasharray="8 8" />
-            {/* Speedrunner Silhouette */}
-            <polygon points="160,115 138,150 182,150" fill="#0284c7" stroke="#38bdf8" strokeWidth="2.5" />
-            <circle cx="160" cy="160" r="10" fill="#f43f5e" filter="drop-shadow(0 0 16px #f43f5e)" />
-          </svg>
-        </div>
-      );
-
-    case 'block_craft_arena':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-950 via-slate-950 to-teal-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            <rect x="40" y="115" width="240" height="35" fill="#22c55e" rx="4" />
-            {/* Diamond Sword in Center */}
-            <polygon points="160,45 175,75 160,105 145,75" fill="#38bdf8" filter="drop-shadow(0 0 16px #38bdf8)" />
-            <rect x="70" y="85" width="26" height="26" fill="#b45309" stroke="#f59e0b" strokeWidth="2" />
-            <rect x="220" y="85" width="26" height="26" fill="#b45309" stroke="#f59e0b" strokeWidth="2" />
-          </svg>
-        </div>
-      );
-
-    case 'neon_cyber_pong':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-cyan-950 via-slate-950 to-rose-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            <line x1="160" y1="0" x2="160" y2="180" stroke="#334155" strokeWidth="3" strokeDasharray="8 8" />
-            {/* Left Paddle */}
-            <rect x="30" y="60" width="12" height="55" rx="5" fill="#06b6d4" filter="drop-shadow(0 0 12px #06b6d4)" />
-            {/* Right Paddle */}
-            <rect x="278" y="50" width="12" height="55" rx="5" fill="#f43f5e" filter="drop-shadow(0 0 12px #f43f5e)" />
-            {/* Glowing Ball with Trail */}
-            <circle cx="175" cy="85" r="9" fill="#facc15" filter="drop-shadow(0 0 16px #facc15)" />
-            <line x1="120" y1="75" x2="175" y2="85" stroke="#fde047" strokeWidth="3" strokeDasharray="4 4" opacity="0.6" />
-          </svg>
-        </div>
-      );
-
-    case 'solar_overdrive':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-950 via-slate-950 to-rose-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Giant Glowing Sun */}
-            <circle cx="160" cy="60" r="45" fill="#f97316" filter="drop-shadow(0 0 35px #f97316)" />
-            <circle cx="160" cy="60" r="30" fill="#fde047" />
-            {/* Speed Tunnel Track */}
-            <polygon points="160,80 30,180 290,180" fill="#0f172a" opacity="0.85" />
-            <line x1="160" y1="80" x2="160" y2="180" stroke="#f59e0b" strokeWidth="3" strokeDasharray="10 10" />
-            {/* F-Zero Style Super Ship */}
-            <polygon points="160,110 185,155 160,145 135,155" fill="#06b6d4" stroke="#22d3ee" strokeWidth="2.5" filter="drop-shadow(0 0 18px #06b6d4)" />
-            {/* Nitro Fire Trail */}
-            <line x1="160" y1="150" x2="160" y2="178" stroke="#f43f5e" strokeWidth="6" strokeLinecap="round" filter="drop-shadow(0 0 12px #f43f5e)" />
-          </svg>
-        </div>
-      );
-
-    case 'pixel_survivors':
-      return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-950 via-slate-950 to-rose-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            {/* Dark Vampire Realm */}
-            <circle cx="160" cy="90" r="70" fill="#3b0764" opacity="0.5" filter="drop-shadow(0 0 30px #a855f7)" />
-            {/* Magic Wand / Plasma Orb Ring */}
-            <circle cx="160" cy="90" r="45" stroke="#ec4899" strokeWidth="2" strokeDasharray="6 6" fill="none" />
-            {/* Hero Wizard */}
-            <circle cx="160" cy="85" r="10" fill="#f59e0b" />
-            <polygon points="160,65 175,85 145,85" fill="#8b5cf6" filter="drop-shadow(0 0 8px #8b5cf6)" />
-            {/* Swarm of Bats & Skulls closing in */}
-            <text x="80" y="60" fontSize="18" fill="#f43f5e">🦇</text>
-            <text x="230" y="60" fontSize="18" fill="#f43f5e">🦇</text>
-            <text x="70" y="140" fontSize="18" fill="#e11d48">💀</text>
-            <text x="240" y="140" fontSize="18" fill="#e11d48">💀</text>
-            <text x="160" y="155" fontSize="18" fill="#a855f7">👾</text>
-            {/* Magic Explosion Wave */}
-            <circle cx="160" cy="90" r="25" stroke="#38bdf8" strokeWidth="3" fill="none" filter="drop-shadow(0 0 12px #38bdf8)" />
+            {/* Target telemetry stats */}
+            <g fill="#c084fc" opacity="0.85" className="font-mono text-[9px] font-bold">
+              <text x={isWide ? 40 : 15} y={isWide ? 45 : 30}>LOCK: 99.8%</text>
+              <text x={isWide ? 40 : 15} y={isWide ? 62 : 45}>FREQ: 432 THz</text>
+              <text x={isWide ? 530 : 220} y={isWide ? 45 : 30}>CRIT: x10</text>
+            </g>
           </svg>
         </div>
       );
 
     default:
       return (
-        <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 flex items-center justify-center ${className}`}>
-          <svg className="w-full h-full" viewBox="0 0 320 180" fill="none" preserveAspectRatio="xMidYMid slice">
-            <circle cx="160" cy="90" r="50" fill="#06b6d4" opacity="0.25" filter="drop-shadow(0 0 20px #06b6d4)" />
-            <polygon points="160,40 210,130 110,130" stroke="#38bdf8" strokeWidth="3" fill="none" />
-            <circle cx="160" cy="90" r="12" fill="#facc15" />
-          </svg>
+        <div className={`relative overflow-hidden bg-slate-900 flex items-center justify-center ${className}`}>
+          <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-2xl font-mono text-cyan-400">
+            🎮
+          </div>
         </div>
       );
   }

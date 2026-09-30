@@ -2,11 +2,12 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, User, Camera, Upload, Trash2, Check, Tag, Sparkles,
-  Shield, Trophy, Coins, Search, Palette, Image as ImageIcon
+  Shield, Trophy, Coins, Search, Image as ImageIcon
 } from 'lucide-react';
 import { audio } from '../utils/audio';
 import { UserProfile } from '../types';
-import { PROFILE_TAGS_54 } from '../gamesData';
+import { PROFILE_TAGS_79 } from '../gamesData';
+import { Language, getTranslation } from '../utils/i18n';
 
 interface ProfileCreatorModalProps {
   isOpen: boolean;
@@ -15,21 +16,8 @@ interface ProfileCreatorModalProps {
   onSaveProfile: (updatedProfile: UserProfile) => void;
   totalTrophies: number;
   rankPoints: number;
+  language?: Language;
 }
-
-const AVATAR_OPTIONS = [
-  { id: 'cyber_agent', name: 'Agent Cyber', emoji: '🧑‍🚀' },
-  { id: 'cyber_ninja', name: 'Ninja Cyber', emoji: '🥷' },
-  { id: 'cyber_knight', name: 'Chevalier Cyber', emoji: '🛡️' },
-  { id: 'neon_kitty', name: 'Néon Kitty', emoji: '🐱' },
-  { id: 'void_lord', name: 'Mage du Néant', emoji: '🧙‍♂️' },
-  { id: 'apex_robot', name: 'Robot Titan', emoji: '🤖' }
-];
-
-const PRESET_COLORS = [
-  '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#f43f5e',
-  '#f59e0b', '#10b981', '#14b8a6', '#6366f1', '#64748b'
-];
 
 export function ProfileCreatorModal({
   isOpen,
@@ -37,17 +25,17 @@ export function ProfileCreatorModal({
   profile,
   onSaveProfile,
   totalTrophies,
-  rankPoints
+  rankPoints,
+  language = 'en'
 }: ProfileCreatorModalProps) {
   const [username, setUsername] = useState(profile.username);
   const [bio, setBio] = useState(profile.bio || 'Passionné de jeux arcade & métaverse !');
-  const [avatarModel, setAvatarModel] = useState(profile.avatarModel || 'cyber_agent');
-  const [avatarColor, setAvatarColor] = useState(profile.avatarColor || '#06b6d4');
   const [customAvatarUrl, setCustomAvatarUrl] = useState<string | undefined>(profile.customAvatarUrl);
   const [selectedTags, setSelectedTags] = useState<string[]>(profile.selectedTags || ['Pro Gamer', 'Speedrunner', 'Trader']);
   const [tagSearch, setTagSearch] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const t = getTranslation(language);
 
   if (!isOpen) return null;
 
@@ -56,7 +44,6 @@ export function ProfileCreatorModal({
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      alert('Veuillez sélectionner un fichier image valide (PNG, JPG, WEBP).');
       return;
     }
 
@@ -108,17 +95,17 @@ export function ProfileCreatorModal({
       ...profile,
       username: username.trim() || 'CYBER_HERO',
       bio,
-      avatarModel,
-      avatarColor,
       customAvatarUrl,
       selectedTags
     });
     onClose();
   };
 
-  const filteredTags = PROFILE_TAGS_54.filter(t =>
-    t.toLowerCase().includes(tagSearch.toLowerCase())
+  const filteredTags = PROFILE_TAGS_79.filter(tag =>
+    tag.toLowerCase().includes(tagSearch.toLowerCase())
   );
+
+  const initialLetter = (username.trim()[0] || 'V').toUpperCase();
 
   return (
     <AnimatePresence>
@@ -127,27 +114,22 @@ export function ProfileCreatorModal({
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
-          className="liquid-glass-container w-full max-w-4xl max-h-[92vh] rounded-3xl p-5 sm:p-7 flex flex-col justify-between overflow-hidden shadow-2xl relative border border-white/15"
+          className="liquid-glass-container w-full max-w-4xl max-h-[92vh] rounded-3xl p-5 sm:p-7 flex flex-col justify-between overflow-hidden shadow-2xl relative border border-white/15 text-slate-100"
         >
           {/* Top Glint */}
           <div className="absolute inset-x-12 top-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-300/40 to-transparent pointer-events-none" />
 
-          {/* Modal Header */}
+          {/* Modal Header without 'Liquid Glass' phrase and without version badge */}
           <div className="flex items-center justify-between pb-4 border-b border-white/10">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
                 <User className="w-6 h-6" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-black text-white font-mono tracking-tight">
-                    PROFIL JOUEUR LIQUID GLASS
-                  </h2>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
-                    v3.2
-                  </span>
-                </div>
-                <p className="text-xs text-slate-300">Photo personnalisée, avatar, bio & badges communautaires</p>
+                <h2 className="text-lg font-black text-white font-mono tracking-tight uppercase">
+                  {t.playerProfile}
+                </h2>
+                <p className="text-xs text-slate-300">{t.profileSubtitle}</p>
               </div>
             </div>
 
@@ -167,17 +149,19 @@ export function ProfileCreatorModal({
               <div className="flex flex-col items-center justify-center space-y-3">
                 <div className="relative group">
                   <div
-                    className="w-32 h-32 rounded-3xl border-2 border-cyan-400/70 overflow-hidden flex items-center justify-center text-6xl shadow-[0_0_25px_rgba(6,182,212,0.35)] relative"
-                    style={{ backgroundColor: customAvatarUrl ? 'transparent' : avatarColor }}
+                    className="w-32 h-32 rounded-3xl border-2 border-cyan-400/70 overflow-hidden flex items-center justify-center shadow-[0_0_25px_rgba(6,182,212,0.35)] relative bg-gradient-to-br from-cyan-950 via-slate-900 to-indigo-950"
                   >
                     {customAvatarUrl ? (
                       <img
                         src={customAvatarUrl}
-                        alt="Photo de profil personnalisée"
+                        alt="Photo de profil"
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      AVATAR_OPTIONS.find(a => a.id === avatarModel)?.emoji || '🧑‍🚀'
+                      /* Display first letter of username when no photo uploaded */
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-600 font-mono font-black text-white text-5xl select-none shadow-inner">
+                        {initialLetter}
+                      </div>
                     )}
                   </div>
 
@@ -185,10 +169,10 @@ export function ProfileCreatorModal({
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     className="absolute inset-0 rounded-3xl bg-slate-950/60 opacity-0 group-hover:opacity-100 backdrop-blur-sm transition-opacity flex flex-col items-center justify-center gap-1 cursor-pointer text-cyan-300"
-                    title="Changer la photo"
+                    title={customAvatarUrl ? t.replacePhoto : t.uploadPhoto}
                   >
                     <Camera className="w-6 h-6" />
-                    <span className="text-[10px] font-mono font-bold">Modifier</span>
+                    <span className="text-[10px] font-mono font-bold">{t.uploadPhoto}</span>
                   </button>
                 </div>
 
@@ -207,14 +191,14 @@ export function ProfileCreatorModal({
                     className="px-3 py-1.5 rounded-xl liquid-glass-pill text-[11px] font-mono font-bold text-cyan-300 hover:text-white flex items-center gap-1.5 cursor-pointer shadow-sm"
                   >
                     <Upload className="w-3.5 h-3.5" />
-                    <span>{customAvatarUrl ? 'Remplacer photo' : 'Importer photo'}</span>
+                    <span>{customAvatarUrl ? t.replacePhoto : t.uploadPhoto}</span>
                   </button>
 
                   {customAvatarUrl && (
                     <button
                       onClick={removeCustomPhoto}
                       className="p-1.5 rounded-xl liquid-glass-pill text-rose-400 hover:text-rose-300 hover:border-rose-400/50 cursor-pointer shadow-sm"
-                      title="Supprimer la photo personnalisée"
+                      title={t.deletePhoto}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -223,9 +207,7 @@ export function ProfileCreatorModal({
 
                 <div className="text-center">
                   <span className="text-xs font-mono font-bold text-cyan-300 uppercase tracking-wider block">
-                    {(profile.title || 'VÉTÉRAN VERTEX 3.2')
-                      .replace(/roblox/gi, 'Vertex')
-                      .replace(/3\.0/g, '3.2')}
+                    {profile.title || 'VÉTÉRAN VERTEX'}
                   </span>
                   <h3 className="text-base font-black text-white font-mono">{username}</h3>
                   <div className="mt-1 flex items-center justify-center gap-1 text-[9px] font-mono text-yellow-300 font-bold liquid-glass-vc px-2 py-0.5 rounded-md w-fit mx-auto shadow-sm">
@@ -239,7 +221,7 @@ export function ProfileCreatorModal({
               <div className="md:col-span-2 space-y-3.5">
                 <div>
                   <label className="block text-xs font-mono font-bold text-slate-300 mb-1">
-                    Pseudonyme Joueur :
+                    {t.username} :
                   </label>
                   <input
                     type="text"
@@ -247,13 +229,13 @@ export function ProfileCreatorModal({
                     onChange={(e) => setUsername(e.target.value)}
                     maxLength={20}
                     className="w-full px-4 py-2.5 rounded-2xl liquid-glass-input text-white font-bold font-mono text-sm outline-none"
-                    placeholder="Votre pseudo..."
+                    placeholder={language === 'en' ? 'Your username...' : language === 'es' ? 'Tu nombre de usuario...' : 'Votre pseudo...'}
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-mono font-bold text-slate-300 mb-1">
-                    Bio & Citation du Profil :
+                    {t.bio} :
                   </label>
                   <textarea
                     value={bio}
@@ -261,14 +243,14 @@ export function ProfileCreatorModal({
                     rows={2}
                     maxLength={120}
                     className="w-full px-4 py-2.5 rounded-2xl liquid-glass-input text-white text-xs outline-none resize-none font-sans"
-                    placeholder="Racontez votre parcours sur Vertex..."
+                    placeholder={t.bioPlaceholder}
                   />
                 </div>
 
                 {/* Selected Tags Showcase */}
                 <div>
                   <label className="block text-xs font-mono font-bold text-cyan-300 mb-1.5">
-                    Badges & Tags Actifs ({selectedTags.length}/8) :
+                    {t.activeBadges} ({selectedTags.length}/8) :
                   </label>
                   <div className="flex flex-wrap gap-1.5">
                     {selectedTags.map(tag => (
@@ -285,58 +267,11 @@ export function ProfileCreatorModal({
               </div>
             </div>
 
-            {/* 2. Avatar Model & Background Tint */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider font-mono flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-cyan-400" /> Modèle d'Avatar (si aucune photo importée) :
-                </h4>
-              </div>
-
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
-                {AVATAR_OPTIONS.map(opt => (
-                  <button
-                    key={opt.id}
-                    onClick={() => { audio.playClick(); setAvatarModel(opt.id); }}
-                    className={`p-3 rounded-2xl border flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
-                      avatarModel === opt.id && !customAvatarUrl
-                        ? 'liquid-glass-pill-active'
-                        : 'liquid-glass-pill'
-                    }`}
-                  >
-                    <span className="text-3xl">{opt.emoji}</span>
-                    <span className="text-[10px] font-mono font-bold text-center text-slate-300 leading-tight">
-                      {opt.name}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Tint Colors */}
-              <div>
-                <label className="block text-xs font-mono font-bold text-slate-400 mb-2 flex items-center gap-1.5">
-                  <Palette className="w-3.5 h-3.5 text-cyan-400" /> Couleur d'Ambiance de l'Avatar :
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {PRESET_COLORS.map(c => (
-                    <button
-                      key={c}
-                      onClick={() => { audio.playClick(); setAvatarColor(c); }}
-                      className={`w-7 h-7 rounded-xl transition-all cursor-pointer border ${
-                        avatarColor === c ? 'scale-125 border-white shadow-[0_0_10px_white]' : 'border-transparent hover:scale-110'
-                      }`}
-                      style={{ backgroundColor: c }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* 3. 50+ Description Tags with Search Filter */}
+            {/* 2. 75+ Description Tags (+25 New) with Search Filter */}
             <div className="space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider font-mono flex items-center gap-1.5">
-                  <Tag className="w-3.5 h-3.5 text-cyan-400" /> Catalogue des Étiquettes (+50 disponibles) :
+                  <Tag className="w-3.5 h-3.5 text-cyan-400" /> {t.tagsCatalog} ({PROFILE_TAGS_79.length}) :
                 </h4>
                 <div className="relative">
                   <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -344,13 +279,13 @@ export function ProfileCreatorModal({
                     type="text"
                     value={tagSearch}
                     onChange={(e) => setTagSearch(e.target.value)}
-                    placeholder="Filtrer un tag..."
+                    placeholder={t.filterTags}
                     className="pl-8 pr-3 py-1 rounded-xl liquid-glass-input text-xs text-white placeholder-slate-500 outline-none"
                   />
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl liquid-glass-card border border-white/5 flex flex-wrap gap-2 max-h-48 overflow-y-auto no-scrollbar">
+              <div className="p-4 rounded-2xl liquid-glass-card border border-white/5 flex flex-wrap gap-2 max-h-56 overflow-y-auto no-scrollbar">
                 {filteredTags.map(tag => {
                   const isSelected = selectedTags.includes(tag);
                   return (
@@ -377,13 +312,13 @@ export function ProfileCreatorModal({
               onClick={() => { audio.playClick(); onClose(); }}
               className="px-5 py-2.5 rounded-2xl liquid-glass-pill text-slate-300 hover:text-white font-mono text-xs uppercase cursor-pointer"
             >
-              Annuler
+              {t.cancel}
             </button>
             <button
               onClick={handleSave}
               className="px-7 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black font-mono text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(6,182,212,0.5)] cursor-pointer flex items-center gap-2 active:scale-95"
             >
-              <Check className="w-4 h-4 stroke-[3]" /> ENREGISTRER LE PROFIL
+              <Check className="w-4 h-4 stroke-[3]" /> {t.saveProfile}
             </button>
           </div>
         </motion.div>

@@ -8,6 +8,7 @@ import {
 import { audio } from '../utils/audio';
 import { RngUniverseItem, TradeRequest } from '../types';
 import { RNG_UNIVERSE_ITEMS } from '../gamesData';
+import { Language, getTranslation } from '../utils/i18n';
 
 interface RngUniverseModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ interface RngUniverseModalProps {
   onAcceptTrade: (tradeId: string) => void;
   totalRolls: number;
   userVCoins: number;
+  language?: Language;
 }
 
 export function RngUniverseModal({
@@ -28,8 +30,10 @@ export function RngUniverseModal({
   tradeRequests,
   onAcceptTrade,
   totalRolls,
-  userVCoins
+  userVCoins,
+  language = 'en'
 }: RngUniverseModalProps) {
+  const t = getTranslation(language);
   const [activeTab, setActiveTab] = useState<'roll' | 'inventory' | 'potions' | 'trades'>('roll');
   const [selectedUniverse, setSelectedUniverse] = useState<string>('all');
   const [isRolling, setIsRolling] = useState(false);
@@ -138,6 +142,45 @@ export function RngUniverseModal({
     }
   };
 
+  const performMultiRoll = (count: number) => {
+    if (isRolling) return;
+    audio.playLevelUp();
+    setIsRolling(true);
+
+    let nextInv = { ...inventory };
+    let totalEarnedVC = 0;
+    const rolledItems: RngUniverseItem[] = [];
+    let currentPity = pityCounter;
+    let rollsRemaining = luckCharges.remainingRolls;
+    const currentMultiplier = luckCharges.multiplier;
+
+    for (let i = 0; i < count; i++) {
+      const activeLuck = rollsRemaining > 0 ? currentMultiplier : 1;
+      if (rollsRemaining > 0) rollsRemaining--;
+
+      const item = calculateFairRoll(activeLuck, currentPity);
+      rolledItems.push(item);
+      totalEarnedVC += item.vcoinWorth;
+      nextInv[item.id] = (nextInv[item.id] || 0) + 1;
+
+      if (item.chanceDenominator >= 500) {
+        currentPity = 0;
+      } else {
+        currentPity++;
+      }
+    }
+
+    setPityCounter(currentPity);
+    setLuckCharges(prev => ({ ...prev, remainingRolls: rollsRemaining }));
+    setLastRolledItem(rolledItems[rolledItems.length - 1]);
+    setRollHistory(prev => [...rolledItems, ...prev].slice(0, 25));
+    onInventoryUpdate(nextInv, totalEarnedVC);
+    setIsRolling(false);
+
+    const highest = rolledItems.reduce((max, curr) => curr.chanceDenominator > max.chanceDenominator ? curr : max, rolledItems[0]);
+    notify(`🎲 Multi-Tirage V2 (${count}x) terminé ! Meilleure relique : ${highest.name} (+${totalEarnedVC} VC)`);
+  };
+
   const finishRoll = (item: RngUniverseItem) => {
     setIsRolling(false);
     setLastRolledItem(item);
@@ -230,15 +273,12 @@ export function RngUniverseModal({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-black text-white font-mono tracking-tight">
-                    SANCTUAIRE RNG LIQUID GLASS
+                  <h2 className="text-lg font-black text-white font-mono tracking-tight uppercase">
+                    {t.rngSanctuary}
                   </h2>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
-                    v3.2
-                  </span>
                 </div>
                 <p className="text-xs text-slate-300">
-                  Tirages de reliques cosmiques, probabilités équilibrées & alchimie de chance
+                  {t.rngSubtitle}
                 </p>
               </div>
             </div>
@@ -249,8 +289,8 @@ export function RngUniverseModal({
                 <Sparkles className="w-3.5 h-3.5 text-cyan-300 animate-spin" />
                 <span>
                   {currentLuckMultiplier > 1
-                    ? `${currentLuckMultiplier}x Chance (${luckCharges.remainingRolls} tirages)`
-                    : '1x Chance Normale'}
+                    ? `${currentLuckMultiplier}x ${t.luckBooster} (${luckCharges.remainingRolls})`
+                    : language === 'en' ? '1x Standard Luck' : language === 'es' ? '1x Suerte Normal' : '1x Chance Normale'}
                 </span>
               </div>
 
@@ -283,10 +323,10 @@ export function RngUniverseModal({
           <div className="pt-3 pb-2 flex items-center justify-between gap-2 border-b border-white/10">
             <div className="flex items-center gap-1.5 p-1 rounded-2xl liquid-glass-pill border-white/10">
               {[
-                { id: 'roll', label: '🎲 Tirage & Roulette' },
-                { id: 'inventory', label: `🎒 Inventaire (${Object.keys(inventory).length})` },
-                { id: 'potions', label: '🧪 Potions de Chance' },
-                { id: 'trades', label: `🤝 Marché PNJ (${tradeRequests.length})` }
+                { id: 'roll', label: language === 'en' ? '🎲 Wheel & Rolls' : language === 'es' ? '🎲 Tiradas' : '🎲 Tirage & Roulette' },
+                { id: 'inventory', label: `${language === 'en' ? '🎒 Inventory' : language === 'es' ? '🎒 Inventario' : '🎒 Inventaire'} (${Object.keys(inventory).length})` },
+                { id: 'potions', label: language === 'en' ? '🧪 Luck Potions' : language === 'es' ? '🧪 Pociones' : '🧪 Potions de Chance' },
+                { id: 'trades', label: `${language === 'en' ? '🤝 NPC Market' : language === 'es' ? '🤝 Mercado' : '🤝 Marché PNJ'} (${tradeRequests.length})` }
               ].map(tab => (
                 <button
                   key={tab.id}
@@ -307,7 +347,9 @@ export function RngUniverseModal({
 
             {/* Pity Counter Tag */}
             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-xl liquid-glass-pill text-xs font-mono text-slate-300">
-              <span className="text-slate-400">Pitié Épique :</span>
+              <span className="text-slate-400">
+                {language === 'en' ? 'Epic Pity:' : language === 'es' ? 'Piedad Épica:' : 'Pitié Épique :'}
+              </span>
               <strong className="text-cyan-300 font-bold">{pityCounter} / 25</strong>
             </div>
           </div>
@@ -382,59 +424,84 @@ export function RngUniverseModal({
                 )}
               </div>
 
-              {/* Roll Controls */}
-              <div className="w-full max-w-xl flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5 w-full sm:w-auto">
+              {/* Roll Controls V2 */}
+              <div className="w-full max-w-xl flex flex-col gap-3">
+                <div className="flex items-center justify-between gap-2.5 w-full">
                   <button
                     onClick={() => setFastRoll(!fastRoll)}
-                    className={`flex-1 sm:flex-none px-4 py-2.5 rounded-2xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                    className={`flex-1 px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                       fastRoll
                         ? 'bg-amber-500/25 text-yellow-300 border border-amber-400/60 shadow-[0_0_12px_rgba(245,158,11,0.4)]'
                         : 'liquid-glass-pill text-slate-300 hover:text-white'
                     }`}
                   >
-                    ⚡ Rapide {fastRoll ? 'Activé' : 'Désactivé'}
+                    ⚡ {language === 'en' ? 'Fast' : language === 'es' ? 'Rápido' : 'Rapide'} {fastRoll ? 'ON' : 'OFF'}
                   </button>
 
                   <button
                     onClick={() => setAutoRoll(!autoRoll)}
-                    className={`flex-1 sm:flex-none px-4 py-2.5 rounded-2xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                    className={`flex-1 px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
                       autoRoll
                         ? 'bg-rose-500/25 text-rose-300 border border-rose-400/60 shadow-[0_0_12px_rgba(244,63,94,0.4)]'
                         : 'liquid-glass-pill text-slate-300 hover:text-white'
                     }`}
                   >
-                    🔄 Auto {autoRoll ? 'En cours' : 'Désactivé'}
+                    🔄 Auto {autoRoll ? 'ON' : 'OFF'}
                   </button>
+
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => performMultiRoll(5)}
+                      disabled={isRolling}
+                      className="px-3.5 py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/35 border border-purple-400/50 text-purple-300 font-mono text-xs font-bold cursor-pointer disabled:opacity-40 transition-all active:scale-95"
+                    >
+                      🎲 5x
+                    </button>
+                    <button
+                      onClick={() => performMultiRoll(10)}
+                      disabled={isRolling}
+                      className="px-3.5 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/35 border border-amber-400/50 text-amber-300 font-mono text-xs font-black cursor-pointer disabled:opacity-40 transition-all active:scale-95"
+                    >
+                      🌟 10x
+                    </button>
+                  </div>
                 </div>
 
                 <button
                   onClick={() => performRoll()}
                   disabled={isRolling}
-                  className="w-full sm:w-auto flex-1 py-3 px-8 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 active:scale-95 text-slate-950 font-black text-xs uppercase tracking-wider font-mono shadow-[0_0_25px_rgba(6,182,212,0.6)] cursor-pointer disabled:opacity-40"
+                  className="w-full py-3.5 px-8 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 active:scale-95 text-slate-950 font-black text-sm uppercase tracking-wider font-mono shadow-[0_0_25px_rgba(6,182,212,0.6)] cursor-pointer disabled:opacity-40 flex items-center justify-center gap-2"
                 >
-                  🎲 TIRER UNE RELIQUE
+                  <Dice5 className="w-4 h-4 stroke-[2.5]" /> {language === 'en' ? 'SUMMON 1x RELIC' : language === 'es' ? 'TIRADA 1x RELIQUIA' : 'TIRAGE 1x RELIQUE'}
                 </button>
               </div>
 
               {/* Live Odds & Drop Table Preview */}
               <div className="w-full max-w-xl p-3.5 rounded-2xl liquid-glass-card border border-white/10">
                 <h4 className="text-xs font-bold text-slate-300 font-mono mb-2 flex items-center justify-between">
-                  <span>Table des Probabilités Actuelles ({currentLuckMultiplier}x Chance) :</span>
-                  <span className="text-[10px] text-cyan-300">Tirages Totaux : {totalRolls}</span>
+                  <span>
+                    {language === 'en' ? `Current Probability Table (${currentLuckMultiplier}x Luck):` :
+                     language === 'es' ? `Tabla de Probabilidades (${currentLuckMultiplier}x Suerte):` :
+                     `Table des Probabilités Actuelles (${currentLuckMultiplier}x Chance) :`}
+                  </span>
+                  <span className="text-[10px] text-cyan-300">
+                    {language === 'en' ? `Total Rolls: ${totalRolls}` :
+                     language === 'es' ? `Tiradas Totales: ${totalRolls}` :
+                     `Tirages Totaux : ${totalRolls}`}
+                  </span>
                 </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono">
                   <div className="p-2 rounded-xl liquid-glass-pill text-slate-300 text-center">
-                    Commun : <strong className="text-white">~52%</strong>
+                    {language === 'en' ? 'Common:' : language === 'es' ? 'Común:' : 'Commun :'} <strong className="text-white">~52%</strong>
                   </div>
                   <div className="p-2 rounded-xl liquid-glass-pill text-blue-300 text-center">
-                    Rare : <strong className="text-white">~26%</strong>
+                    {language === 'en' ? 'Rare:' : language === 'es' ? 'Raro:' : 'Rare :'} <strong className="text-white">~26%</strong>
                   </div>
                   <div className="p-2 rounded-xl liquid-glass-pill text-purple-300 text-center">
-                    Épique : <strong className="text-white">~14%</strong>
+                    {language === 'en' ? 'Epic:' : language === 'es' ? 'Épico:' : 'Épique :'} <strong className="text-white">~14%</strong>
                   </div>
                   <div className="p-2 rounded-xl liquid-glass-pill text-yellow-300 text-center">
-                    Mythique : <strong className="text-white">~4.5%</strong>
+                    {language === 'en' ? 'Mythic:' : language === 'es' ? 'Mítico:' : 'Mythique :'} <strong className="text-white">~4.5%</strong>
                   </div>
                 </div>
               </div>
@@ -446,16 +513,22 @@ export function RngUniverseModal({
             <div className="flex-1 overflow-y-auto my-3 space-y-4 no-scrollbar">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-bold text-white font-mono uppercase tracking-wider">
-                  Objets Découverts ({Object.keys(inventory).length} uniques)
+                  {language === 'en' ? `Discovered Relics (${Object.keys(inventory).length} unique)` :
+                   language === 'es' ? `Reliquias Descubiertas (${Object.keys(inventory).length} únicas)` :
+                   `Objets Découverts (${Object.keys(inventory).length} uniques)`}
                 </h3>
                 <p className="text-xs text-slate-300">
-                  Vendez vos doublons pour récupérer instantanément des V-Coins !
+                  {language === 'en' ? 'Sell duplicates to instantly get V-Coins!' :
+                   language === 'es' ? '¡Vende tus duplicados para obtener V-Coins al instante!' :
+                   'Vendez vos doublons pour récupérer instantanément des V-Coins !'}
                 </p>
               </div>
 
               {Object.keys(inventory).length === 0 ? (
                 <div className="text-center py-16 text-slate-400 font-mono text-xs">
-                  Votre inventaire est vide. Lancez vos premiers tirages dans l'onglet Tirage !
+                  {language === 'en' ? 'Your inventory is empty. Start rolling in the Rolls tab!' :
+                   language === 'es' ? 'Tu inventario está vacío. ¡Haz tus primeras tiradas en la pestaña Tiradas!' :
+                   'Votre inventaire est vide. Lancez vos premiers tirages dans l\'onglet Tirage !'}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -485,7 +558,7 @@ export function RngUniverseModal({
                           </div>
                           <h4 className="font-bold text-white text-xs font-mono">{item.name}</h4>
                           <span className="text-[10px] text-yellow-400 font-mono">
-                            Valeur : {item.vcoinWorth} VC
+                            {language === 'en' ? 'Value' : language === 'es' ? 'Valor' : 'Valeur'} : {item.vcoinWorth} VC
                           </span>
                         </div>
 
@@ -493,7 +566,7 @@ export function RngUniverseModal({
                           onClick={() => handleSellItem(itemId)}
                           className="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/50 text-rose-300 text-[10px] font-mono font-bold cursor-pointer transition-colors active:scale-95"
                         >
-                          Vendre ({Math.floor(item.vcoinWorth * 0.7)} VC)
+                          {language === 'en' ? 'Sell' : language === 'es' ? 'Vender' : 'Vendre'} ({Math.floor(item.vcoinWorth * 0.7)} VC)
                         </button>
                       </div>
                     );
@@ -508,10 +581,12 @@ export function RngUniverseModal({
             <div className="flex-1 overflow-y-auto my-3 space-y-4 no-scrollbar">
               <div>
                 <h3 className="text-xs font-bold text-white font-mono uppercase tracking-wider">
-                  Laboratoire d'Alchimie
+                  {language === 'en' ? 'Alchemy Laboratory' : language === 'es' ? 'Laboratorio de Alquimia' : 'Laboratoire d\'Alchimie'}
                 </h3>
                 <p className="text-xs text-slate-300 mt-0.5">
-                  Achetez des élixirs pour démultiplier vos chances d'obtenir des reliques légendaires et mythiques !
+                  {language === 'en' ? 'Buy elixirs to multiply your chances of getting legendary and mythic relics!' :
+                   language === 'es' ? '¡Compra elixires para multiplicar tus posibilidades de conseguir reliquias legendarias y míticas!' :
+                   'Achetez des élixirs pour démultiplier vos chances d\'obtenir des reliques légendaires et mythiques !'}
                 </p>
               </div>
 
@@ -522,16 +597,20 @@ export function RngUniverseModal({
                     <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/60 flex items-center justify-center text-2xl mb-3 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
                       🍀
                     </div>
-                    <h4 className="font-bold text-white text-sm font-mono">Élixir Trèfle</h4>
+                    <h4 className="font-bold text-white text-sm font-mono">
+                      {language === 'en' ? 'Clover Elixir' : language === 'es' ? 'Elixir de Trébol' : 'Élixir Trèfle'}
+                    </h4>
                     <p className="text-xs text-slate-300 mt-1">
-                      Augmente vos chances de <strong>+50% (1.5x)</strong> pendant 15 tirages consécutifs.
+                      {language === 'en' ? 'Increases luck by +50% (1.5x) for 15 consecutive rolls.' :
+                       language === 'es' ? 'Aumenta tu suerte un +50% (1.5x) durante 15 tiradas consecutivas.' :
+                       'Augmente vos chances de +50% (1.5x) pendant 15 tirages consécutifs.'}
                     </p>
                   </div>
                   <button
                     onClick={() => handleBuyPotion(1.5, 15, 75, 'Élixir Trèfle')}
                     className="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs font-mono uppercase cursor-pointer active:scale-95 transition-all shadow-[0_0_15px_rgba(16,185,129,0.4)]"
                   >
-                    Acheter (75 VC)
+                    {language === 'en' ? 'Buy' : language === 'es' ? 'Comprar' : 'Acheter'} (75 VC)
                   </button>
                 </div>
 
@@ -541,16 +620,20 @@ export function RngUniverseModal({
                     <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/60 flex items-center justify-center text-2xl mb-3 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
                       ⚡
                     </div>
-                    <h4 className="font-bold text-white text-sm font-mono">Potion Stellaire</h4>
+                    <h4 className="font-bold text-white text-sm font-mono">
+                      {language === 'en' ? 'Stellar Potion' : language === 'es' ? 'Poción Estelar' : 'Potion Stellaire'}
+                    </h4>
                     <p className="text-xs text-slate-300 mt-1">
-                      Multiplie vos chances par <strong>2.5x</strong> pendant 25 tirages consécutifs.
+                      {language === 'en' ? 'Multiplies your luck by 2.5x for 25 consecutive rolls.' :
+                       language === 'es' ? 'Multiplica tu suerte por 2.5x durante 25 tiradas consecutivas.' :
+                       'Multiplie vos chances par 2.5x pendant 25 tirages consécutifs.'}
                     </p>
                   </div>
                   <button
                     onClick={() => handleBuyPotion(2.5, 25, 180, 'Potion Stellaire')}
                     className="w-full py-2.5 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black text-xs font-mono uppercase cursor-pointer active:scale-95 transition-all shadow-[0_0_15px_rgba(6,182,212,0.4)]"
                   >
-                    Acheter (180 VC)
+                    {language === 'en' ? 'Buy' : language === 'es' ? 'Comprar' : 'Acheter'} (180 VC)
                   </button>
                 </div>
 
@@ -560,16 +643,20 @@ export function RngUniverseModal({
                     <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-400/60 flex items-center justify-center text-2xl mb-3 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
                       🌌
                     </div>
-                    <h4 className="font-bold text-white text-sm font-mono">Essence Céleste</h4>
+                    <h4 className="font-bold text-white text-sm font-mono">
+                      {language === 'en' ? 'Celestial Essence' : language === 'es' ? 'Esencia Celestial' : 'Essence Céleste'}
+                    </h4>
                     <p className="text-xs text-slate-300 mt-1">
-                      Multiplie vos chances par <strong>4x</strong> pendant 40 tirages consécutifs !
+                      {language === 'en' ? 'Multiplies your luck by 4x for 40 consecutive rolls!' :
+                       language === 'es' ? '¡Multiplica tu suerte por 4x durante 40 tiradas consecutivas!' :
+                       'Multiplie vos chances par 4x pendant 40 tirages consécutifs !'}
                     </p>
                   </div>
                   <button
                     onClick={() => handleBuyPotion(4, 40, 350, 'Essence Céleste')}
                     className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-black text-xs font-mono uppercase cursor-pointer active:scale-95 transition-all shadow-[0_0_15px_rgba(168,85,247,0.4)]"
                   >
-                    Acheter (350 VC)
+                    {language === 'en' ? 'Buy' : language === 'es' ? 'Comprar' : 'Acheter'} (350 VC)
                   </button>
                 </div>
               </div>
@@ -581,10 +668,14 @@ export function RngUniverseModal({
             <div className="flex-1 overflow-y-auto my-3 space-y-4 no-scrollbar">
               <div>
                 <h3 className="text-xs font-bold text-white font-mono uppercase tracking-wider">
-                  Offres des PNJ et Collectionneurs
+                  {language === 'en' ? 'NPC & Collector Market Offers' :
+                   language === 'es' ? 'Ofertas del Mercado de PNJs' :
+                   'Offres des PNJ et Collectionneurs'}
                 </h3>
                 <p className="text-xs text-slate-300">
-                  Acceptez leurs offres d'échange pour gagner des V-Coins supplémentaires !
+                  {language === 'en' ? 'Accept their trade requests to earn bonus V-Coins!' :
+                   language === 'es' ? '¡Acepta sus ofertas de intercambio para ganar V-Coins extra!' :
+                   'Acceptez leurs offres d\'échange pour gagner des V-Coins supplémentaires !'}
                 </p>
               </div>
 
@@ -601,7 +692,7 @@ export function RngUniverseModal({
                       </div>
                       <p className="text-xs text-slate-300 italic">"{trade.message}"</p>
                       <div className="text-[11px] text-yellow-400 font-mono mt-1 font-bold">
-                        Offre : +{trade.offeredVCoins} V-Coins
+                        {language === 'en' ? 'Offer' : language === 'es' ? 'Oferta' : 'Offre'} : +{trade.offeredVCoins} V-Coins
                       </div>
                     </div>
 
@@ -609,7 +700,7 @@ export function RngUniverseModal({
                       onClick={() => onAcceptTrade(trade.id)}
                       className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs font-mono uppercase cursor-pointer transition-all active:scale-95 shadow-[0_0_15px_rgba(16,185,129,0.35)]"
                     >
-                      Accepter (+{trade.offeredVCoins} VC)
+                      {language === 'en' ? 'Accept' : language === 'es' ? 'Aceptar' : 'Accepter'} (+{trade.offeredVCoins} VC)
                     </button>
                   </div>
                 ))}
@@ -619,8 +710,12 @@ export function RngUniverseModal({
 
           {/* Modal Footer Info */}
           <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400">
-            <span>Probabilités certifiées équitables • Pitié garantie à 25 tirages</span>
-            <span className="text-cyan-400 font-bold">Sanctuaire RNG Liquid Glass v3.2</span>
+            <span>
+              {language === 'en' ? 'Certified fair odds • Guaranteed pity at 25 rolls' :
+               language === 'es' ? 'Probabilidades certificadas justas • Piedad garantizada a las 25 tiradas' :
+               'Probabilités certifiées équitables • Pitié garantie à 25 tirages'}
+            </span>
+            <span className="text-cyan-400 font-bold">Vertex Arcades</span>
           </div>
         </motion.div>
       </div>

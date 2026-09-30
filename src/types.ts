@@ -1,8 +1,10 @@
-// Vertex Arcades v3.2 TypeScript Definitions
+// Vertex Arcades - TypeScript Definitions
+import { Language } from './utils/i18n';
 
 export type CosmeticRarity = 'commun' | 'rare' | 'epique' | 'legendaire' | 'mythique' | 'divin';
 
 export interface AppSettings {
+  language?: Language; // 'en' (default) | 'fr' | 'es'
   sfxEnabled: boolean;
   musicEnabled: boolean;
   sfxVolume: number; // 0 to 100
@@ -67,14 +69,18 @@ export interface GameData {
   isPaid: boolean;
   costVCoins: number;
   isRankedAvailable?: boolean;
+  imageSquare?: string;
+  imageBanner?: string;
 }
 
 export interface Achievement {
   id: string;
   title: string;
   frenchTitle: string;
+  spanishTitle?: string;
   description: string;
   frenchDescription: string;
+  spanishDescription?: string;
   vcoinReward: number;
   isUnlocked: boolean;
   icon: string;

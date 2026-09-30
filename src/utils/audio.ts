@@ -232,6 +232,11 @@ class AudioManager {
     this.playTone([659.25, 987.77], [0.05, 0.15], 'sine', undefined, 0.22);
   }
 
+  // Sparkling like chime sound effect
+  playLike() {
+    this.playTone([587.33, 880, 1174.66, 1760], [0.04, 0.05, 0.06, 0.22], 'sine', undefined, 0.26);
+  }
+
   // RNG Rolling tick
   playRngTick() {
     this.playTone([800 + Math.random() * 400], [0.03], 'square', undefined, 0.1);

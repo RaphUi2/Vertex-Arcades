@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { StoryChapter, StoryModeState } from '../types';
 import { audio } from '../utils/audio';
+import { Language, getTranslation } from '../utils/i18n';
 
 interface StoryModeModalProps {
   storyState: StoryModeState;
@@ -13,6 +14,7 @@ interface StoryModeModalProps {
   onEarnVCoins: (coins: number) => void;
   onEarnTrophies: (trophies: number) => void;
   onClose: () => void;
+  language?: Language;
 }
 
 export function StoryModeModal({
@@ -20,8 +22,10 @@ export function StoryModeModal({
   onUpdateStory,
   onEarnVCoins,
   onEarnTrophies,
-  onClose
+  onClose,
+  language = 'en'
 }: StoryModeModalProps) {
+  const t = getTranslation(language);
   const [selectedChapter, setSelectedChapter] = useState<StoryChapter | null>(null);
   const [battleState, setBattleState] = useState<{
     inBattle: boolean;
@@ -187,14 +191,14 @@ export function StoryModeModal({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-black text-white font-mono tracking-tight">
-                  CHRONIQUES D'AETHELGARD
+                <h2 className="text-lg font-black text-white font-mono tracking-tight uppercase">
+                  {t.storyMode}
                 </h2>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/30 flex items-center gap-1">
-                  <Star className="w-3 h-3 fill-amber-400" /> {storyState.totalStars} / 15 ★
+                  <Star className="w-3 h-3 fill-amber-400" /> {storyState.totalStars} / 18 ★
                 </span>
               </div>
-              <p className="text-xs text-slate-300">Campagne narrative épique en 5 chapitres & combats tactiques</p>
+              <p className="text-xs text-slate-300">{t.storySubtitle}</p>
             </div>
           </div>
 
@@ -215,7 +219,7 @@ export function StoryModeModal({
               <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-mono text-cyan-400 uppercase font-black">
-                    Chapitre {selectedChapter.id} : {selectedChapter.title}
+                    {t.chapter} {selectedChapter.id} : {selectedChapter.title}
                   </span>
                   <p className="text-xs text-slate-300 mt-0.5">{selectedChapter.lore}</p>
                 </div>
@@ -223,7 +227,7 @@ export function StoryModeModal({
                   onClick={() => setBattleState(null)}
                   className="px-3 py-1.5 rounded-xl liquid-glass-pill text-xs font-mono text-slate-300 hover:text-white cursor-pointer"
                 >
-                  Abandonner
+                  {language === 'en' ? 'Abandon' : language === 'es' ? 'Abandonar' : 'Abandonner'}
                 </button>
               </div>
 
@@ -292,8 +296,8 @@ export function StoryModeModal({
                     className="p-3 rounded-2xl liquid-glass-pill hover:border-cyan-400 flex flex-col items-center gap-1 font-mono text-xs font-black cursor-pointer active:scale-95 disabled:opacity-40"
                   >
                     <Zap className="w-5 h-5 text-cyan-400" />
-                    <span>TIR PLASMA</span>
-                    <span className="text-[10px] text-slate-400 font-normal">25-40 dégâts</span>
+                    <span>{language === 'en' ? 'PLASMA BLAST' : language === 'es' ? 'DISPARO PLASMA' : 'TIR PLASMA'}</span>
+                    <span className="text-[10px] text-slate-400 font-normal">25-40 {language === 'en' ? 'dmg' : language === 'es' ? 'daño' : 'dégâts'}</span>
                   </button>
 
                   <button
@@ -302,8 +306,8 @@ export function StoryModeModal({
                     className="p-3 rounded-2xl liquid-glass-pill hover:border-amber-400 flex flex-col items-center gap-1 font-mono text-xs font-black cursor-pointer active:scale-95 disabled:opacity-40"
                   >
                     <Swords className="w-5 h-5 text-amber-400" />
-                    <span>FRAPPE LOURDE</span>
-                    <span className="text-[10px] text-slate-400 font-normal">70% chance 55-85 dégâts</span>
+                    <span>{language === 'en' ? 'HEAVY CRIT' : language === 'es' ? 'GOLPE PESADO' : 'FRAPPE LOURDE'}</span>
+                    <span className="text-[10px] text-slate-400 font-normal">70% {language === 'en' ? 'chance 55-85 dmg' : language === 'es' ? 'prob 55-85 daño' : 'chance 55-85 dégâts'}</span>
                   </button>
 
                   <button
@@ -312,8 +316,8 @@ export function StoryModeModal({
                     className="p-3 rounded-2xl liquid-glass-pill hover:border-blue-400 flex flex-col items-center gap-1 font-mono text-xs font-black cursor-pointer active:scale-95 disabled:opacity-40"
                   >
                     <Shield className="w-5 h-5 text-blue-400" />
-                    <span>BOUCLIER HOLO</span>
-                    <span className="text-[10px] text-slate-400 font-normal">+35 absorption</span>
+                    <span>{language === 'en' ? 'HOLO SHIELD' : language === 'es' ? 'ESCUDO HOLO' : 'BOUCLIER HOLO'}</span>
+                    <span className="text-[10px] text-slate-400 font-normal">+35 {language === 'en' ? 'absorption' : language === 'es' ? 'absorción' : 'absorption'}</span>
                   </button>
 
                   <button
@@ -322,38 +326,44 @@ export function StoryModeModal({
                     className="p-3 rounded-2xl liquid-glass-pill hover:border-emerald-400 flex flex-col items-center gap-1 font-mono text-xs font-black cursor-pointer active:scale-95 disabled:opacity-40"
                   >
                     <Sparkles className="w-5 h-5 text-emerald-400" />
-                    <span>SOIN NANO</span>
-                    <span className="text-[10px] text-slate-400 font-normal">+40 PV restaurés</span>
+                    <span>{language === 'en' ? 'NANO HEAL' : language === 'es' ? 'CURACIÓN NANO' : 'SOIN NANO'}</span>
+                    <span className="text-[10px] text-slate-400 font-normal">+40 {language === 'en' ? 'HP restored' : language === 'es' ? 'PV recuperados' : 'PV restaurés'}</span>
                   </button>
                 </div>
               ) : battleState.isVictory ? (
                 <div className="p-4 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 text-center flex flex-col items-center gap-2">
                   <Trophy className="w-10 h-10 text-yellow-400 animate-bounce" />
-                  <h3 className="text-lg font-black text-white font-mono">CHAPITRE COMPLÉTÉ AVEC SUCCÈS !</h3>
+                  <h3 className="text-lg font-black text-white font-mono">
+                    {language === 'en' ? 'CHAPTER COMPLETED SUCCESSFULLY!' : language === 'es' ? '¡CAPÍTULO COMPLETADO CON ÉXITO!' : 'CHAPITRE COMPLÉTÉ AVEC SUCCÈS !'}
+                  </h3>
                   <div className="flex items-center gap-4 text-xs font-mono">
                     <span className="text-yellow-400 font-black">+{selectedChapter.rewardVCoins} V-Coins</span>
-                    <span className="text-cyan-300 font-black">+100 Trophées</span>
+                    <span className="text-cyan-300 font-black">+100 {t.trophies}</span>
                     {selectedChapter.rewardTitle && (
-                      <span className="text-purple-300 font-black">Titre : {selectedChapter.rewardTitle}</span>
+                      <span className="text-purple-300 font-black">{language === 'en' ? 'Title' : language === 'es' ? 'Título' : 'Titre'} : {selectedChapter.rewardTitle}</span>
                     )}
                   </div>
                   <button
                     onClick={() => setBattleState(null)}
                     className="mt-2 px-6 py-2 rounded-xl bg-emerald-500 text-slate-950 font-black font-mono cursor-pointer hover:bg-emerald-400"
                   >
-                    CONTINUER L'AVENTURE
+                    {language === 'en' ? 'CONTINUE ADVENTURE' : language === 'es' ? 'CONTINUAR AVENTURA' : 'CONTINUER L\'AVENTURE'}
                   </button>
                 </div>
               ) : (
                 <div className="p-4 rounded-2xl bg-rose-500/20 border border-rose-400/50 text-center flex flex-col items-center gap-2">
                   <Skull className="w-10 h-10 text-rose-500 animate-bounce" />
-                  <h3 className="text-lg font-black text-white font-mono">DÉFAITE FACE AU BOSS</h3>
-                  <p className="text-xs text-slate-300">Ajustez votre stratégie tactique et retentez votre chance !</p>
+                  <h3 className="text-lg font-black text-white font-mono">
+                    {language === 'en' ? 'DEFEATED BY THE BOSS' : language === 'es' ? 'DERROTA ANTE EL JEFE' : 'DÉFAITE FACE AU BOSS'}
+                  </h3>
+                  <p className="text-xs text-slate-300">
+                    {language === 'en' ? 'Adjust your tactics and try again!' : language === 'es' ? '¡Ajusta tu estrategia y vuelve a intentarlo!' : 'Ajustez votre stratégie tactique et retentez votre chance !'}
+                  </p>
                   <button
                     onClick={() => startChapter(selectedChapter)}
                     className="mt-2 px-6 py-2 rounded-xl bg-rose-500 text-white font-black font-mono cursor-pointer hover:bg-rose-400 flex items-center gap-1.5"
                   >
-                    <RotateCcw className="w-4 h-4" /> RECOMBATTRE CE BOSS
+                    <RotateCcw className="w-4 h-4" /> {language === 'en' ? 'RETRY THIS BOSS' : language === 'es' ? 'REINTENTAR ESTE JEFE' : 'RECOMBATTRE CE BOSS'}
                   </button>
                 </div>
               )}
@@ -380,10 +390,10 @@ export function StoryModeModal({
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="text-[10px] font-mono font-bold text-cyan-400 uppercase">
-                              Chapitre {chap.id}
+                              {t.chapter} {chap.id}
                             </span>
                             <span className="text-xs text-slate-400">·</span>
-                            <span className="text-[10px] font-mono text-slate-400">Boss : {chap.enemyName}</span>
+                            <span className="text-[10px] font-mono text-slate-400">{t.boss} : {chap.enemyName}</span>
                           </div>
                           <h4 className="text-base font-black text-white font-mono tracking-tight mt-0.5">
                             {chap.title}
@@ -426,8 +436,16 @@ export function StoryModeModal({
 
         {/* Footer info */}
         <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400">
-          <span>5 Chapitres Narratifs • 15 Étoiles à conquérir</span>
-          <span className="text-cyan-400 font-bold">Récompenses cumulables & Titres Légendaires</span>
+          <span>
+            {language === 'en' ? '6 Narrative Chapters • 18 Stars to Conquer' :
+             language === 'es' ? '6 Capítulos Narrativos • 18 Estrellas por Conquistar' :
+             '6 Chapitres Narratifs • 18 Étoiles à conquérir'}
+          </span>
+          <span className="text-cyan-400 font-bold">
+            {language === 'en' ? 'Stackable rewards & Legendary Titles' :
+             language === 'es' ? 'Recompensas acumulativas y Títulos Legendarios' :
+             'Récompenses cumulables & Titres Légendaires'}
+          </span>
         </div>
       </motion.div>
     </div>

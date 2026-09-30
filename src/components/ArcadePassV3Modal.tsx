@@ -4,6 +4,7 @@ import { X, Crown, Check, Sparkles, Lock, Star, Coins, Zap } from 'lucide-react'
 import { audio } from '../utils/audio';
 import { ArcadePass } from '../types';
 import { PASS_LEVELS_V3 } from '../gamesData';
+import { Language, getTranslation } from '../utils/i18n';
 
 interface ArcadePassV3ModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface ArcadePassV3ModalProps {
   onClaimReward: (level: number, isPremium: boolean, rewardLabel: string, rewardType: string, rewardValue: any) => void;
   onUpgradeToPremium: () => void;
   userVCoins: number;
+  language?: Language;
 }
 
 export function ArcadePassV3Modal({
@@ -20,8 +22,11 @@ export function ArcadePassV3Modal({
   passState,
   onClaimReward,
   onUpgradeToPremium,
-  userVCoins
+  userVCoins,
+  language = 'en'
 }: ArcadePassV3ModalProps) {
+  const t = getTranslation(language);
+
   if (!isOpen) return null;
 
   const currentLevel = passState.level;
@@ -49,15 +54,18 @@ export function ArcadePassV3Modal({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-black text-white font-mono tracking-tight">
-                    PASS ARCADE LIQUID GLASS
+                  <h2 className="text-lg font-black text-white font-mono tracking-tight uppercase">
+                    {t.arcadePass}
                   </h2>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-400/30">
-                    SAISON 3
+                    {language === 'en' ? 'SEASON 3' : language === 'es' ? 'TEMPORADA 3' : 'SAISON 3'}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-400/40 animate-pulse">
+                    {language === 'en' ? 'Ends: Oct 31 at 14:00' : language === 'es' ? 'Fin: 31 oct. 14h' : 'Fin : 31 oct. à 14h'}
                   </span>
                 </div>
                 <p className="text-xs text-slate-300">
-                  50 Paliers Exclusifs • Titres, Auras, Couvre-chefs & V-Coins
+                  {t.arcadePassSubtitle} • {t.seasonEndsDate}
                 </p>
               </div>
             </div>
@@ -74,7 +82,7 @@ export function ArcadePassV3Modal({
                   disabled={userVCoins < 1000}
                   className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-xs uppercase cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.5)] disabled:opacity-40 font-mono transition-all active:scale-95"
                 >
-                  Pass VIP (1 000 VC)
+                  {t.upgradeVip}
                 </button>
               )}
               <button
@@ -94,10 +102,12 @@ export function ArcadePassV3Modal({
               </div>
               <div>
                 <span className="text-xs font-mono font-bold text-white uppercase tracking-wider block">
-                  Palier Actuel : Niveau {currentLevel} / 50
+                  {language === 'en' ? 'Current Tier: Level' : language === 'es' ? 'Nivel Actual:' : 'Palier Actuel : Niveau'} {currentLevel} / 50
                 </span>
                 <span className="text-[11px] font-mono text-slate-300">
-                  {currentXp} / {xpPerLevel} XP accumulés pour le niveau suivant
+                  {language === 'en' ? `${currentXp} / ${xpPerLevel} XP earned toward next tier` :
+                   language === 'es' ? `${currentXp} / ${xpPerLevel} XP acumulados para el siguiente nivel` :
+                   `${currentXp} / ${xpPerLevel} XP accumulés pour le niveau suivant`}
                 </span>
               </div>
             </div>
@@ -105,7 +115,7 @@ export function ArcadePassV3Modal({
             {/* XP Bar */}
             <div className="w-full sm:w-64 space-y-1.5">
               <div className="flex justify-between text-[10px] font-mono text-slate-400">
-                <span>Progression</span>
+                <span>{language === 'en' ? 'Progress' : language === 'es' ? 'Progreso' : 'Progression'}</span>
                 <span className="text-cyan-300 font-bold">{Math.round(progressPct)}%</span>
               </div>
               <div className="w-full h-2.5 rounded-full bg-slate-950/80 border border-white/10 overflow-hidden">
@@ -144,19 +154,21 @@ export function ArcadePassV3Modal({
                         {lvl.level}
                       </div>
                       <span className="text-xs font-mono font-bold text-slate-300 hidden sm:inline">
-                        Niveau {lvl.level}
+                        {language === 'en' ? 'Level' : language === 'es' ? 'Nivel' : 'Niveau'} {lvl.level}
                       </span>
                     </div>
 
                     {/* Free Reward */}
                     <div className="flex-1 p-2 rounded-2xl liquid-glass-pill border-white/5 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-mono font-black text-cyan-400 uppercase">GRATUIT :</span>
+                        <span className="text-[10px] font-mono font-black text-cyan-400 uppercase">
+                          {t.free.toUpperCase()} :
+                        </span>
                         <span className="text-xs font-mono text-white line-clamp-1">{lvl.freeReward.label}</span>
                       </div>
                       {isFreeClaimed ? (
                         <span className="text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1">
-                          <Check className="w-3 h-3 stroke-[3]" /> Pris
+                          <Check className="w-3 h-3 stroke-[3]" /> {t.claimed}
                         </span>
                       ) : canClaimFree ? (
                         <button
@@ -166,10 +178,10 @@ export function ArcadePassV3Modal({
                           }}
                           className="px-2.5 py-1 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-slate-950 text-[10px] font-mono font-black uppercase cursor-pointer transition-all active:scale-95"
                         >
-                          Réclamer
+                          {t.claim}
                         </button>
                       ) : (
-                        <span className="text-[10px] font-mono text-slate-400">Verrouillé</span>
+                        <span className="text-[10px] font-mono text-slate-400">{t.locked}</span>
                       )}
                     </div>
 
@@ -183,7 +195,7 @@ export function ArcadePassV3Modal({
                       </div>
                       {isPremiumClaimed ? (
                         <span className="text-[10px] font-mono text-emerald-400 font-bold flex items-center gap-1">
-                          <Check className="w-3 h-3 stroke-[3]" /> Pris
+                          <Check className="w-3 h-3 stroke-[3]" /> {t.claimed}
                         </span>
                       ) : canClaimPremium ? (
                         <button
@@ -193,7 +205,7 @@ export function ArcadePassV3Modal({
                           }}
                           className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 text-slate-950 text-[10px] font-mono font-black uppercase cursor-pointer transition-all active:scale-95"
                         >
-                          Réclamer
+                          {t.claim}
                         </button>
                       ) : (
                         <span className="text-[10px] font-mono text-slate-400 flex items-center gap-1">
@@ -209,8 +221,12 @@ export function ArcadePassV3Modal({
 
           {/* Footer Info */}
           <div className="pt-3 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400">
-            <span>XP obtenue en jouant et en complétant des missions</span>
-            <span className="text-purple-400 font-bold">Pass Arcade Liquid Glass</span>
+            <span>
+              {language === 'en' ? 'XP earned by playing experiences and finishing missions' :
+               language === 'es' ? 'XP obtenida jugando experiencias y completando misiones' :
+               'XP obtenue en jouant et en complétant des missions'}
+            </span>
+            <span className="text-purple-400 font-bold">{t.arcadePass}</span>
           </div>
         </motion.div>
       </div>

@@ -4,59 +4,41 @@ import {
   Zap, Trophy, Sparkles, Heart, Search, Play, X, Coins,
   Settings, Gamepad2, Volume2, VolumeX, Crown, Target, ShoppingBag,
   ArrowRightLeft, Skull, Flame, Check, Shield, Lock, User, Award,
-  Menu, ChevronRight, Plus, Star, Compass, Layers, Radio, BookOpen
+  Menu, ChevronRight, Plus, Star, Compass, Layers, Radio, BookOpen,
+  Filter, SlidersHorizontal, ArrowLeft
 } from 'lucide-react';
 
 import { audio } from './utils/audio';
 import { useGamepad } from './utils/gamepad';
-import { GlobalState, GameStats, UserProfile, Quest, RngUniverseItem, StoryModeState } from './types';
+import { GlobalState, GameStats, UserProfile, Quest, RngUniverseItem, StoryModeState, GameData } from './types';
+import { Language, getTranslation } from './utils/i18n';
 import {
   GAMES_LIST,
-  INITIAL_ACHIEVEMENTS_200,
+  INITIAL_ACHIEVEMENTS_300,
   INITIAL_QUESTS_V3,
   INITIAL_TRADE_REQUESTS,
   INITIAL_STORY_MODE,
-  NEW_COSMETICS_SHOP,
-  RANKED_GAMES_IDS,
-  ShopCosmetic
+  RANKED_GAMES_IDS
 } from './gamesData';
 
 // Modals
 import { GameCardIllustration } from './components/GameCardIllustration';
+import { GameDetailModal } from './components/GameDetailModal';
 import { RngUniverseModal } from './components/RngUniverseModal';
 import { ApexTrophyRoadModal } from './components/ApexTrophyRoadModal';
 import { ProfileCreatorModal } from './components/ProfileCreatorModal';
 import { QuestsV3Modal } from './components/QuestsV3Modal';
 import { StoryModeModal } from './components/StoryModeModal';
 import { AchievementsV3Modal } from './components/AchievementsV3Modal';
-import { ShopV3Modal } from './components/ShopV3Modal';
 import { SettingsV3Modal } from './components/SettingsV3Modal';
 import { ArcadePassV3Modal } from './components/ArcadePassV3Modal';
-import { MobileGameControls } from './components/MobileGameControls';
 
-// 22 Games
-import { QuantumObby } from './games/QuantumObby';
-import { AetheriaVoid } from './games/AetheriaVoid';
-import { TitanCore } from './games/TitanCore';
-import { CyberHeist } from './games/CyberHeist';
-import { NebulaStrike } from './games/NebulaStrike';
-import { ChronoShift } from './games/ChronoShift';
-import { RoboTycoon } from './games/RoboTycoon';
-import { ShadowDungeon } from './games/ShadowDungeon';
-import { HyperDrift } from './games/HyperDrift';
-import { PixelForge } from './games/PixelForge';
-import { GravitySurge } from './games/GravitySurge';
-import { SynthRider } from './games/SynthRider';
-import { BioHazardDefense } from './games/BioHazardDefense';
-import { SkyboundWings } from './games/SkyboundWings';
-import { GlitchHunter } from './games/GlitchHunter';
-import { CosmicMiner } from './games/CosmicMiner';
-import { ShadowShinobi } from './games/ShadowShinobi';
-import { SpeedRunners2099 } from './games/SpeedRunners2099';
-import { BlockCraftArena } from './games/BlockCraftArena';
-import { NeonCyberPong } from './games/NeonCyberPong';
-import { SolarOverdrive } from './games/SolarOverdrive';
-import { PixelSurvivors } from './games/PixelSurvivors';
+// 5 Modern Games
+import { CyberRunner2099 } from './games/CyberRunner2099';
+import { CosmicDefender } from './games/CosmicDefender';
+import { PixelDungeonQuest } from './games/PixelDungeonQuest';
+import { TitanPinballTitan } from './games/TitanPinballTitan';
+import { QuantumStrike } from './games/QuantumStrike';
 
 const PLAY_BUTTON_STYLES: Record<string, string> = {
   emerald: 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 shadow-[0_0_20px_rgba(20,184,166,0.35)] border border-emerald-300/40',
@@ -87,8 +69,8 @@ export default function App() {
           avatarModel: 'cyber_agent',
           totalVCoins: 1250,
           totalPixels: 1250,
-          title: 'VÉTÉRAN VERTEX 3.2',
-          unlockedTitles: ['VÉTÉRAN VERTEX 3.2'],
+          title: 'VÉTÉRAN VERTEX',
+          unlockedTitles: ['VÉTÉRAN VERTEX'],
           unlockedAvatarIcons: ['Crown', 'Zap', 'Star'],
           activeAura: 'none',
           unlockedAuras: ['none'],
@@ -98,7 +80,7 @@ export default function App() {
           unlockedFrames: ['frame_neon_cyan'],
           activeHat: 'hat_cap_pro',
           unlockedHats: ['hat_cap_pro'],
-          bio: 'Prêt pour la version 3.2 ! Explorateur d\'expériences et champion de l\'arène.',
+          bio: 'Champion des arènes et explorateur de mondes arcade.',
           selectedTags: ['Pro Gamer', 'Speedrunner', 'Trader'],
           unlockedGames: [],
           luckMultiplier: 1
@@ -107,10 +89,11 @@ export default function App() {
           acc[g.id] = { plays: 0, highScore: 0 };
           return acc;
         }, {} as Record<string, GameStats>),
-        achievements: INITIAL_ACHIEVEMENTS_200,
+        achievements: INITIAL_ACHIEVEMENTS_300,
         quests: INITIAL_QUESTS_V3,
         arcadePass: { level: 2, xp: 350, isPremium: false, claimedFreeRewards: [], claimedPremiumRewards: [] },
         settings: {
+          language: 'en', // English by default
           sfxEnabled: true,
           musicEnabled: true,
           sfxVolume: 70,
@@ -133,21 +116,21 @@ export default function App() {
         activeTradeRequests: INITIAL_TRADE_REQUESTS,
         completedTradesCount: 0,
         storyMode: INITIAL_STORY_MODE,
-        favorites: ['quantum_obby', 'titan_core', 'shadow_shinobi'],
+        favorites: ['cyber_runner_2099', 'cosmic_defender'],
         recentGames: []
       };
     }
 
     if (parsed.profile) {
-      if (parsed.profile.title && (/roblox/i.test(parsed.profile.title) || /3\.0/i.test(parsed.profile.title))) {
-        parsed.profile.title = 'VÉTÉRAN VERTEX 3.2';
+      if (parsed.profile.title && (/roblox/i.test(parsed.profile.title) || /3\.[0-9]/i.test(parsed.profile.title))) {
+        parsed.profile.title = 'VÉTÉRAN VERTEX';
       }
       if (Array.isArray(parsed.profile.unlockedTitles)) {
         parsed.profile.unlockedTitles = parsed.profile.unlockedTitles.map((t: string) =>
-          (/roblox/i.test(t) || /3\.0/i.test(t)) ? 'VÉTÉRAN VERTEX 3.2' : t
+          (/roblox/i.test(t) || /3\.[0-9]/i.test(t)) ? 'VÉTÉRAN VERTEX' : t
         );
-        if (!parsed.profile.unlockedTitles.includes('VÉTÉRAN VERTEX 3.2')) {
-          parsed.profile.unlockedTitles.push('VÉTÉRAN VERTEX 3.2');
+        if (!parsed.profile.unlockedTitles.includes('VÉTÉRAN VERTEX')) {
+          parsed.profile.unlockedTitles.push('VÉTÉRAN VERTEX');
         }
       }
       if (parsed.profile.bio && /roblox/i.test(parsed.profile.bio)) {
@@ -160,20 +143,51 @@ export default function App() {
       }
     }
 
-    if (!parsed.storyMode) {
-      parsed.storyMode = INITIAL_STORY_MODE;
+    // Always ensure all 6 Story Mode chapters are present and synchronized
+    if (!parsed.storyMode || !parsed.storyMode.chapters || parsed.storyMode.chapters.length < 6) {
+      const existingChaptersMap = new Map<number, any>((parsed.storyMode?.chapters || []).map((c: any) => [c.id, c]));
+      const fullChapters = INITIAL_STORY_MODE.chapters.map(chap => {
+        const exist = existingChaptersMap.get(chap.id) as Record<string, any> | undefined;
+        if (exist && typeof exist === 'object') {
+          return { ...chap, isCompleted: !!exist.isCompleted, stars: exist.stars || 0, isUnlocked: exist.isUnlocked ?? chap.isUnlocked };
+        }
+        return chap;
+      });
+      parsed.storyMode = {
+        currentChapterId: parsed.storyMode?.currentChapterId || 1,
+        totalStars: parsed.storyMode?.totalStars || 0,
+        chapters: fullChapters
+      };
+    } else {
+      // Ensure Chapter 6 data is correctly merged
+      const existingChaptersMap = new Map<number, any>(parsed.storyMode.chapters.map((c: any) => [c.id, c]));
+      parsed.storyMode.chapters = INITIAL_STORY_MODE.chapters.map(chap => {
+        const exist = existingChaptersMap.get(chap.id) as Record<string, any> | undefined;
+        if (exist && typeof exist === 'object') {
+          return { ...chap, isCompleted: !!exist.isCompleted, stars: exist.stars || 0, isUnlocked: exist.isUnlocked ?? chap.isUnlocked };
+        }
+        return chap;
+      });
     }
-    if (!parsed.achievements || parsed.achievements.length < 250) {
-      parsed.achievements = INITIAL_ACHIEVEMENTS_200;
-    }
+
+    // Always guarantee exactly 300 achievements from INITIAL_ACHIEVEMENTS_300 with latest titles & translations
+    const existingAchMap = new Map(parsed.achievements?.map((a: any) => [a.id, a.isUnlocked]) || []);
+    parsed.achievements = INITIAL_ACHIEVEMENTS_300.map(ach => ({
+      ...ach,
+      isUnlocked: existingAchMap.has(ach.id) ? !!existingAchMap.get(ach.id) : ach.isUnlocked
+    }));
+
     if (!parsed.settings) {
       parsed.settings = {} as any;
+    }
+    if (!parsed.settings.language) {
+      parsed.settings.language = 'en'; // English is default
     }
     if (!parsed.settings.colorTheme) {
       parsed.settings.colorTheme = 'cyber';
       parsed.settings.monochromeMode = false;
     }
-    // Ensure all 22 games have stats
+    // Ensure all 5 games have stats
     for (const g of GAMES_LIST) {
       if (!parsed.stats[g.id]) {
         parsed.stats[g.id] = { plays: 0, highScore: 0 };
@@ -188,6 +202,11 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // UI state for Roblox-like game card click & filters/search buttons
+  const [selectedGameForDetail, setSelectedGameForDetail] = useState<GameData | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
   // iOS Drawer Navigation Menu
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -198,7 +217,6 @@ export default function App() {
   const [showQuestsModal, setShowQuestsModal] = useState(false);
   const [showStoryModal, setShowStoryModal] = useState(false);
   const [showAchievementsModal, setShowAchievementsModal] = useState(false);
-  const [showShopModal, setShowShopModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showPassModal, setShowPassModal] = useState(false);
 
@@ -235,6 +253,16 @@ export default function App() {
   // Controller / Gamepad Hook
   const { gamepadState, vibrate } = useGamepad((action) => {
     if (action === 'B') {
+      if (activeGameId) {
+        audio.playClick();
+        setActiveGameId(null);
+        return;
+      }
+      if (selectedGameForDetail) {
+        audio.playClick();
+        setSelectedGameForDetail(null);
+        return;
+      }
       setIsDrawerOpen(false);
       setShowRngModal(false);
       setShowTrophyModal(false);
@@ -242,10 +270,13 @@ export default function App() {
       setShowQuestsModal(false);
       setShowStoryModal(false);
       setShowAchievementsModal(false);
-      setShowShopModal(false);
       setShowSettingsModal(false);
       setShowPassModal(false);
       setPaidGamePrompt(null);
+    } else if (action === 'A') {
+      if (selectedGameForDetail) {
+        handleTryLaunchGame(selectedGameForDetail.id);
+      }
     } else if (action === 'Y') {
       audio.playClick();
       setShowProfileModal(true);
@@ -254,6 +285,36 @@ export default function App() {
       setIsDrawerOpen(prev => !prev);
     }
   });
+
+  // Global Escape Key Listener for Multiplatform Keyboard / Desktop
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (activeGameId) {
+          audio.playClick();
+          setActiveGameId(null);
+        } else if (selectedGameForDetail) {
+          audio.playClick();
+          setSelectedGameForDetail(null);
+        } else if (isDrawerOpen) {
+          setIsDrawerOpen(false);
+        } else if (paidGamePrompt) {
+          setPaidGamePrompt(null);
+        } else {
+          setShowRngModal(false);
+          setShowTrophyModal(false);
+          setShowProfileModal(false);
+          setShowQuestsModal(false);
+          setShowStoryModal(false);
+          setShowAchievementsModal(false);
+          setShowSettingsModal(false);
+          setShowPassModal(false);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeGameId, selectedGameForDetail, isDrawerOpen, paidGamePrompt]);
 
   // Save state to localStorage
   useEffect(() => {
@@ -266,9 +327,9 @@ export default function App() {
 
   const currentVCoins = state.profile.totalVCoins ?? 0;
 
-  // Toggle favorite with animated Heart pop
+  // Toggle favorite with animated Heart pop & like sound effect
   const handleToggleFavorite = (gameId: string) => {
-    audio.playHeartPop();
+    audio.playLike();
     vibrate(45, 0.4, 0.6);
     setFavoritedPopId(gameId);
     setTimeout(() => setFavoritedPopId(null), 800);
@@ -343,10 +404,10 @@ export default function App() {
       const newQuests = prev.quests.map(q => {
         let added = 0;
         if (q.id === 'q_daily_1') added = 1;
-        if (q.id === 'q_daily_2' && gameId === 'quantum_obby') added = score;
+        if (q.id === 'q_daily_2' && gameId === 'cyber_runner_2099') added = score;
         if (q.id === 'q_daily_3') added = earnedVC;
         if (q.id === 'q_weekly_1') added = 1;
-        if (q.id === 'q_weekly_2' && gameId === 'aetheria_void') added = score;
+        if (q.id === 'q_weekly_2' && gameId === 'cosmic_defender') added = score;
         if (q.id === 'q_meta_1') added = bossDmg;
 
         const nextCur = Math.min(q.target, q.current + added);
@@ -417,6 +478,8 @@ export default function App() {
 
   const currentTheme = state.settings.colorTheme || (state.settings.monochromeMode ? 'dark' : 'cyber');
   const themeClass = currentTheme === 'dark' ? 'theme-dark' : currentTheme === 'light' ? 'theme-light' : 'theme-cyber';
+  const currentLang: Language = state.settings.language || 'en';
+  const t = getTranslation(currentLang);
 
   return (
     <div className={`relative min-h-screen ${themeClass} text-slate-100 flex flex-col justify-between overflow-x-hidden font-sans select-none antialiased transition-colors duration-300`}>
@@ -447,13 +510,14 @@ export default function App() {
         >
           <div className="relative">
             <div
-              className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center text-lg border border-cyan-400/80 shadow-[0_0_12px_rgba(6,182,212,0.3)]"
-              style={{ backgroundColor: state.profile.customAvatarUrl ? 'transparent' : state.profile.avatarColor }}
+              className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center text-lg border border-cyan-400/80 shadow-[0_0_12px_rgba(6,182,212,0.3)] bg-gradient-to-br from-cyan-900 to-blue-950"
             >
               {state.profile.customAvatarUrl ? (
                 <img src={state.profile.customAvatarUrl} alt="Avatar" className="w-full h-full object-cover" />
               ) : (
-                state.profile.avatarModel === 'cyber_ninja' ? '🥷' : state.profile.avatarModel === 'blocky_knight' ? '🛡️' : '🧑‍🚀'
+                <span className="font-mono font-black text-white text-base">
+                  {(state.profile.username.trim()[0] || 'V').toUpperCase()}
+                </span>
               )}
             </div>
             {/* Live Online Status Dot */}
@@ -469,27 +533,28 @@ export default function App() {
                 Niv. {state.arcadePass.level}
               </span>
             </div>
-            <div className="flex items-center gap-2.5 text-[10px] text-slate-400 font-mono mt-0.5">
+            <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono mt-0.5">
               <span className="text-yellow-400 font-bold flex items-center gap-1">
-                <Trophy className="w-3 h-3 fill-current" /> {state.totalTrophies}
-              </span>
-              <span>·</span>
-              <span className="text-orange-400 font-bold flex items-center gap-1">
-                <Flame className="w-3 h-3 fill-current" /> 5j
+                <Trophy className="w-3 h-3 fill-current" /> {state.totalTrophies} 🏆
               </span>
             </div>
           </div>
         </div>
 
-        {/* Center: SLEEK MONOCHROME GAMEPAD LOGO WITH VERSION 3.2 */}
+        {/* Center: SLEEK MONOCHROME GAMEPAD LOGO */}
         <div
           onClick={() => { audio.playWin(); }}
           className="flex items-center gap-2 px-3 py-1.5 rounded-2xl liquid-glass-pill hover:border-cyan-400/70 transition-all cursor-pointer group shadow-sm active:scale-95"
-          title="Vertex Arcades v3.2"
+          title="Vertex Arcades"
         >
           <Gamepad2 className="w-5 h-5 text-cyan-400 filter drop-shadow-[0_0_8px_rgba(6,182,212,0.9)] group-hover:scale-110 transition-transform" />
           <span className="font-mono font-black text-xs text-white tracking-wider flex items-center gap-1.5">
-            VERTEX <span className="px-1.5 py-0.5 rounded-md text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">v3.2</span>
+            VERTEX
+            {gamepadState?.connected && (
+              <span className="px-1.5 py-0.5 rounded-md text-[8px] bg-emerald-500/25 text-emerald-300 border border-emerald-400/30 uppercase tracking-widest hidden sm:inline">
+                🎮 PAD
+              </span>
+            )}
           </span>
         </div>
 
@@ -497,9 +562,9 @@ export default function App() {
         <div className="flex items-center gap-2">
           {/* Small Golden Liquid Glass VC Badge */}
           <div
-            onClick={() => { audio.playClick(); setShowShopModal(true); }}
+            onClick={() => { audio.playClick(); setShowQuestsModal(true); }}
             className="liquid-glass-vc flex items-center gap-1 px-2 py-0.5 rounded-lg text-yellow-300 text-[10px] font-mono font-bold cursor-pointer group shadow-sm active:scale-95 transition-all"
-            title="Votre solde V-Coins (Cliquer pour recharger)"
+            title={t.vcoinsBalance}
           >
             <Coins className="w-2.5 h-2.5 fill-current text-yellow-400 group-hover:rotate-12 transition-transform" />
             <span>{currentVCoins.toLocaleString()} VC</span>
@@ -515,7 +580,7 @@ export default function App() {
               setIsDrawerOpen(true);
             }}
             className="w-10 h-10 rounded-2xl liquid-glass-pill hover:border-cyan-400 flex items-center justify-center text-slate-200 hover:text-white transition-all cursor-pointer shadow-md active:scale-95 group"
-            title="Ouvrir le menu principal (tous les menus)"
+            title={t.openMenu}
           >
             <Menu className="w-5 h-5 text-cyan-300 group-hover:scale-110 transition-transform" />
           </button>
@@ -552,12 +617,9 @@ export default function App() {
                     </div>
                     <div>
                       <h3 className="text-sm font-black text-white font-mono tracking-wider flex items-center gap-2">
-                        HUB VERTEX
-                        <span className="px-1.5 py-0.2 rounded text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
-                          v3.2
-                        </span>
+                        {t.drawerMenuTitle}
                       </h3>
-                      <p className="text-[11px] text-slate-400 font-sans">Toutes les expériences & fonctionnalités</p>
+                      <p className="text-[11px] text-slate-400 font-sans">{t.allExperiences}</p>
                     </div>
                   </div>
                   <button
@@ -575,13 +637,14 @@ export default function App() {
                 >
                   <div className="flex items-center gap-3">
                     <div 
-                      className="w-11 h-11 rounded-xl overflow-hidden flex items-center justify-center text-xl border border-cyan-400/60 shadow-inner"
-                      style={{ backgroundColor: state.profile.customAvatarUrl ? 'transparent' : state.profile.avatarColor }}
+                      className="w-11 h-11 rounded-xl overflow-hidden flex items-center justify-center text-xl border border-cyan-400/60 shadow-inner bg-gradient-to-br from-cyan-900 to-blue-950"
                     >
                       {state.profile.customAvatarUrl ? (
                         <img src={state.profile.customAvatarUrl} alt="Avatar" className="w-full h-full object-cover" />
                       ) : (
-                        state.profile.avatarModel === 'cyber_ninja' ? '🥷' : state.profile.avatarModel === 'blocky_knight' ? '🛡️' : '🧑‍🚀'
+                        <span className="font-mono font-black text-white text-base">
+                          {(state.profile.username.trim()[0] || 'V').toUpperCase()}
+                        </span>
                       )}
                     </div>
                     <div>
@@ -590,7 +653,7 @@ export default function App() {
                           {state.profile.username}
                         </span>
                         <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-cyan-500/25 text-cyan-300 border border-cyan-400/30 font-bold">
-                          VIP Niv. {state.arcadePass.level}
+                          VIP {t.level} {state.arcadePass.level}
                         </span>
                       </div>
                       <div className="flex items-center gap-2.5 text-[9px] font-mono text-slate-300 mt-1">
@@ -611,15 +674,15 @@ export default function App() {
                   {/* Category 1: JEUX & EXPÉRIENCES */}
                   <div>
                     <span className="text-[10px] font-mono font-black text-cyan-400/90 tracking-wider uppercase px-1 mb-2 block">
-                      🎮 Jeux & Expériences
+                      {t.navSectionGames}
                     </span>
                     <div className="space-y-1.5">
                       {[
                         {
                           id: 'games',
-                          title: 'Catalogue des Jeux',
-                          subtitle: '22 Expériences Originales (3 Gratuits • 19 VIP)',
-                          badge: '22 JEUX',
+                          title: t.navGamesTitle,
+                          subtitle: t.navGamesSub,
+                          badge: t.navGamesBadge,
                           badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/30',
                           icon: <Gamepad2 className="w-4 h-4 text-cyan-400" />,
                           iconBg: 'bg-cyan-500/10 border-cyan-400/30',
@@ -627,9 +690,9 @@ export default function App() {
                         },
                         {
                           id: 'rng',
-                          title: 'Sanctuaire RNG',
-                          subtitle: 'Roulette de Reliques & Potions Alchimiques',
-                          badge: 'CHANCE x3',
+                          title: t.navRngTitle,
+                          subtitle: t.navRngSub,
+                          badge: t.navRngBadge,
                           badgeColor: 'bg-teal-500/20 text-teal-300 border-teal-400/30',
                           icon: <Sparkles className="w-4 h-4 text-teal-300" />,
                           iconBg: 'bg-teal-500/10 border-teal-400/30',
@@ -637,9 +700,9 @@ export default function App() {
                         },
                         {
                           id: 'story',
-                          title: 'Mode Histoire : Chroniques',
-                          subtitle: 'Campagne stellaire, 5 Chapitres & Boss',
-                          badge: '5 CHAPITRES',
+                          title: t.navStoryTitle,
+                          subtitle: t.navStorySub,
+                          badge: t.navStoryBadge,
                           badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-400/30',
                           icon: <BookOpen className="w-4 h-4 text-cyan-400" />,
                           iconBg: 'bg-cyan-500/10 border-cyan-400/30',
@@ -676,14 +739,14 @@ export default function App() {
                   {/* Category 2: PROGRESSION & RÉCOMPENSES */}
                   <div>
                     <span className="text-[10px] font-mono font-black text-amber-400/90 tracking-wider uppercase px-1 mb-2 block">
-                      🏆 Progression & Récompenses
+                      {t.navSectionProgression}
                     </span>
                     <div className="space-y-1.5">
                       {[
                         {
                           id: 'trophy',
-                          title: 'Ligue Stellaire Apex',
-                          subtitle: 'Route des 10 000 Trophées & Paliers',
+                          title: t.navTrophyTitle,
+                          subtitle: t.navTrophySub,
                           badge: `${state.totalTrophies} 🏆`,
                           badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-400/30',
                           icon: <Trophy className="w-4 h-4 text-amber-400" />,
@@ -692,9 +755,9 @@ export default function App() {
                         },
                         {
                           id: 'pass',
-                          title: 'Pass Arcade VIP',
-                          subtitle: '50 Paliers débloquables & Titres légendaires',
-                          badge: `Niv. ${state.arcadePass.level}`,
+                          title: t.navPassTitle,
+                          subtitle: t.navPassSub,
+                          badge: `${t.level} ${state.arcadePass.level}`,
                           badgeColor: 'bg-purple-500/20 text-purple-300 border-purple-400/30',
                           icon: <Crown className="w-4 h-4 text-purple-400" />,
                           iconBg: 'bg-purple-500/10 border-purple-400/30',
@@ -702,9 +765,9 @@ export default function App() {
                         },
                         {
                           id: 'quests',
-                          title: 'Missions & Quêtes',
-                          subtitle: 'Défis journaliers, hebdos & boss',
-                          badge: 'GAIN VC',
+                          title: t.navQuestsTitle,
+                          subtitle: t.navQuestsSub,
+                          badge: t.navQuestsBadge,
                           badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30',
                           icon: <Target className="w-4 h-4 text-emerald-400" />,
                           iconBg: 'bg-emerald-500/10 border-emerald-400/30',
@@ -712,9 +775,9 @@ export default function App() {
                         },
                         {
                           id: 'achievements',
-                          title: '250 Succès d\'Arcade',
-                          subtitle: 'Défis de gameplay, Histoire & V-Coins',
-                          badge: '250 SUCCÈS',
+                          title: t.navAchievementsTitle,
+                          subtitle: t.navAchievementsSub,
+                          badge: t.navAchievementsBadge,
                           badgeColor: 'bg-yellow-500/20 text-yellow-300 border-yellow-400/30',
                           icon: <Award className="w-4 h-4 text-yellow-400" />,
                           iconBg: 'bg-yellow-500/10 border-yellow-400/30',
@@ -751,35 +814,15 @@ export default function App() {
                   {/* Category 3: HUB JOUEUR & RÉGLAGES */}
                   <div>
                     <span className="text-[10px] font-mono font-black text-slate-400 tracking-wider uppercase px-1 mb-2 block">
-                      💎 Hub Joueur & Réglages
+                      {t.navSectionHub}
                     </span>
                     <div className="space-y-1.5">
                       {[
                         {
-                          id: 'shop',
-                          title: 'Boutique Cosmétiques',
-                          subtitle: 'Auras, Effets, Bannières, Chapeaux & Packs',
-                          badge: 'BOUTIQUE',
-                          badgeColor: 'bg-rose-500/20 text-rose-300 border-rose-400/30',
-                          icon: <ShoppingBag className="w-4 h-4 text-rose-400" />,
-                          iconBg: 'bg-rose-500/10 border-rose-400/30',
-                          action: () => { setShowShopModal(true); setIsDrawerOpen(false); }
-                        },
-                        {
-                          id: 'achievements',
-                          title: '200 Succès de Maîtrise',
-                          subtitle: 'Défis complétés & récompenses de succès',
-                          badge: '200 SUCCÈS',
-                          badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-400/30',
-                          icon: <Award className="w-4 h-4 text-amber-400" />,
-                          iconBg: 'bg-amber-500/10 border-amber-400/30',
-                          action: () => { setShowAchievementsModal(true); setIsDrawerOpen(false); }
-                        },
-                        {
                           id: 'profile',
-                          title: 'Mon Profil & Bio',
-                          subtitle: 'Personnaliser modèle, couleurs et tags',
-                          badge: 'PROFIL',
+                          title: t.navProfileTitle,
+                          subtitle: t.navProfileSub,
+                          badge: t.navProfileBadge,
                           badgeColor: 'bg-sky-500/20 text-sky-300 border-sky-400/30',
                           icon: <User className="w-4 h-4 text-sky-400" />,
                           iconBg: 'bg-sky-500/10 border-sky-400/30',
@@ -787,9 +830,9 @@ export default function App() {
                         },
                         {
                           id: 'settings',
-                          title: 'Paramètres & Audio',
-                          subtitle: 'Audio, graphismes, manettes et contrôles',
-                          badge: 'RÉGLAGES',
+                          title: t.navSettingsTitle,
+                          subtitle: t.navSettingsSub,
+                          badge: t.navSettingsBadge,
                           badgeColor: 'bg-slate-500/20 text-slate-300 border-slate-400/30',
                           icon: <Settings className="w-4 h-4 text-slate-300" />,
                           iconBg: 'bg-slate-500/10 border-slate-400/30',
@@ -831,14 +874,14 @@ export default function App() {
                   <button
                     onClick={toggleSound}
                     className="p-2 rounded-xl liquid-glass-pill text-xs font-mono text-slate-300 hover:text-white flex items-center gap-1.5 cursor-pointer"
-                    title="Basculer le son"
+                    title={t.toggleSound}
                   >
                     {state.settings.sfxEnabled ? <Volume2 className="w-3.5 h-3.5 text-cyan-400" /> : <VolumeX className="w-3.5 h-3.5 text-slate-500" />}
-                    <span>{state.settings.sfxEnabled ? 'Son ON' : 'Son OFF'}</span>
+                    <span>{state.settings.sfxEnabled ? t.soundOn : t.soundOff}</span>
                   </button>
                 </div>
                 <span className="text-[10px] text-slate-400 font-mono">
-                  Vertex Arcades v3.2
+                  Vertex Arcades
                 </span>
               </div>
             </motion.div>
@@ -848,75 +891,139 @@ export default function App() {
 
       {/* 4. Main Content Body - Clean Modern Experience Catalog */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-6">
-        {/* Liquid Glass Search & Segmented Filter Bar */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 mb-7">
-          {/* Liquid Glass Segmented Category Tabs */}
-          <div className="relative flex items-center gap-1.5 overflow-x-auto p-1.5 rounded-2xl liquid-glass-container no-scrollbar shadow-2xl">
-            {/* Top liquid reflection specular glint */}
-            <div className="absolute inset-x-6 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none" />
+        {/* Header Controls Bar: Filter & Search Toggle Buttons */}
+        <div className="flex flex-col gap-3 mb-6">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              {/* Button 1: Toggle Filters */}
+              <button
+                onClick={() => {
+                  audio.playClick();
+                  setIsFilterOpen(prev => !prev);
+                }}
+                className={`px-4 py-2 rounded-2xl flex items-center gap-2 text-xs font-mono font-bold cursor-pointer transition-all shadow-md active:scale-95 ${
+                  isFilterOpen || selectedCategory !== 'all'
+                    ? 'liquid-glass-pill-active border-cyan-400 text-white'
+                    : 'liquid-glass-pill text-slate-300 hover:text-white'
+                }`}
+                title={t.filters}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5 text-cyan-400" />
+                <span>{t.filters}</span>
+                {selectedCategory !== 'all' && (
+                  <span className="ml-1 px-2 py-0.2 rounded-full text-[9px] bg-cyan-400 text-slate-950 font-black uppercase">
+                    {selectedCategory}
+                  </span>
+                )}
+              </button>
 
-            {[
-              { id: 'all', label: `Tous les Jeux (${GAMES_LIST.length})` },
-              { id: 'favorites', label: 'Favoris ❤️' },
-              { id: 'free', label: 'Gratuits ⚡' },
-              { id: 'paid', label: 'VIP V-Coins 💎' },
-              { id: 'action', label: 'Action' },
-              { id: 'survival', label: 'Survie' },
-              { id: 'racer', label: 'Course' },
-              { id: 'platformer', label: 'Plateforme' },
-              { id: 'tycoon', label: 'Tycoon' },
-              { id: 'rhythm', label: 'Rythme' }
-            ].map(cat => {
-              const isActive = selectedCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => { audio.playClick(); setSelectedCategory(cat.id); }}
-                  className={`relative px-4 py-2 rounded-xl text-xs font-mono font-bold whitespace-nowrap cursor-pointer transition-all ${
-                    isActive
-                      ? 'liquid-glass-pill-active scale-[1.02]'
-                      : 'liquid-glass-pill text-slate-300 hover:text-white'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Liquid Glass Search Box */}
-          <div className="relative min-w-[280px] group">
-            {/* Liquid aura backdrop glow */}
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/30 via-teal-400/20 to-blue-500/30 rounded-2xl blur-md opacity-40 group-focus-within:opacity-100 transition-all duration-500 pointer-events-none" />
-
-            <div className="relative flex items-center rounded-2xl liquid-glass-input overflow-hidden">
-              {/* Top specular refraction glint */}
-              <div className="absolute inset-x-4 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
-
-              <Search className="w-4 h-4 ml-3.5 text-cyan-400 group-focus-within:text-cyan-300 transition-colors pointer-events-none shrink-0" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Rechercher une expérience, créateur..."
-                className="w-full pl-3 pr-9 py-2.5 bg-transparent text-xs text-white placeholder-slate-400 outline-none font-sans"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 p-1 rounded-full bg-white/10 hover:bg-white/25 text-slate-300 hover:text-white transition-all cursor-pointer"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
+              {/* Button 2: Toggle Search Bar */}
+              <button
+                onClick={() => {
+                  audio.playClick();
+                  setIsSearchOpen(prev => !prev);
+                }}
+                className={`px-4 py-2 rounded-2xl flex items-center gap-2 text-xs font-mono font-bold cursor-pointer transition-all shadow-md active:scale-95 ${
+                  isSearchOpen || searchQuery
+                    ? 'liquid-glass-pill-active border-cyan-400 text-white'
+                    : 'liquid-glass-pill text-slate-300 hover:text-white'
+                }`}
+                title={t.search}
+              >
+                <Search className="w-3.5 h-3.5 text-cyan-400" />
+                <span>{t.search}</span>
+                {searchQuery && (
+                  <span className="ml-1 px-1.5 py-0.2 rounded-full text-[9px] bg-cyan-400/25 text-cyan-200 border border-cyan-400/30 truncate max-w-[80px]">
+                    "{searchQuery}"
+                  </span>
+                )}
+              </button>
             </div>
+
+            {/* Total experiences count */}
+            <span className="text-xs font-mono text-slate-400 hidden sm:inline-block">
+              {filteredGames.length} / {GAMES_LIST.length} {t.gamesCount}
+            </span>
           </div>
+
+          {/* Expandable Category Filters Strip */}
+          <AnimatePresence>
+            {isFilterOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="relative flex items-center gap-1.5 overflow-x-auto p-2 rounded-2xl liquid-glass-container no-scrollbar shadow-xl border border-white/10 my-1">
+                  {[
+                    { id: 'all', label: `${t.all} (${GAMES_LIST.length})` },
+                    { id: 'favorites', label: `${t.favorites} ❤️` },
+                    { id: 'free', label: t.catFree },
+                    { id: 'paid', label: t.catVip },
+                    { id: 'action', label: t.catAction },
+                    { id: 'survival', label: t.catSurvival },
+                    { id: 'racer', label: t.catRacer },
+                    { id: 'platformer', label: t.catPlatformer },
+                    { id: 'tycoon', label: t.catTycoon },
+                    { id: 'rhythm', label: t.catRhythm }
+                  ].map(cat => {
+                    const isActive = selectedCategory === cat.id;
+                    return (
+                      <button
+                        key={cat.id}
+                        onClick={() => { audio.playClick(); setSelectedCategory(cat.id); }}
+                        className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold whitespace-nowrap cursor-pointer transition-all ${
+                          isActive
+                            ? 'liquid-glass-pill-active scale-[1.02]'
+                            : 'liquid-glass-pill text-slate-300 hover:text-white'
+                        }`}
+                      >
+                        {cat.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Expandable Search Input Bar */}
+          <AnimatePresence>
+            {isSearchOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="relative flex items-center rounded-2xl liquid-glass-input overflow-hidden my-1 shadow-lg">
+                  <Search className="w-4 h-4 ml-3.5 text-cyan-400 shrink-0 pointer-events-none" />
+                  <input
+                    type="text"
+                    autoFocus
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t.searchPlaceholder}
+                    className="w-full pl-3 pr-9 py-2.5 bg-transparent text-xs text-white placeholder-slate-400 outline-none font-sans"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2.5 p-1 rounded-full bg-white/10 hover:bg-white/25 text-slate-300 hover:text-white transition-all cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        {/* 5. Rich Experience Grid (20 Games) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        {/* 5. 1:1 Square Format Game Grid (Clean illustrations with short title & favorite heart) */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3.5 sm:gap-5">
           {filteredGames.map((game) => {
-            const stats = state.stats[game.id] || { plays: 0, highScore: 0 };
             const isFavorite = state.favorites.includes(game.id);
             const isUnlocked = !game.isPaid || state.profile.unlockedGames?.includes(game.id);
             const isPopping = favoritedPopId === game.id;
@@ -924,145 +1031,63 @@ export default function App() {
             return (
               <motion.div
                 key={game.id}
-                whileHover={{ y: -7, scale: 1.025 }}
-                transition={{ type: "spring", stiffness: 380, damping: 24 }}
-                className="liquid-glass-card rounded-3xl border border-white/12 bg-gradient-to-b from-slate-900/85 via-slate-900/90 to-slate-950/95 hover:border-cyan-400/80 transition-all flex flex-col justify-between overflow-hidden group shadow-xl hover:shadow-[0_20px_50px_rgba(6,182,212,0.35),0_0_30px_rgba(34,211,238,0.25)] backdrop-blur-2xl relative"
+                whileHover={{ y: -6, scale: 1.03 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                onClick={() => {
+                  audio.playClick();
+                  setSelectedGameForDetail(game);
+                }}
+                className="aspect-square liquid-glass-card rounded-3xl border border-white/12 hover:border-cyan-400/80 transition-all overflow-hidden group shadow-xl hover:shadow-[0_15px_35px_rgba(6,182,212,0.35)] backdrop-blur-2xl relative cursor-pointer active:scale-95 flex flex-col justify-end"
               >
-                {/* Specular top reflection glint */}
-                <div className="absolute inset-x-8 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none z-20" />
+                {/* 1:1 Full Cover Illustration */}
+                <div className="absolute inset-0 z-0">
+                  <GameCardIllustration gameId={game.id} className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500" />
+                </div>
 
-                {/* Subtle ambient cyan aura on hover */}
-                <div className="absolute inset-0 rounded-3xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-gradient-to-b from-cyan-400/12 via-transparent to-cyan-500/5 z-0" />
+                {/* Top Subtle Sheen */}
+                <div className="absolute inset-x-6 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none z-10" />
 
-                {/* --- Illustration Cover & Floating Glass Chips --- */}
-                <div className="relative overflow-hidden z-10">
-                  <div className="transform transition-transform duration-500 ease-out group-hover:scale-105">
-                    <GameCardIllustration gameId={game.id} className="w-full h-44 object-cover" />
-                  </div>
-
-                  {/* Contrast gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent pointer-events-none" />
-
-                  {/* Top-Left Floating Badge: Status / Price */}
-                  <div className="absolute top-3 left-3 z-10">
-                    {game.isPaid ? (
-                      isUnlocked ? (
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-black tracking-wider bg-emerald-500/25 text-emerald-300 border border-emerald-400/50 backdrop-blur-md shadow-md flex items-center gap-1">
-                          <Check className="w-3 h-3 text-emerald-400 stroke-[3]" /> ACQUIS
-                        </span>
-                      ) : (
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-black tracking-wider bg-amber-500/25 text-amber-300 border border-amber-400/50 backdrop-blur-md shadow-md flex items-center gap-1">
-                          <Coins className="w-3 h-3 text-amber-400 fill-amber-400" /> {game.costVCoins} VC
-                        </span>
-                      )
-                    ) : (
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-black tracking-wider bg-cyan-500/25 text-cyan-300 border border-cyan-400/50 backdrop-blur-md shadow-md flex items-center gap-1">
-                        <Sparkles className="w-3 h-3 text-cyan-400" /> GRATUIT
+                {/* Top Left: Floating Status Badge */}
+                <div className="absolute top-2.5 left-2.5 z-10">
+                  {game.isPaid ? (
+                    isUnlocked ? (
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-black tracking-wider bg-emerald-500/35 text-emerald-300 border border-emerald-400/50 backdrop-blur-md shadow-md flex items-center gap-1">
+                        <Check className="w-2.5 h-2.5 text-emerald-400 stroke-[3]" /> {t.owned}
                       </span>
-                    )}
-                  </div>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-black tracking-wider bg-amber-500/35 text-amber-300 border border-amber-400/50 backdrop-blur-md shadow-md flex items-center gap-1">
+                        <Coins className="w-2.5 h-2.5 text-amber-400 fill-amber-400" /> {game.costVCoins} VC
+                      </span>
+                    )
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-black tracking-wider bg-cyan-500/35 text-cyan-300 border border-cyan-400/50 backdrop-blur-md shadow-md flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5 text-cyan-400" /> {t.free}
+                    </span>
+                  )}
+                </div>
 
-                  {/* Top-Right Animated Heart Button */}
+                {/* Bottom Bar: Gradient Overlay with ONLY Short Game Name & Favorite Heart on the Right */}
+                <div className="relative z-10 p-2.5 pt-8 bg-gradient-to-t from-slate-950 via-slate-950/85 to-transparent flex items-center justify-between gap-1.5">
+                  <span className="font-black text-white text-xs sm:text-sm font-mono tracking-tight truncate drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                    {game.name}
+                  </span>
+
+                  {/* Favorite Like Button nicely positioned to the right of the title */}
                   <motion.button
-                    animate={isPopping ? { scale: [1, 1.4, 0.9, 1] } : { scale: 1 }}
+                    animate={isPopping ? { scale: [1, 1.45, 0.9, 1] } : { scale: 1 }}
                     transition={{ duration: 0.35 }}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleToggleFavorite(game.id);
                     }}
-                    className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-xl border transition-all cursor-pointer shadow-md z-10 ${
+                    className={`p-1.5 rounded-xl backdrop-blur-xl border transition-all cursor-pointer shadow-md shrink-0 ${
                       isFavorite
-                        ? 'bg-rose-500/35 border-rose-400/70 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.6)]'
-                        : 'bg-slate-950/65 hover:bg-slate-900/80 border-white/20 text-slate-300 hover:text-white hover:border-white/40'
+                        ? 'bg-rose-500/40 border-rose-400/70 text-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.6)]'
+                        : 'bg-black/50 hover:bg-slate-900 border-white/20 text-slate-300 hover:text-white'
                     }`}
+                    title={isFavorite ? t.favorite : t.favorites}
                   >
                     <Heart className={`w-3.5 h-3.5 ${isFavorite ? 'fill-current' : ''}`} />
-                  </motion.button>
-
-                  {/* Bottom Image Badges: Category & Difficulty */}
-                  <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
-                    <span className="px-2.5 py-0.5 rounded-lg bg-slate-950/80 backdrop-blur-md text-[9px] font-mono font-bold text-cyan-300 border border-white/15 uppercase tracking-wider flex items-center gap-1">
-                      <Gamepad2 className="w-2.5 h-2.5" />
-                      {game.category}
-                    </span>
-
-                    <span className={`px-2 py-0.5 rounded-lg backdrop-blur-md text-[9px] font-mono font-bold border flex items-center gap-1.5 ${
-                      game.difficulty === 'Facile'
-                        ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                        : game.difficulty === 'Moyen'
-                        ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-                        : 'bg-rose-500/15 text-rose-300 border-rose-500/30'
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${
-                        game.difficulty === 'Facile' ? 'bg-emerald-400' : game.difficulty === 'Moyen' ? 'bg-amber-400' : 'bg-rose-400'
-                      }`} />
-                      {game.difficulty}
-                    </span>
-                  </div>
-                </div>
-
-                {/* --- Information Card Body --- */}
-                <div className="p-4 flex-1 flex flex-col justify-between gap-3.5 z-10">
-                  <div className="space-y-1.5">
-                    {/* Creator label */}
-                    <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-400">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/80" />
-                      <span className="truncate text-slate-300">
-                        Par <span className="text-cyan-300 font-semibold">{game.creator}</span>
-                      </span>
-                    </div>
-
-                    {/* Title */}
-                    <h3 className="font-black text-white text-base group-hover:text-cyan-300 transition-colors font-sans tracking-tight line-clamp-1">
-                      {game.frenchName}
-                    </h3>
-
-                    {/* Description */}
-                    <p className="text-[11px] text-slate-300/85 leading-relaxed line-clamp-2 h-[34px]">
-                      {game.description}
-                    </p>
-                  </div>
-
-                  {/* Player Personal Stats Pod (Organized 2-Column Capsule) */}
-                  <div className="grid grid-cols-2 gap-2 p-2 rounded-xl bg-white/[0.03] border border-white/8 backdrop-blur-sm text-[10px] font-mono">
-                    <div className="flex items-center gap-2 text-slate-300">
-                      <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                      <div className="truncate">
-                        <span className="text-slate-400 text-[9px] block">Record</span>
-                        <strong className="text-amber-300 font-black">{stats.highScore.toLocaleString()}</strong>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-300 border-l border-white/10 pl-2.5">
-                      <Zap className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                      <div className="truncate">
-                        <span className="text-slate-400 text-[9px] block">Parties</span>
-                        <strong className="text-cyan-300 font-black">{stats.plays}</strong>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action CTA Button */}
-                  <motion.button
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => handleTryLaunchGame(game.id)}
-                    className={`w-full py-2.5 rounded-2xl font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg font-mono relative overflow-hidden ${
-                      isUnlocked
-                        ? (PLAY_BUTTON_STYLES[state.settings.playButtonColor || 'emerald'] || PLAY_BUTTON_STYLES.emerald)
-                        : 'bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 text-slate-950 shadow-[0_0_20px_rgba(245,158,11,0.35)] border border-yellow-300/40'
-                    }`}
-                  >
-                    {/* Specular button sheen */}
-                    <div className="absolute inset-x-4 top-0 h-[1px] bg-white/40 pointer-events-none" />
-
-                    {isUnlocked ? (
-                      <>
-                        <Play className="w-3.5 h-3.5 fill-current" /> JOUER MAINTENANT
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="w-3.5 h-3.5 stroke-[2.5]" /> DÉBLOQUER ({game.costVCoins} VC)
-                      </>
-                    )}
                   </motion.button>
                 </div>
               </motion.div>
@@ -1071,184 +1096,136 @@ export default function App() {
         </div>
       </main>
 
-      {/* 6. Active Game Overlay Cabinet (All 22 Games - Expanded Immersive Screen) */}
-      {activeGameId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-3 bg-slate-950/95 backdrop-blur-2xl overflow-y-auto">
-          <div className="relative w-full max-w-[98vw] xl:max-w-7xl h-[92vh] flex flex-col justify-between my-auto py-1">
-            {activeGameId === 'quantum_obby' && (
-              <QuantumObby
-                onFinish={(sc, b) => handleFinishGame('quantum_obby', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'aetheria_void' && (
-              <AetheriaVoid
-                onFinish={(sc, b) => handleFinishGame('aetheria_void', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'titan_core' && (
-              <TitanCore
-                onFinish={(sc, b) => handleFinishGame('titan_core', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'cyber_heist' && (
-              <CyberHeist
-                onFinish={(sc, b) => handleFinishGame('cyber_heist', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'nebula_strike' && (
-              <NebulaStrike
-                onFinish={(sc, b) => handleFinishGame('nebula_strike', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'chrono_shift' && (
-              <ChronoShift
-                onFinish={(sc, b) => handleFinishGame('chrono_shift', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'robo_tycoon' && (
-              <RoboTycoon
-                onFinish={(sc, b) => handleFinishGame('robo_tycoon', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'shadow_dungeon' && (
-              <ShadowDungeon
-                onFinish={(sc, b) => handleFinishGame('shadow_dungeon', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'hyper_drift' && (
-              <HyperDrift
-                onFinish={(sc, b) => handleFinishGame('hyper_drift', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'pixelforge_craft' && (
-              <PixelForge
-                onFinish={(sc, b) => handleFinishGame('pixelforge_craft', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'gravity_surge' && (
-              <GravitySurge
-                onFinish={(sc, b) => handleFinishGame('gravity_surge', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'synth_rider' && (
-              <SynthRider
-                onFinish={(sc, b) => handleFinishGame('synth_rider', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'biohazard_defense' && (
-              <BioHazardDefense
-                onFinish={(sc, b) => handleFinishGame('biohazard_defense', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'skybound_wings' && (
-              <SkyboundWings
-                onFinish={(sc, b) => handleFinishGame('skybound_wings', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'glitch_hunter' && (
-              <GlitchHunter
-                onFinish={(sc, b) => handleFinishGame('glitch_hunter', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {/* 5 NEW GAMES */}
-            {activeGameId === 'cosmic_miner' && (
-              <CosmicMiner
-                onFinish={(sc, b) => handleFinishGame('cosmic_miner', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'shadow_shinobi' && (
-              <ShadowShinobi
-                onFinish={(sc, b) => handleFinishGame('shadow_shinobi', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'speed_runners_2099' && (
-              <SpeedRunners2099
-                onFinish={(sc, b) => handleFinishGame('speed_runners_2099', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'block_craft_arena' && (
-              <BlockCraftArena
-                onFinish={(sc, b) => handleFinishGame('block_craft_arena', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {activeGameId === 'neon_cyber_pong' && (
-              <NeonCyberPong
-                onFinish={(sc, b) => handleFinishGame('neon_cyber_pong', sc, b)}
-                onExit={() => setActiveGameId(null)}
-              />
-            )}
-            {/* 2 BRAND NEW V3.2 PAID GAMES */}
-            {activeGameId === 'solar_overdrive' && (
-              <div className="relative w-full h-full flex flex-col">
-                <div className="flex justify-end p-2">
-                  <button
-                    onClick={() => setActiveGameId(null)}
-                    className="px-4 py-1.5 rounded-xl liquid-glass-pill text-xs font-mono font-bold text-slate-300 hover:text-white flex items-center gap-1.5 cursor-pointer shadow-md"
-                  >
-                    <X className="w-3.5 h-3.5" /> Quitter
-                  </button>
-                </div>
-                <div className="flex-1 overflow-hidden">
-                  <SolarOverdrive
-                    onScoreSubmit={(sc) => handleFinishGame('solar_overdrive', sc, 100)}
-                    onVCoinsEarned={(vc) => {
-                      setState(prev => ({
-                        ...prev,
-                        profile: { ...prev.profile, totalVCoins: prev.profile.totalVCoins + vc }
-                      }));
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-            {activeGameId === 'pixel_survivors' && (
-              <div className="relative w-full h-full flex flex-col">
-                <div className="flex justify-end p-2">
-                  <button
-                    onClick={() => setActiveGameId(null)}
-                    className="px-4 py-1.5 rounded-xl liquid-glass-pill text-xs font-mono font-bold text-slate-300 hover:text-white flex items-center gap-1.5 cursor-pointer shadow-md"
-                  >
-                    <X className="w-3.5 h-3.5" /> Quitter
-                  </button>
-                </div>
-                <div className="flex-1 overflow-hidden">
-                  <PixelSurvivors
-                    onScoreSubmit={(sc) => handleFinishGame('pixel_survivors', sc, 100)}
-                    onVCoinsEarned={(vc) => {
-                      setState(prev => ({
-                        ...prev,
-                        profile: { ...prev.profile, totalVCoins: prev.profile.totalVCoins + vc }
-                      }));
-                    }}
-                  />
-                </div>
-              </div>
-            )}
+      {/* 6. Game Detail Modal (Roblox-like Game Page with 16:9 Banner & Stats) */}
+      <GameDetailModal
+        isOpen={!!selectedGameForDetail}
+        onClose={() => setSelectedGameForDetail(null)}
+        game={selectedGameForDetail}
+        stats={selectedGameForDetail ? (state.stats[selectedGameForDetail.id] || { plays: 0, highScore: 0 }) : { plays: 0, highScore: 0 }}
+        isUnlocked={selectedGameForDetail ? (!selectedGameForDetail.isPaid || !!state.profile.unlockedGames?.includes(selectedGameForDetail.id)) : false}
+        isFavorite={selectedGameForDetail ? state.favorites.includes(selectedGameForDetail.id) : false}
+        userVCoins={currentVCoins}
+        playButtonColor={state.settings.playButtonColor}
+        language={state.settings.language || 'en'}
+        onToggleFavorite={handleToggleFavorite}
+        onPlayGame={(gameId) => handleTryLaunchGame(gameId)}
+        onUnlockGame={(game) => handleUnlockPaidGame(game.id)}
+      />
 
-            {/* Mobile / Touch Ergonomic Controls */}
-            <MobileGameControls
-              gameId={activeGameId}
-              onExit={() => setActiveGameId(null)}
-            />
+      {/* 6. Active Game Overlay Cabinet - Multiplatform Console / PC / Mobile / Tablet Shell */}
+      {activeGameId && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-slate-950/98 backdrop-blur-3xl overflow-hidden select-none">
+          {/* Universal Multiplatform Header Bar */}
+          <header className="h-14 shrink-0 px-3 sm:px-6 flex items-center justify-between border-b border-white/10 bg-slate-900/80 backdrop-blur-xl z-20">
+            {/* Left: Instant Back / Exit Button */}
+            <button
+              onClick={() => {
+                audio.playClick();
+                setActiveGameId(null);
+              }}
+              className="px-3.5 py-1.5 rounded-xl liquid-glass-pill hover:border-cyan-400 text-xs font-mono font-bold text-cyan-300 flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95 transition-all"
+              title="Retour au catalogue (Échap / Manette B)"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Retour</span>
+            </button>
+
+            {/* Center: Clean Game Name & Multiplatform Indicator */}
+            <div className="flex items-center gap-2">
+              <span className="font-mono font-black text-white text-sm sm:text-base tracking-wider uppercase">
+                {GAMES_LIST.find(g => g.id === activeGameId)?.name || 'Jeu'}
+              </span>
+              <div className="hidden sm:flex items-center gap-1.5">
+                {gamepadState?.connected ? (
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
+                    🎮 Manette Détectée
+                  </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30">
+                    📱 Tactile / ⌨️ Clavier
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Right: Sound Toggle & VC Counter */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                onClick={toggleSound}
+                className="p-2 rounded-xl liquid-glass-pill text-xs text-slate-300 hover:text-white cursor-pointer"
+                title={t.toggleSound}
+              >
+                {state.settings.sfxEnabled ? <Volume2 className="w-4 h-4 text-cyan-400" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+              </button>
+              <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-500/20 border border-amber-400/40 text-yellow-300 text-xs font-mono font-bold">
+                <Coins className="w-3.5 h-3.5 fill-current text-yellow-400" />
+                <span>{currentVCoins.toLocaleString()} VC</span>
+              </div>
+            </div>
+          </header>
+
+          {/* Main Game Frame - Responsive full-height canvas */}
+          <div className="flex-1 w-full max-w-7xl mx-auto flex flex-col items-center justify-center p-1 sm:p-4 overflow-y-auto no-scrollbar">
+            {activeGameId === "cyber_runner_2099" && (
+              <CyberRunner2099
+                onScoreSubmit={(sc) => handleFinishGame("cyber_runner_2099", sc, 1)}
+                onVCoinsEarned={(vc) => {
+                  setState(prev => ({
+                    ...prev,
+                    profile: { ...prev.profile, totalVCoins: prev.profile.totalVCoins + vc }
+                  }));
+                }}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === "cosmic_defender" && (
+              <CosmicDefender
+                onScoreSubmit={(sc) => handleFinishGame("cosmic_defender", sc, 1)}
+                onVCoinsEarned={(vc) => {
+                  setState(prev => ({
+                    ...prev,
+                    profile: { ...prev.profile, totalVCoins: prev.profile.totalVCoins + vc }
+                  }));
+                }}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === "pixel_dungeon_quest" && (
+              <PixelDungeonQuest
+                onScoreSubmit={(sc) => handleFinishGame("pixel_dungeon_quest", sc, 1)}
+                onVCoinsEarned={(vc) => {
+                  setState(prev => ({
+                    ...prev,
+                    profile: { ...prev.profile, totalVCoins: prev.profile.totalVCoins + vc }
+                  }));
+                }}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === "titan_pinball_titan" && (
+              <TitanPinballTitan
+                onScoreSubmit={(sc) => handleFinishGame("titan_pinball_titan", sc, 1)}
+                onVCoinsEarned={(vc) => {
+                  setState(prev => ({
+                    ...prev,
+                    profile: { ...prev.profile, totalVCoins: prev.profile.totalVCoins + vc }
+                  }));
+                }}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
+            {activeGameId === "quantum_strike" && (
+              <QuantumStrike
+                onScoreSubmit={(sc) => handleFinishGame("quantum_strike", sc, 1)}
+                onVCoinsEarned={(vc) => {
+                  setState(prev => ({
+                    ...prev,
+                    profile: { ...prev.profile, totalVCoins: prev.profile.totalVCoins + vc }
+                  }));
+                }}
+                onExit={() => setActiveGameId(null)}
+              />
+            )}
           </div>
         </div>
       )}
@@ -1316,6 +1293,7 @@ export default function App() {
         }}
         totalRolls={state.rngTotalRolls}
         userVCoins={currentVCoins}
+        language={currentLang}
       />
 
       <ApexTrophyRoadModal
@@ -1323,6 +1301,7 @@ export default function App() {
         onClose={() => setShowTrophyModal(false)}
         totalTrophies={state.totalTrophies}
         claimedMilestones={state.claimedTrophyRoadRewards}
+        language={currentLang}
         onClaimMilestone={(nodeReq, label, type, val) => {
           setState(prev => {
             const nextClaimed = [...prev.claimedTrophyRoadRewards, nodeReq];
@@ -1342,6 +1321,7 @@ export default function App() {
         isOpen={showProfileModal}
         onClose={() => setShowProfileModal(false)}
         profile={state.profile}
+        language={currentLang}
         onSaveProfile={(updated) => {
           setState(prev => ({ ...prev, profile: updated }));
           notify(`Profil de ${updated.username} mis à jour avec succès !`);
@@ -1354,6 +1334,7 @@ export default function App() {
         isOpen={showQuestsModal}
         onClose={() => setShowQuestsModal(false)}
         quests={state.quests}
+        language={currentLang}
         onClaimQuest={(qId) => {
           const q = state.quests.find(quest => quest.id === qId);
           if (!q) return;
@@ -1373,6 +1354,7 @@ export default function App() {
       {showStoryModal && state.storyMode && (
         <StoryModeModal
           storyState={state.storyMode}
+          language={currentLang}
           onUpdateStory={(updated) => {
             setState(prev => ({ ...prev, storyMode: updated }));
           }}
@@ -1398,33 +1380,7 @@ export default function App() {
         isOpen={showAchievementsModal}
         onClose={() => setShowAchievementsModal(false)}
         achievements={state.achievements}
-      />
-
-      <ShopV3Modal
-        isOpen={showShopModal}
-        onClose={() => setShowShopModal(false)}
-        userVCoins={currentVCoins}
-        profile={state.profile}
-        onBuyAndEquip={(item) => {
-          setState(prev => {
-            let nextProfile = { ...prev.profile };
-            if (!nextProfile.unlockedHats?.includes(item.id) && item.category === 'hat') {
-              nextProfile.unlockedHats = [...(nextProfile.unlockedHats || []), item.id];
-              nextProfile.activeHat = item.id;
-              nextProfile.totalVCoins -= item.costVCoins;
-            } else if (!nextProfile.unlockedAuras?.includes(item.id) && item.category === 'aura') {
-              nextProfile.unlockedAuras = [...(nextProfile.unlockedAuras || []), item.id];
-              nextProfile.activeAura = item.id;
-              nextProfile.totalVCoins -= item.costVCoins;
-            } else if (!nextProfile.unlockedTitles?.includes(item.name) && item.category === 'title') {
-              nextProfile.unlockedTitles = [...(nextProfile.unlockedTitles || []), item.name];
-              nextProfile.title = item.name;
-              nextProfile.totalVCoins -= item.costVCoins;
-            }
-            return { ...prev, profile: nextProfile };
-          });
-          notify(`Cosmétique équipé : ${item.name} !`);
-        }}
+        language={currentLang}
       />
 
       <SettingsV3Modal
@@ -1444,6 +1400,7 @@ export default function App() {
         isOpen={showPassModal}
         onClose={() => setShowPassModal(false)}
         passState={state.arcadePass}
+        language={currentLang}
         onClaimReward={(lvl, isPrem, label, type, val) => {
           setState(prev => {
             const nextFreeClaimed = !isPrem ? [...prev.arcadePass.claimedFreeRewards, lvl] : prev.arcadePass.claimedFreeRewards;

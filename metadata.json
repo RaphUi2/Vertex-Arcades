@@ -1,6 +1,6 @@
 {
   "name": "Vertex Arcades",
-  "description": "Vertex Arcades v3.2 : Plateforme de jeux et d'expériences avec catalogue de 22 jeux originaux, Mode Histoire scénarisé en 5 chapitres, profil Liquid Glass avec publication de photo personnalisée, 250 succès, écrans de jeu agrandis immersifs et manette intégrée.",
+  "description": "Vertex Arcades : Plateforme de jeux avec catalogue d'expériences au format 1:1, fiches de jeux 16:9, Ligue des Trophées, Sanctuaire RNG, succès et support multiplateforme.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
