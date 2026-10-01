@@ -1,6 +1,6 @@
 // Web Audio API Retro & Modern Stylized Synthesizer & Procedural BGM Engine
 
-export type BGMTrack = 'chill' | 'synthwave' | 'hyper' | 'neon';
+export type BGMTrack = 'portal' | 'chill' | 'synthwave' | 'hyper' | 'neon';
 
 export interface BGMTrackInfo {
   id: BGMTrack;
@@ -10,6 +10,7 @@ export interface BGMTrackInfo {
 }
 
 export const BGM_TRACKS: BGMTrackInfo[] = [
+  { id: 'portal', name: 'Nexus Portal Ambient', genre: 'Ethereal Cosmic Lounge', bpm: 72 },
   { id: 'chill', name: 'Cyber Lounge Chillout', genre: 'Lo-Fi Cyber Lounge', bpm: 84 },
   { id: 'synthwave', name: 'Horizon 2099', genre: 'Synthwave Arp', bpm: 120 },
   { id: 'hyper', name: 'Cyber Arena Hype', genre: 'Arcade Funk & Electro', bpm: 128 },
@@ -295,6 +296,45 @@ class AudioManager {
     const leadNotes = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 587.33, 659.25];
 
     try {
+      // 0. PORTAL SPECIAL CELESTIAL AMBIENT SYNTH
+      if (track === 'portal') {
+        // Deep sub-pad resonance every 8 steps
+        if (step % 8 === 0) {
+          const padOsc = ctx.createOscillator();
+          const padGain = ctx.createGain();
+          padOsc.type = 'sine';
+          const rootNote = step === 0 ? 130.81 : 164.81; // C3 or E3
+          padOsc.frequency.setValueAtTime(rootNote, now);
+          padGain.gain.setValueAtTime(0.001, now);
+          padGain.gain.linearRampToValueAtTime(0.12 * this.musicVolume, now + 0.4);
+          padGain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+
+          padOsc.connect(padGain);
+          padGain.connect(this.bgmGainNode);
+          padOsc.start(now);
+          padOsc.stop(now + 1.25);
+        }
+
+        // Sparkling ethereal bell arpeggios on steps 0, 3, 7, 11, 14
+        if ([0, 3, 7, 11, 14].includes(step)) {
+          const celestialNotes = [523.25, 659.25, 783.99, 987.77, 1046.5, 1318.51];
+          const cFreq = celestialNotes[(step * 2 + Math.floor(this.stepCount / 12)) % celestialNotes.length];
+
+          const bellOsc = ctx.createOscillator();
+          const bellGain = ctx.createGain();
+          bellOsc.type = 'sine';
+          bellOsc.frequency.setValueAtTime(cFreq, now);
+          bellGain.gain.setValueAtTime(0.06 * this.musicVolume, now);
+          bellGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6);
+
+          bellOsc.connect(bellGain);
+          bellGain.connect(this.bgmGainNode);
+          bellOsc.start(now);
+          bellOsc.stop(now + 0.65);
+        }
+        return;
+      }
+
       // 1. Kick / Bass Pulse on beats 0, 4, 8, 12
       if (step % 4 === 0) {
         const bassOsc = ctx.createOscillator();

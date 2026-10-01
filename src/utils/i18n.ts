@@ -150,6 +150,40 @@ export interface Translations {
   themeDark: string;
   themeLight: string;
 
+  portalTitle: string;
+  portalSubtitle: string;
+  returnToPortal: string;
+  portalDestinations: string;
+  destGamesTitle: string;
+  destGamesSub: string;
+  destVibeTitle: string;
+  destVibeSub: string;
+  destVwebTitle: string;
+  destVwebSub: string;
+  enterDestination: string;
+  explorePreview: string;
+  portalHeroBadge: string;
+  portalChooseDestination: string;
+  portalServersOnline: string;
+  portalPlacesAvailable: string;
+  portalFriendCode: string;
+  portalAvailableOnline: string;
+  portalComingSoon: string;
+  portalGamesHighlight1: string;
+  portalGamesHighlight2: string;
+  portalGamesHighlight3: string;
+  portalGamesHighlight4: string;
+  portalVibeHighlight1: string;
+  portalVibeHighlight2: string;
+  portalVibeHighlight3: string;
+  portalVibeHighlight4: string;
+  portalVwebHighlight1: string;
+  portalVwebHighlight2: string;
+  portalVwebHighlight3: string;
+  portalVwebHighlight4: string;
+  settingsPortalSfxDesc: string;
+  settingsPortalMusicDesc: string;
+
   owned: string;
   free: string;
   gamesCount: string;
@@ -323,6 +357,40 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     themeDark: 'Obsidian Black',
     themeLight: 'Pure White',
 
+    portalTitle: 'Vertex Portal',
+    portalSubtitle: 'Select your destination across the Vertex multiverse & digital worlds',
+    returnToPortal: 'Vertex Portal',
+    portalDestinations: 'Vertex Places & Destinations',
+    destGamesTitle: 'Games',
+    destGamesSub: 'Arcade arena, high score challenges, story mode and quests',
+    destVibeTitle: 'Vibe',
+    destVibeSub: 'Chill lounges, lo-fi radio, 3D hangouts and live soundwaves',
+    destVwebTitle: 'Vweb',
+    destVwebSub: 'Metaverse web browser, creator spaces and decentralized apps',
+    enterDestination: 'Enter Experience ➜',
+    explorePreview: 'Explore Preview ➜',
+    portalHeroBadge: 'Multiverse Portal & Vertex Worlds',
+    portalChooseDestination: 'CHOOSE YOUR DESTINATION',
+    portalServersOnline: 'Vertex Servers Operational',
+    portalPlacesAvailable: '3 Multiverse Worlds Available',
+    portalFriendCode: 'Friend Code',
+    portalAvailableOnline: 'AVAILABLE • ONLINE',
+    portalComingSoon: 'COMING SOON!',
+    portalGamesHighlight1: '5 Original Games',
+    portalGamesHighlight2: '300 Achievements',
+    portalGamesHighlight3: 'VIP Pass & XP',
+    portalGamesHighlight4: 'Story Mode',
+    portalVibeHighlight1: 'Lo-Fi Lounges',
+    portalVibeHighlight2: 'Synthwave Radio',
+    portalVibeHighlight3: '3D Spatial Hangout',
+    portalVibeHighlight4: 'Spatial Voice Chat',
+    portalVwebHighlight1: 'Metaverse Browser',
+    portalVwebHighlight2: 'Creator Studios',
+    portalVwebHighlight3: 'Decentralized Apps',
+    portalVwebHighlight4: 'Digital Marketplace',
+    settingsPortalSfxDesc: 'Interface interaction sound effects and button haptics',
+    settingsPortalMusicDesc: 'Celestial ambient portal soundtrack',
+
     owned: 'ACQUIRED',
     free: 'FREE',
     gamesCount: 'Games',
@@ -495,6 +563,40 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     themeDark: 'Noir Obsidienne',
     themeLight: 'Blanc Pur',
 
+    portalTitle: 'Portail Vertex',
+    portalSubtitle: 'Sélectionnez votre destination dans le métaverse et les mondes Vertex',
+    returnToPortal: 'Portail Vertex',
+    portalDestinations: 'Lieux & Expériences Vertex',
+    destGamesTitle: 'Games',
+    destGamesSub: 'Arène arcade, défis de score, mode histoire et quêtes',
+    destVibeTitle: 'Vibe',
+    destVibeSub: 'Salons chill, radio lo-fi, hangouts 3D et flux sonores en direct',
+    destVwebTitle: 'Vweb',
+    destVwebSub: 'Navigateur métaverse, espaces créateurs et mini-applications',
+    enterDestination: 'Entrer dans l\'expérience ➜',
+    explorePreview: 'Explorer l\'aperçu ➜',
+    portalHeroBadge: 'Portail Multivers & Lieux Vertex',
+    portalChooseDestination: 'CHOISISSEZ VOTRE DESTINATION',
+    portalServersOnline: 'Serveurs Vertex Opérationnels',
+    portalPlacesAvailable: '3 Lieux Multivers Disponibles',
+    portalFriendCode: 'Code Ami',
+    portalAvailableOnline: 'DISPONIBLE • EN LIGNE',
+    portalComingSoon: 'COMING SOON!',
+    portalGamesHighlight1: '5 Jeux Originaux',
+    portalGamesHighlight2: '300 Succès',
+    portalGamesHighlight3: 'Pass VIP & XP',
+    portalGamesHighlight4: 'Mode Histoire',
+    portalVibeHighlight1: 'Salons Lo-Fi',
+    portalVibeHighlight2: 'Radio Synthwave',
+    portalVibeHighlight3: 'Hangout Spatial 3D',
+    portalVibeHighlight4: 'Vocal Spatialisant',
+    portalVwebHighlight1: 'Navigateur Métaverse',
+    portalVwebHighlight2: 'Espaces Studios',
+    portalVwebHighlight3: 'Mini-Apps Décentr.',
+    portalVwebHighlight4: 'Marché Numérique',
+    settingsPortalSfxDesc: 'Sons d\'interaction de l\'interface et retours tactiles',
+    settingsPortalMusicDesc: 'Ambiance sonore spatiale et céleste du Portail',
+
     owned: 'ACQUIS',
     free: 'GRATUIT',
     gamesCount: 'Jeux',
@@ -666,6 +768,40 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     themeCyber: 'Cyber Neón',
     themeDark: 'Negro Obsidiana',
     themeLight: 'Blanco Puro',
+
+    portalTitle: 'Portal Vertex',
+    portalSubtitle: 'Elige tu destino en el multiverso y mundos digitales de Vertex',
+    returnToPortal: 'Portal Vertex',
+    portalDestinations: 'Lugares y Destinos Vertex',
+    destGamesTitle: 'Games',
+    destGamesSub: 'Arena arcade, desafíos de récords, modo historia y misiones',
+    destVibeTitle: 'Vibe',
+    destVibeSub: 'Salas chill, radio lo-fi, hangouts 3D y ondas sonoras en vivo',
+    destVwebTitle: 'Vweb',
+    destVwebSub: 'Navegador metaverso, espacios creadores y mini-aplicaciones',
+    enterDestination: 'Entrar a la experiencia ➜',
+    explorePreview: 'Explorar vista previa ➜',
+    portalHeroBadge: 'Portal Multiverso y Lugares Vertex',
+    portalChooseDestination: 'ELIGE TU DESTINO',
+    portalServersOnline: 'Servidores Vertex Operativos',
+    portalPlacesAvailable: '3 Mundos Multiverso Disponibles',
+    portalFriendCode: 'Código de Amigo',
+    portalAvailableOnline: 'DISPONIBLE • EN LÍNEA',
+    portalComingSoon: 'COMING SOON!',
+    portalGamesHighlight1: '5 Juegos Originales',
+    portalGamesHighlight2: '300 Logros',
+    portalGamesHighlight3: 'Pase VIP y XP',
+    portalGamesHighlight4: 'Modo Historia',
+    portalVibeHighlight1: 'Salas Lo-Fi',
+    portalVibeHighlight2: 'Radio Synthwave',
+    portalVibeHighlight3: 'Hangout Espacial 3D',
+    portalVibeHighlight4: 'Voz Espacial',
+    portalVwebHighlight1: 'Navegador Metaverso',
+    portalVwebHighlight2: 'Estudios de Creador',
+    portalVwebHighlight3: 'Mini-Apps Descentralizadas',
+    portalVwebHighlight4: 'Mercado Digital',
+    settingsPortalSfxDesc: 'Efectos de sonido de interfaz y respuesta táctil',
+    settingsPortalMusicDesc: 'Banda sonora espacial y celestial del Portal',
 
     owned: 'ADQUIRIDO',
     free: 'GRATIS',

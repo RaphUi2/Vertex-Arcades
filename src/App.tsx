@@ -5,7 +5,7 @@ import {
   Settings, Gamepad2, Volume2, VolumeX, Crown, Target, ShoppingBag,
   ArrowRightLeft, Skull, Flame, Check, Shield, Lock, User, Award,
   Menu, ChevronRight, Plus, Star, Compass, Layers, Radio, BookOpen,
-  Filter, SlidersHorizontal, ArrowLeft, Users, Palette, Moon, Sun
+  Filter, SlidersHorizontal, ArrowLeft, Users, Palette, Moon, Sun, Globe
 } from 'lucide-react';
 
 import { audio } from './utils/audio';
@@ -33,6 +33,9 @@ import { AchievementsV3Modal } from './components/AchievementsV3Modal';
 import { SettingsV3Modal } from './components/SettingsV3Modal';
 import { ArcadePassV3Modal } from './components/ArcadePassV3Modal';
 import { FriendsComingSoonModal } from './components/FriendsComingSoonModal';
+import { VertexPortalHub } from './components/VertexPortalHub';
+import { VibePreviewModal } from './components/VibePreviewModal';
+import { VwebPreviewModal } from './components/VwebPreviewModal';
 
 // 5 Modern Games
 import { CyberRunner2099 } from './games/CyberRunner2099';
@@ -206,6 +209,11 @@ export default function App() {
     return parsed;
   });
 
+  // Active Destination: Starts on 'hub' (Portail Vertex) on every launch!
+  const [currentDestination, setCurrentDestination] = useState<'hub' | 'games'>('hub');
+  const [showVibeModal, setShowVibeModal] = useState(false);
+  const [showVwebModal, setShowVwebModal] = useState(false);
+
   // Active game & category filters
   const [activeGameId, setActiveGameId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -283,6 +291,8 @@ export default function App() {
       setShowSettingsModal(false);
       setShowPassModal(false);
       setShowFriendsModal(false);
+      setShowVibeModal(false);
+      setShowVwebModal(false);
       setPaidGamePrompt(null);
     } else if (action === 'A') {
       if (selectedGameForDetail) {
@@ -321,6 +331,8 @@ export default function App() {
           setShowSettingsModal(false);
           setShowPassModal(false);
           setShowFriendsModal(false);
+          setShowVibeModal(false);
+          setShowVwebModal(false);
         }
       }
     };
@@ -517,8 +529,39 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* 2. Top Header - Liquid Glass Hotbar */}
-      <header className="liquid-glass-header sticky top-0 z-40 w-full px-4 sm:px-8 py-3 flex items-center justify-between">
+      {/* 2. MAIN HUB / PORTAL LANDING (Default on startup) */}
+      {currentDestination === 'hub' ? (
+        <VertexPortalHub
+          profile={state.profile}
+          settings={state.settings}
+          totalTrophies={state.totalTrophies}
+          arcadePassLevel={state.arcadePass.level}
+          language={currentLang}
+          onEnterGames={() => {
+            setCurrentDestination('games');
+            if (state.settings.musicEnabled) {
+              audio.startBGM(state.settings.currentTrack || 'chill');
+            }
+            notify("Bienvenue dans GAMES ! 🎮");
+          }}
+          onOpenVibePreview={() => setShowVibeModal(true)}
+          onOpenVwebPreview={() => setShowVwebModal(true)}
+          onOpenProfile={() => setShowProfileModal(true)}
+          onOpenSettings={() => setShowSettingsModal(true)}
+          onToggleSound={toggleSound}
+          onSelectTheme={(th) => {
+            audio.playClick();
+            setState(prev => ({ ...prev, settings: { ...prev.settings, colorTheme: th } }));
+            notify(`Thème ${th === 'dark' ? 'Noir Obsidienne' : th === 'light' ? 'Blanc Pur' : 'Cyber Néon'} activé`);
+          }}
+          onSelectLanguage={(lng) => {
+            setState(prev => ({ ...prev, settings: { ...prev.settings, language: lng } }));
+          }}
+        />
+      ) : (
+        <>
+          {/* Top Header - Liquid Glass Hotbar for GAMES */}
+          <header className="liquid-glass-header sticky top-0 z-40 w-full px-4 sm:px-8 py-3 flex items-center justify-between">
         {/* Specular top reflection glint line */}
         <div className="absolute inset-x-8 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/35 to-transparent pointer-events-none" />
 
@@ -570,15 +613,33 @@ export default function App() {
           </div>
         </div>
 
-        {/* Center: SLEEK MONOCHROME GAMEPAD LOGO */}
+        {/* Center-Left: Instant Return to Vertex Portal Button */}
+        <button
+          onClick={() => {
+            audio.playClick();
+            setActiveGameId(null);
+            setSelectedGameForDetail(null);
+            setCurrentDestination('hub');
+            if (state.settings.musicEnabled) {
+              audio.startBGM('portal');
+            }
+          }}
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl liquid-glass-pill hover:border-cyan-400 text-cyan-300 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95 group font-mono text-xs font-bold"
+          title="Retourner au Portail Principal (Menu des Lieux)"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-cyan-400 group-hover:rotate-45 transition-transform" />
+          <span>🌌 Lieux & Portail</span>
+        </button>
+
+        {/* Center: SLEEK GAMES LOGO */}
         <div
           onClick={() => { audio.playWin(); }}
           className="flex items-center gap-2 px-3 py-1.5 rounded-2xl liquid-glass-pill hover:border-cyan-400/70 transition-all cursor-pointer group shadow-sm active:scale-95"
-          title="Vertex Arcades"
+          title="Games"
         >
           <Gamepad2 className="w-5 h-5 text-cyan-400 filter drop-shadow-[0_0_8px_rgba(6,182,212,0.9)] group-hover:scale-110 transition-transform" />
           <span className="font-mono font-black text-xs text-white tracking-wider flex items-center gap-1.5">
-            VERTEX
+            GAMES
             {gamepadState?.connected && (
               <span className="px-1.5 py-0.5 rounded-md text-[8px] bg-emerald-500/25 text-emerald-300 border border-emerald-400/30 uppercase tracking-widest hidden sm:inline">
                 🎮 PAD
@@ -715,6 +776,91 @@ export default function App() {
 
                 {/* Categorized Navigation Sections */}
                 <div className="space-y-5">
+                  {/* Category 0: LIEUX VERTEX & DESTINATIONS */}
+                  <div>
+                    <span className="text-[10px] font-mono font-black text-cyan-400/90 tracking-wider uppercase px-1 mb-2 block">
+                      🌌 {t.portalDestinations}
+                    </span>
+                    <div className="space-y-1.5">
+                      {/* Return to Portal Main Menu */}
+                      <div
+                        onClick={() => {
+                          audio.playClick();
+                          setIsDrawerOpen(false);
+                          setActiveGameId(null);
+                          setSelectedGameForDetail(null);
+                          setCurrentDestination('hub');
+                          if (state.settings.musicEnabled) {
+                            audio.startBGM('portal');
+                          }
+                        }}
+                        className="p-3 rounded-2xl liquid-glass-card border border-cyan-400/50 hover:border-cyan-400 transition-all cursor-pointer group flex items-center justify-between shadow-md"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-cyan-500/25 border border-cyan-400/40 flex items-center justify-center text-cyan-300">
+                            <Sparkles className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-white font-mono group-hover:text-cyan-300 transition-colors">
+                                {t.returnToPortal}
+                              </span>
+                              <span className="px-1.5 py-0.2 rounded-full text-[8px] font-mono font-black bg-cyan-500/30 text-cyan-200 border border-cyan-400/50">
+                                MENU
+                              </span>
+                            </div>
+                            <span className="text-[10px] text-slate-400 font-mono block">
+                              Changer de lieu (Games, Vibe, Vweb)
+                            </span>
+                          </div>
+                        </div>
+                        <ArrowLeft className="w-4 h-4 text-cyan-400 group-hover:-translate-x-1 transition-transform" />
+                      </div>
+
+                      {/* Vibe Quick Preview */}
+                      <div
+                        onClick={() => {
+                          audio.playClick();
+                          setIsDrawerOpen(false);
+                          setShowVibeModal(true);
+                        }}
+                        className="p-2.5 rounded-2xl liquid-glass-pill border border-fuchsia-400/30 hover:border-fuchsia-400 transition-all cursor-pointer group flex items-center justify-between text-xs font-mono"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-lg bg-fuchsia-500/20 border border-fuchsia-400/30 flex items-center justify-center text-fuchsia-300">
+                            <Radio className="w-3.5 h-3.5" />
+                          </div>
+                          <div>
+                            <span className="font-bold text-white group-hover:text-fuchsia-300">Vibe</span>
+                            <span className="text-[10px] text-slate-400 ml-2">Salons & Radio Lo-Fi</span>
+                          </div>
+                        </div>
+                        <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-fuchsia-500/25 text-fuchsia-300 border border-fuchsia-400/40 font-bold animate-pulse">Soon!</span>
+                      </div>
+
+                      {/* Vweb Quick Preview */}
+                      <div
+                        onClick={() => {
+                          audio.playClick();
+                          setIsDrawerOpen(false);
+                          setShowVwebModal(true);
+                        }}
+                        className="p-2.5 rounded-2xl liquid-glass-pill border border-blue-400/30 hover:border-blue-400 transition-all cursor-pointer group flex items-center justify-between text-xs font-mono"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-lg bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300">
+                            <Globe className="w-3.5 h-3.5" />
+                          </div>
+                          <div>
+                            <span className="font-bold text-white group-hover:text-blue-300">Vweb</span>
+                            <span className="text-[10px] text-slate-400 ml-2">Web Métaverse & Apps</span>
+                          </div>
+                        </div>
+                        <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-blue-500/25 text-blue-300 border border-blue-400/40 font-bold animate-pulse">Soon!</span>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Category 1: JEUX & EXPÉRIENCES */}
                   <div>
                     <span className="text-[10px] font-mono font-black text-cyan-400/90 tracking-wider uppercase px-1 mb-2 block">
@@ -1366,6 +1512,8 @@ export default function App() {
           </div>
         </div>
       )}
+      </>
+      )}
 
       {/* 8. Modals System */}
       <RngUniverseModal
@@ -1492,6 +1640,7 @@ export default function App() {
         onUpdateSettings={(newSet) => setState(prev => ({ ...prev, settings: newSet }))}
         gamepadConnected={gamepadState.connected}
         gamepadName={gamepadState.id}
+        context={currentDestination === 'hub' ? 'portal' : 'games'}
         onResetData={() => {
           localStorage.removeItem('vertex_arcades_v3_state');
           window.location.reload();
@@ -1537,6 +1686,22 @@ export default function App() {
         isOpen={showFriendsModal}
         onClose={() => setShowFriendsModal(false)}
         username={state.profile.username}
+        onShowToast={(msg) => notify(msg)}
+        language={currentLang}
+      />
+
+      {/* 9. Vibe Destination Preview Modal */}
+      <VibePreviewModal
+        isOpen={showVibeModal}
+        onClose={() => setShowVibeModal(false)}
+        onShowToast={(msg) => notify(msg)}
+        language={currentLang}
+      />
+
+      {/* 10. Vweb Destination Preview Modal */}
+      <VwebPreviewModal
+        isOpen={showVwebModal}
+        onClose={() => setShowVwebModal(false)}
         onShowToast={(msg) => notify(msg)}
         language={currentLang}
       />

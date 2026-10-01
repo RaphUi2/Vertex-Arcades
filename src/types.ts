@@ -9,7 +9,7 @@ export interface AppSettings {
   musicEnabled: boolean;
   sfxVolume: number; // 0 to 100
   musicVolume: number; // 0 to 100
-  currentTrack: 'chill' | 'synthwave' | 'hyper' | 'neon';
+  currentTrack: 'portal' | 'chill' | 'synthwave' | 'hyper' | 'neon';
   graphicsQuality: 'eco' | 'balanced' | 'ultra';
   particleDensity: 'faible' | 'normal' | 'extreme';
   glowEffects: boolean;
