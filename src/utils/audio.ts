@@ -1,6 +1,6 @@
 // Web Audio API Retro & Modern Stylized Synthesizer & Procedural BGM Engine
 
-export type BGMTrack = 'portal' | 'chill' | 'synthwave' | 'hyper' | 'neon';
+export type BGMTrack = 'halloween' | 'portal' | 'chill' | 'synthwave' | 'hyper' | 'neon';
 
 export interface BGMTrackInfo {
   id: BGMTrack;
@@ -10,6 +10,7 @@ export interface BGMTrackInfo {
 }
 
 export const BGM_TRACKS: BGMTrackInfo[] = [
+  { id: 'halloween', name: '🎃 Spooky Midnight Masquerade', genre: 'Gothic Halloween Synth', bpm: 88 },
   { id: 'portal', name: 'Nexus Portal Ambient', genre: 'Ethereal Cosmic Lounge', bpm: 72 },
   { id: 'chill', name: 'Cyber Lounge Chillout', genre: 'Lo-Fi Cyber Lounge', bpm: 84 },
   { id: 'synthwave', name: 'Horizon 2099', genre: 'Synthwave Arp', bpm: 120 },
@@ -22,9 +23,9 @@ class AudioManager {
   private sfxEnabled: boolean = true;
   private musicEnabled: boolean = true;
   private sfxVolume: number = 0.7; // 0 to 1
-  private musicVolume: number = 0.4; // 0 to 1
+  private musicVolume: number = 0.45; // 0 to 1
   private bgmInterval: any = null;
-  private currentTrack: BGMTrack = 'chill';
+  private currentTrack: BGMTrack = 'halloween';
   private isBgmPlaying: boolean = false;
   private bgmGainNode: GainNode | null = null;
   private stepCount: number = 0;
@@ -248,6 +249,11 @@ class AudioManager {
     this.playTone([440, 554.37, 659.25, 880, 1108.73, 1318.51, 1760], [0.06, 0.06, 0.06, 0.08, 0.08, 0.1, 0.45], 'square', undefined, 0.3);
   }
 
+  // 🎃 Halloween Spooky Chime & Ghost Cackle
+  playHalloweenSpook() {
+    this.playTone([622.25, 587.33, 466.16, 440, 311.13, 293.66], [0.08, 0.08, 0.08, 0.1, 0.12, 0.35], 'sawtooth', 75, 0.28);
+  }
+
   // Rank Level-Up Fanfare
   playRankUp() {
     this.playTone([440, 659.25, 880, 1318.51], [0.08, 0.08, 0.1, 0.35], 'triangle', undefined, 0.28);
@@ -296,6 +302,94 @@ class AudioManager {
     const leadNotes = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 587.33, 659.25];
 
     try {
+      // 🎃 HALLOWEEN SPECIAL RETRO GOTHIC SYNTH ENGINE
+      if (track === 'halloween') {
+        // A. Deep Gothic Church Organ Sub-Chords every 8 steps
+        if (step % 8 === 0) {
+          const chordProgression = [
+            [73.42, 110.0, 174.61],  // D minor (D2, A2, F3)
+            [58.27, 116.54, 146.83], // Bb major (Bb1, Bb2, D3)
+            [49.00, 98.00, 146.83],  // G minor (G1, G2, D3)
+            [69.30, 110.0, 164.81]   // A7 / C# dim (C#2, A2, E3)
+          ];
+          const chordIndex = Math.floor(this.stepCount / 8) % chordProgression.length;
+          const currentChord = chordProgression[chordIndex];
+
+          currentChord.forEach((freq, i) => {
+            const orgOsc = ctx.createOscillator();
+            const orgGain = ctx.createGain();
+            orgOsc.type = i === 0 ? 'triangle' : 'sawtooth';
+            orgOsc.frequency.setValueAtTime(freq, now);
+
+            const vol = (i === 0 ? 0.15 : 0.04) * this.musicVolume;
+            orgGain.gain.setValueAtTime(0.001, now);
+            orgGain.gain.linearRampToValueAtTime(vol, now + 0.15);
+            orgGain.gain.exponentialRampToValueAtTime(0.001, now + 1.6);
+
+            orgOsc.connect(orgGain);
+            orgGain.connect(this.bgmGainNode);
+            orgOsc.start(now);
+            orgOsc.stop(now + 1.65);
+          });
+        }
+
+        // B. Spooky Halloween Fast Arpeggio (Classic Halloween Theme / Stranger Chills Vibe)
+        const spookyArpNotes = [
+          587.33, 440.0, 466.16, 440.0, 587.33, 440.0, 466.16, 440.0,
+          622.25, 440.0, 587.33, 440.0, 466.16, 440.0, 392.00, 440.0
+        ];
+        const currentNote = spookyArpNotes[step % spookyArpNotes.length];
+
+        const bellOsc = ctx.createOscillator();
+        const bellGain = ctx.createGain();
+        bellOsc.type = 'sine';
+        bellOsc.frequency.setValueAtTime(currentNote, now);
+        bellGain.gain.setValueAtTime(0.08 * this.musicVolume, now);
+        bellGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+
+        bellOsc.connect(bellGain);
+        bellGain.connect(this.bgmGainNode);
+        bellOsc.start(now);
+        bellOsc.stop(now + 0.24);
+
+        // C. Ghostly Theremin / Spectral Whistle on selected eerie steps (3, 7, 11, 15)
+        if ([3, 7, 11, 15].includes(step)) {
+          const thOsc = ctx.createOscillator();
+          const thGain = ctx.createGain();
+          thOsc.type = 'sine';
+          const baseGhostFreq = step === 3 ? 880.0 : step === 7 ? 932.33 : step === 11 ? 1046.5 : 783.99;
+          thOsc.frequency.setValueAtTime(baseGhostFreq, now);
+          thOsc.frequency.exponentialRampToValueAtTime(baseGhostFreq * 1.08, now + 0.35);
+
+          thGain.gain.setValueAtTime(0.001, now);
+          thGain.gain.linearRampToValueAtTime(0.045 * this.musicVolume, now + 0.1);
+          thGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+
+          thOsc.connect(thGain);
+          thGain.connect(this.bgmGainNode);
+          thOsc.start(now);
+          thOsc.stop(now + 0.48);
+        }
+
+        // D. Gothic Deep Heartbeat / Clock Pulse on beat 0, 4, 8, 12
+        if (step % 4 === 0) {
+          const heartOsc = ctx.createOscillator();
+          const heartGain = ctx.createGain();
+          heartOsc.type = 'sine';
+          heartOsc.frequency.setValueAtTime(55, now);
+          heartOsc.frequency.exponentialRampToValueAtTime(28, now + 0.18);
+          heartGain.gain.setValueAtTime(0.22 * this.musicVolume, now);
+          heartGain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+          heartOsc.connect(heartGain);
+          heartGain.connect(this.bgmGainNode);
+          heartOsc.start(now);
+          heartOsc.stop(now + 0.22);
+        }
+
+        return;
+      }
+
       // 0. PORTAL SPECIAL CELESTIAL AMBIENT SYNTH
       if (track === 'portal') {
         // Deep sub-pad resonance every 8 steps

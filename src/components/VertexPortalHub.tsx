@@ -22,7 +22,7 @@ interface VertexPortalHubProps {
   onOpenProfile: () => void;
   onOpenSettings: () => void;
   onToggleSound: () => void;
-  onSelectTheme: (theme: 'cyber' | 'dark' | 'light') => void;
+  onSelectTheme: (theme: 'halloween' | 'cyber' | 'dark' | 'light') => void;
   onSelectLanguage: (lang: Language) => void;
 }
 
@@ -43,17 +43,17 @@ export function VertexPortalHub({
 }: VertexPortalHubProps) {
   const t = getTranslation(language);
   const initialLetter = (profile.username.trim()[0] || 'V').toUpperCase();
-  const currentTheme = settings.colorTheme || 'cyber';
+  const currentTheme = settings.colorTheme || 'halloween';
 
-  // Automatically start the dedicated Portal ambient soundtrack on load
+  // Automatically start the Halloween ambient soundtrack on load
   useEffect(() => {
     if (settings.musicEnabled) {
-      audio.startBGM('portal');
+      audio.startBGM(settings.currentTrack || 'halloween');
     }
     return () => {
       // Clean up when unmounting
     };
-  }, [settings.musicEnabled]);
+  }, [settings.musicEnabled, settings.currentTrack]);
 
   const socialStatusEmoji =
     profile.socialStatus === 'ready_for_duel' ? '⚔️ 1v1' :
@@ -129,7 +129,17 @@ export function VertexPortalHub({
         {/* Right: Sound, Theme, Language & Settings Controls (No Money) */}
         <div className="flex items-center gap-2">
           {/* Quick Theme Switcher */}
-          <div className="hidden lg:flex items-center p-1 rounded-2xl liquid-glass-pill border border-white/10 gap-1 text-[10px] font-mono">
+          <div className="hidden lg:flex items-center p-1 rounded-2xl liquid-glass-pill border border-orange-500/30 gap-1 text-[10px] font-mono">
+            <button
+              onClick={() => onSelectTheme('halloween')}
+              className={`px-2.5 py-1 rounded-xl transition-all cursor-pointer flex items-center gap-1 ${
+                currentTheme === 'halloween' ? 'bg-orange-500 text-slate-950 font-black shadow-[0_0_12px_#f97316]' : 'text-orange-300 hover:text-white'
+              }`}
+              title="Thème Halloween"
+            >
+              <span>🎃</span>
+              <span>Halloween</span>
+            </button>
             <button
               onClick={() => onSelectTheme('cyber')}
               className={`px-2.5 py-1 rounded-xl transition-all cursor-pointer ${
@@ -225,31 +235,39 @@ export function VertexPortalHub({
           <motion.div
             whileHover={{ y: -8, scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="relative rounded-[32px] p-6 lg:p-7 flex flex-col justify-between border-2 border-cyan-400/70 bg-gradient-to-b from-cyan-950/50 via-slate-900/90 to-blue-950/70 backdrop-blur-2xl shadow-[0_0_40px_rgba(6,182,212,0.35)] overflow-hidden group transition-all"
+            className="relative rounded-[32px] p-6 lg:p-7 flex flex-col justify-between border-2 border-orange-500/70 bg-gradient-to-b from-orange-950/40 via-slate-900/90 to-cyan-950/60 backdrop-blur-2xl shadow-[0_0_45px_rgba(249,115,22,0.35)] overflow-hidden group transition-all"
           >
-            {/* Holographic Angular Accent Sheen */}
-            <div className="absolute -right-16 -top-16 w-44 h-44 bg-cyan-500/20 rounded-full blur-2xl group-hover:bg-cyan-500/35 transition-all" />
-            <div className="absolute inset-x-8 top-0 h-[2px] bg-gradient-to-r from-transparent via-cyan-300 to-transparent pointer-events-none" />
+            {/* Holographic Angular Accent Sheen with Pumpkin Glow */}
+            <div className="absolute -right-16 -top-16 w-44 h-44 bg-orange-500/25 rounded-full blur-2xl group-hover:bg-orange-500/40 transition-all" />
+            <div className="absolute inset-x-8 top-0 h-[2px] bg-gradient-to-r from-transparent via-orange-400 to-transparent pointer-events-none" />
 
             <div>
               {/* Header with Orb & Status */}
               <div className="flex items-center justify-between mb-5">
                 <div className="relative">
-                  <div className="w-16 h-16 rounded-[22px] bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-slate-950 shadow-[0_0_25px_rgba(6,182,212,0.6)] group-hover:rotate-6 transition-transform">
+                  <div className="w-16 h-16 rounded-[22px] bg-gradient-to-br from-orange-500 via-amber-500 to-cyan-500 flex items-center justify-center text-slate-950 shadow-[0_0_25px_rgba(249,115,22,0.6)] group-hover:rotate-6 transition-transform">
                     <Gamepad2 className="w-9 h-9 stroke-[2.2]" />
                   </div>
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-400 border-2 border-slate-950 animate-pulse shadow-[0_0_8px_#34d399]" />
+                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-orange-400 border-2 border-slate-950 flex items-center justify-center text-[10px] shadow-[0_0_10px_#f97316]">
+                    🎃
+                  </span>
                 </div>
 
-                <span className="px-3.5 py-1 rounded-full text-[10px] font-mono font-black uppercase tracking-wider bg-emerald-500/25 text-emerald-300 border border-emerald-400/50 flex items-center gap-1.5 shadow-[0_0_15px_rgba(16,185,129,0.35)]">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  {t.portalAvailableOnline}
-                </span>
+                <div className="flex flex-col items-end gap-1">
+                  <span className="px-3.5 py-1 rounded-full text-[10px] font-mono font-black uppercase tracking-wider bg-emerald-500/25 text-emerald-300 border border-emerald-400/50 flex items-center gap-1.5 shadow-[0_0_15px_rgba(16,185,129,0.35)]">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    {t.portalAvailableOnline}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-black uppercase tracking-wider bg-orange-500/20 text-orange-300 border border-orange-400/40 animate-pulse">
+                    🎃 HALLOWEEN EVENT
+                  </span>
+                </div>
               </div>
 
               {/* Title & Description */}
-              <h2 className="text-2xl lg:text-3xl font-black font-mono text-white tracking-wider uppercase group-hover:text-cyan-300 transition-colors">
-                {t.destGamesTitle}
+              <h2 className="text-2xl lg:text-3xl font-black font-mono text-white tracking-wider uppercase group-hover:text-orange-300 transition-colors flex items-center gap-2">
+                <span>{t.destGamesTitle}</span>
+                <span className="text-lg">🎃</span>
               </h2>
               <p className="text-xs text-slate-300 mt-1.5 font-sans leading-relaxed">
                 {t.destGamesSub}
@@ -257,19 +275,19 @@ export function VertexPortalHub({
 
               {/* Highlights Pill Badges */}
               <div className="grid grid-cols-2 gap-2 my-6 text-[11px] font-mono">
-                <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2 group-hover:border-cyan-400/30 transition-colors">
-                  <span className="text-cyan-400 font-bold">🎮</span>
+                <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2 group-hover:border-orange-400/30 transition-colors">
+                  <span className="text-orange-400 font-bold">🎮</span>
                   <span className="text-slate-200">{t.portalGamesHighlight1}</span>
                 </div>
-                <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2 group-hover:border-cyan-400/30 transition-colors">
+                <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2 group-hover:border-orange-400/30 transition-colors">
                   <span className="text-yellow-400 font-bold">🏆</span>
                   <span className="text-slate-200">{t.portalGamesHighlight2}</span>
                 </div>
-                <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2 group-hover:border-cyan-400/30 transition-colors">
+                <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2 group-hover:border-orange-400/30 transition-colors">
                   <span className="text-fuchsia-400 font-bold">👑</span>
                   <span className="text-slate-200">{t.portalGamesHighlight3}</span>
                 </div>
-                <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2 group-hover:border-cyan-400/30 transition-colors">
+                <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2 group-hover:border-orange-400/30 transition-colors">
                   <span className="text-amber-400 font-bold">📖</span>
                   <span className="text-slate-200">{t.portalGamesHighlight4}</span>
                 </div>
@@ -282,7 +300,7 @@ export function VertexPortalHub({
                 audio.playJump();
                 onEnterGames();
               }}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 via-teal-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-slate-950 font-black font-mono text-sm uppercase tracking-wider shadow-[0_0_30px_rgba(6,182,212,0.6)] cursor-pointer flex items-center justify-center gap-2 active:scale-95 transition-all"
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-cyan-500 hover:from-orange-400 hover:to-cyan-400 text-slate-950 font-black font-mono text-sm uppercase tracking-wider shadow-[0_0_30px_rgba(249,115,22,0.6)] cursor-pointer flex items-center justify-center gap-2 active:scale-95 transition-all"
             >
               <span>{t.enterDestination}</span>
               <ArrowRight className="w-4 h-4 stroke-[3]" />
@@ -299,20 +317,39 @@ export function VertexPortalHub({
             <div className="absolute -right-16 -top-16 w-44 h-44 bg-fuchsia-500/20 rounded-full blur-2xl group-hover:bg-fuchsia-500/35 transition-all" />
             <div className="absolute inset-x-8 top-0 h-[2px] bg-gradient-to-r from-transparent via-fuchsia-400 to-transparent pointer-events-none" />
 
+            {/* Corner Spiderweb */}
+            <div className="absolute top-0 right-0 w-16 h-16 pointer-events-none z-10 opacity-70 group-hover:opacity-100 transition-opacity">
+              <svg viewBox="0 0 50 50" className="w-full h-full text-purple-400/80 fill-none stroke-current stroke-[1.2]">
+                <path d="M50,0 Q25,0 0,0 M50,0 Q50,25 50,50 M50,0 L0,50 M50,0 L18,50 M50,0 L50,18" />
+                <path d="M40,0 Q35,15 50,20 M30,0 Q22,28 50,35 M20,0 Q12,38 50,45" />
+              </svg>
+            </div>
+
             <div>
               <div className="flex items-center justify-between mb-5">
-                <div className="w-16 h-16 rounded-[22px] bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-white shadow-[0_0_25px_rgba(217,70,239,0.5)] group-hover:rotate-6 transition-transform">
-                  <Radio className="w-9 h-9 stroke-[2.2] animate-pulse" />
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-[22px] bg-gradient-to-br from-fuchsia-500 to-purple-600 flex items-center justify-center text-white shadow-[0_0_25px_rgba(217,70,239,0.5)] group-hover:rotate-6 transition-transform">
+                    <Radio className="w-9 h-9 stroke-[2.2] animate-pulse" />
+                  </div>
+                  <span className="absolute -top-1 -right-1 text-sm animate-bounce" style={{ animationDuration: '1.8s' }}>
+                    🦇
+                  </span>
                 </div>
 
-                <span className="px-3.5 py-1 rounded-full text-[10px] font-mono font-black uppercase tracking-wider bg-fuchsia-500/25 text-fuchsia-300 border border-fuchsia-400/60 flex items-center gap-1.5 shadow-[0_0_15px_rgba(217,70,239,0.4)] animate-pulse">
-                  <Sparkles className="w-2.5 h-2.5" />
-                  {t.portalComingSoon}
-                </span>
+                <div className="flex flex-col items-end gap-1">
+                  <span className="px-3.5 py-1 rounded-full text-[10px] font-mono font-black uppercase tracking-wider bg-fuchsia-500/25 text-fuchsia-300 border border-fuchsia-400/60 flex items-center gap-1.5 shadow-[0_0_15px_rgba(217,70,239,0.4)] animate-pulse">
+                    <Sparkles className="w-2.5 h-2.5" />
+                    {t.portalComingSoon}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-black bg-purple-500/25 text-purple-300 border border-purple-400/40">
+                    👻 SALON LO-FI
+                  </span>
+                </div>
               </div>
 
-              <h2 className="text-2xl lg:text-3xl font-black font-mono text-white tracking-wider uppercase group-hover:text-fuchsia-300 transition-colors">
-                {t.destVibeTitle}
+              <h2 className="text-2xl lg:text-3xl font-black font-mono text-white tracking-wider uppercase group-hover:text-fuchsia-300 transition-colors flex items-center gap-2">
+                <span>{t.destVibeTitle}</span>
+                <span className="text-lg">🕯️</span>
               </h2>
               <p className="text-xs text-slate-300 mt-1.5 font-sans leading-relaxed">
                 {t.destVibeSub}
@@ -362,20 +399,39 @@ export function VertexPortalHub({
             <div className="absolute -right-16 -top-16 w-44 h-44 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-500/35 transition-all" />
             <div className="absolute inset-x-8 top-0 h-[2px] bg-gradient-to-r from-transparent via-blue-400 to-transparent pointer-events-none" />
 
+            {/* Corner Spiderweb */}
+            <div className="absolute top-0 right-0 w-16 h-16 pointer-events-none z-10 opacity-70 group-hover:opacity-100 transition-opacity">
+              <svg viewBox="0 0 50 50" className="w-full h-full text-blue-400/80 fill-none stroke-current stroke-[1.2]">
+                <path d="M50,0 Q25,0 0,0 M50,0 Q50,25 50,50 M50,0 L0,50 M50,0 L18,50 M50,0 L50,18" />
+                <path d="M40,0 Q35,15 50,20 M30,0 Q22,28 50,35 M20,0 Q12,38 50,45" />
+              </svg>
+            </div>
+
             <div>
               <div className="flex items-center justify-between mb-5">
-                <div className="w-16 h-16 rounded-[22px] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-[0_0_25px_rgba(59,130,246,0.5)] group-hover:rotate-6 transition-transform">
-                  <Globe className="w-9 h-9 stroke-[2.2] animate-pulse" />
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-[22px] bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-[0_0_25px_rgba(59,130,246,0.5)] group-hover:rotate-6 transition-transform">
+                    <Globe className="w-9 h-9 stroke-[2.2] animate-pulse" />
+                  </div>
+                  <span className="absolute -top-1 -right-1 text-sm animate-bounce" style={{ animationDuration: '2.2s' }}>
+                    🕸️
+                  </span>
                 </div>
 
-                <span className="px-3.5 py-1 rounded-full text-[10px] font-mono font-black uppercase tracking-wider bg-blue-500/25 text-blue-300 border border-blue-400/60 flex items-center gap-1.5 shadow-[0_0_15px_rgba(59,130,246,0.4)] animate-pulse">
-                  <Sparkles className="w-2.5 h-2.5" />
-                  {t.portalComingSoon}
-                </span>
+                <div className="flex flex-col items-end gap-1">
+                  <span className="px-3.5 py-1 rounded-full text-[10px] font-mono font-black uppercase tracking-wider bg-blue-500/25 text-blue-300 border border-blue-400/60 flex items-center gap-1.5 shadow-[0_0_15px_rgba(59,130,246,0.4)] animate-pulse">
+                    <Sparkles className="w-2.5 h-2.5" />
+                    {t.portalComingSoon}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-black bg-blue-500/25 text-blue-300 border border-blue-400/40">
+                    🔮 MÉMETAVERSE
+                  </span>
+                </div>
               </div>
 
-              <h2 className="text-2xl lg:text-3xl font-black font-mono text-white tracking-wider uppercase group-hover:text-blue-300 transition-colors">
-                {t.destVwebTitle}
+              <h2 className="text-2xl lg:text-3xl font-black font-mono text-white tracking-wider uppercase group-hover:text-blue-300 transition-colors flex items-center gap-2">
+                <span>{t.destVwebTitle}</span>
+                <span className="text-lg">🧙‍♂️</span>
               </h2>
               <p className="text-xs text-slate-300 mt-1.5 font-sans leading-relaxed">
                 {t.destVwebSub}

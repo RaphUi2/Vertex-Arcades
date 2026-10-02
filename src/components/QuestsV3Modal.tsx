@@ -39,26 +39,32 @@ export function QuestsV3Modal({
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           className="liquid-glass-container w-full max-w-3xl max-h-[92vh] rounded-3xl p-5 sm:p-7 flex flex-col justify-between overflow-hidden shadow-2xl relative border border-white/15 text-slate-100"
         >
-          {/* Top Specular Glint */}
-          <div className="absolute inset-x-12 top-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent pointer-events-none" />
+          {/* Top Specular Glint & Corner Spiderweb */}
+          <div className="absolute inset-x-12 top-0 h-[1px] bg-gradient-to-r from-transparent via-orange-400/60 to-transparent pointer-events-none" />
+          <div className="absolute top-0 right-12 w-12 h-12 pointer-events-none opacity-60">
+            <svg viewBox="0 0 50 50" className="w-full h-full text-orange-400 fill-none stroke-current stroke-[1.2]">
+              <path d="M50,0 Q25,0 0,0 M50,0 Q50,25 50,50 M50,0 L0,50" />
+            </svg>
+          </div>
 
           {/* Header */}
-          <div className="flex items-center justify-between pb-4 border-b border-white/10">
+          <div className="flex items-center justify-between pb-4 border-b border-orange-500/20">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center text-2xl text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-                🎯
+              <div className="w-11 h-11 rounded-2xl bg-orange-500/20 border border-orange-400/50 flex items-center justify-center text-2xl text-orange-300 shadow-[0_0_15px_rgba(249,115,22,0.4)]">
+                🎃
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-black text-white font-mono tracking-tight uppercase">
-                    {t.quests}
+                  <h2 className="text-lg font-black text-white font-mono tracking-tight uppercase flex items-center gap-1.5">
+                    <span>{t.quests}</span>
+                    <span className="text-sm">🦇</span>
                   </h2>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                    {language === 'en' ? 'SEASONAL' : language === 'es' ? 'ESTACIONAL' : 'SAISONNIER'}
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-black bg-orange-500/25 text-orange-300 border border-orange-400/40">
+                    🎃 HALLOWEEN 2026
                   </span>
                 </div>
-                <p className="text-xs text-slate-300">
-                  {t.questsSubtitle}
+                <p className="text-xs text-orange-200/80">
+                  {t.questsSubtitle} • 🍬 Bonbons bonus actifs !
                 </p>
               </div>
             </div>

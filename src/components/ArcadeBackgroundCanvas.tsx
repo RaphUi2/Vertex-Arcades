@@ -66,6 +66,7 @@ export const ArcadeBackgroundCanvas: React.FC<ArcadeBackgroundCanvasProps> = ({
       gridOffset = (gridOffset + 0.9) % 50;
       waveOffset += 0.02;
 
+      const isHalloween = currentTheme.includes('halloween') || currentTheme === 'halloween';
       const isMatrix = currentTheme.includes('matrix');
       const isLava = currentTheme.includes('lava') || currentTheme.includes('magma');
       const isSupernova = currentTheme.includes('supernova') || currentTheme.includes('solar');
@@ -74,7 +75,82 @@ export const ArcadeBackgroundCanvas: React.FC<ArcadeBackgroundCanvasProps> = ({
       const isPlasma = currentTheme.includes('plasma') || currentTheme.includes('toxic');
       const isSynthwave = currentTheme.includes('vapor') || currentTheme.includes('synthwave') || currentTheme.includes('sunset');
 
-      if (isMatrix) {
+      if (isHalloween) {
+        // 🎃 Spooky Gothic Halloween Realm (Pumpkin Orange & Midnight Violet)
+        const bgGrad = ctx.createRadialGradient(width / 2, height * 0.4, 30, width / 2, height * 0.5, width * 0.9);
+        bgGrad.addColorStop(0, '#260c38');
+        bgGrad.addColorStop(0.5, '#140520');
+        bgGrad.addColorStop(1, '#06020c');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        const horizonY = height * 0.6;
+
+        // Eerie Horizon Glow (Blood Orange to Gothic Violet)
+        const glow = ctx.createRadialGradient(width / 2, horizonY, 20, width / 2, horizonY, width * 0.7);
+        glow.addColorStop(0, 'rgba(249, 115, 22, 0.35)');
+        glow.addColorStop(0.5, 'rgba(168, 85, 247, 0.2)');
+        glow.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, horizonY - 140, width, 280);
+
+        // Sinister Grid Lines
+        ctx.strokeStyle = 'rgba(249, 115, 22, 0.22)';
+        ctx.lineWidth = 1;
+        const vanishingX = width / 2;
+
+        for (let i = -16; i <= 16; i++) {
+          ctx.beginPath();
+          ctx.moveTo(vanishingX, horizonY);
+          ctx.lineTo(vanishingX + i * (width / 14), height);
+          ctx.stroke();
+        }
+
+        for (let y = horizonY; y < height; y += (y - horizonY) * 0.12 + 2) {
+          const lineY = y + (gridOffset * (y - horizonY)) / 400;
+          if (lineY > horizonY && lineY < height) {
+            ctx.beginPath();
+            ctx.moveTo(0, lineY);
+            ctx.lineTo(width, lineY);
+            ctx.stroke();
+          }
+        }
+
+        // Floating Pumpkin Embers & Ghostly Wisps
+        particles.forEach((p, idx) => {
+          p.pulse += 0.03;
+          const currentSize = p.size + Math.sin(p.pulse) * 0.6;
+          
+          if (idx % 3 === 0) {
+            // Pumpkin Orange Fire Ember
+            ctx.fillStyle = '#f97316';
+            ctx.globalAlpha = p.opacity * (0.6 + Math.sin(p.pulse) * 0.35);
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, Math.max(0.6, currentSize * 1.3), 0, Math.PI * 2);
+            ctx.fill();
+          } else if (idx % 3 === 1) {
+            // Ghostly Violet Wisp
+            ctx.fillStyle = '#c084fc';
+            ctx.globalAlpha = p.opacity * 0.5;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, Math.max(0.6, currentSize * 1.1), 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            // Golden Harvest Spark
+            ctx.fillStyle = '#fbbf24';
+            ctx.globalAlpha = p.opacity * 0.7;
+            ctx.fillRect(p.x, p.y, currentSize * 1.2, currentSize * 1.2);
+          }
+
+          p.y -= 0.7 + (idx % 3) * 0.3;
+          p.x += Math.sin(p.y * 0.02 + waveOffset) * 0.6;
+          if (p.y < 0) {
+            p.y = height;
+            p.x = Math.random() * width;
+          }
+        });
+        ctx.globalAlpha = 1;
+      } else if (isMatrix) {
         // Deep Matrix Rain
         ctx.fillStyle = 'rgba(2, 6, 12, 0.92)';
         ctx.fillRect(0, 0, width, height);

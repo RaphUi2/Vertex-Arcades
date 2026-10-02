@@ -36,6 +36,7 @@ import { FriendsComingSoonModal } from './components/FriendsComingSoonModal';
 import { VertexPortalHub } from './components/VertexPortalHub';
 import { VibePreviewModal } from './components/VibePreviewModal';
 import { VwebPreviewModal } from './components/VwebPreviewModal';
+import { HalloweenDecorOverlay } from './components/HalloweenDecorOverlay';
 
 // 5 Modern Games
 import { CyberRunner2099 } from './games/CyberRunner2099';
@@ -110,7 +111,7 @@ export default function App() {
           musicEnabled: true,
           sfxVolume: 70,
           musicVolume: 40,
-          currentTrack: 'chill',
+          currentTrack: 'halloween',
           graphicsQuality: 'ultra',
           particleDensity: 'extreme',
           glowEffects: true,
@@ -118,7 +119,7 @@ export default function App() {
           hapticVibration: true,
           showFps: false,
           controllerLayout: 'xbox',
-          colorTheme: 'cyber'
+          colorTheme: 'halloween'
         },
         rankPoints: 240,
         totalTrophies: 120,
@@ -195,9 +196,12 @@ export default function App() {
     if (!parsed.settings.language) {
       parsed.settings.language = 'en'; // English is default
     }
-    if (!parsed.settings.colorTheme) {
-      parsed.settings.colorTheme = 'cyber';
+    if (!parsed.settings.colorTheme || parsed.settings.colorTheme === 'cyber') {
+      parsed.settings.colorTheme = 'halloween';
       parsed.settings.monochromeMode = false;
+    }
+    if (!parsed.settings.currentTrack || parsed.settings.currentTrack === 'chill') {
+      parsed.settings.currentTrack = 'halloween';
     }
     // Ensure all 5 games have stats
     for (const g of GAMES_LIST) {
@@ -500,20 +504,23 @@ export default function App() {
     return matchesCategory && matchesSearch;
   });
 
-  const currentTheme = state.settings.colorTheme || (state.settings.monochromeMode ? 'dark' : 'cyber');
-  const themeClass = currentTheme === 'dark' ? 'theme-dark' : currentTheme === 'light' ? 'theme-light' : 'theme-cyber';
+  const currentTheme = state.settings.colorTheme || (state.settings.monochromeMode ? 'dark' : 'halloween');
+  const themeClass = currentTheme === 'dark' ? 'theme-dark' : currentTheme === 'light' ? 'theme-light' : currentTheme === 'cyber' ? 'theme-cyber' : 'theme-halloween';
   const currentLang: Language = state.settings.language || 'en';
   const t = getTranslation(currentLang);
 
-  // Synchronize document theme classes & body background for seamless Noir/Blanc/Cyber feel
+  // Synchronize document theme classes & body background for seamless Halloween/Noir/Blanc/Cyber feel
   useEffect(() => {
-    document.documentElement.classList.remove('theme-dark', 'theme-light', 'theme-cyber');
+    document.documentElement.classList.remove('theme-dark', 'theme-light', 'theme-cyber', 'theme-halloween');
     document.documentElement.classList.add(themeClass);
-    document.body.style.backgroundColor = currentTheme === 'light' ? '#eef1f5' : currentTheme === 'dark' ? '#07080b' : '#080b14';
+    document.body.style.backgroundColor = currentTheme === 'light' ? '#eef1f5' : currentTheme === 'dark' ? '#07080b' : currentTheme === 'cyber' ? '#080b14' : '#07030e';
   }, [currentTheme, themeClass]);
 
   return (
     <div className={`relative min-h-screen ${themeClass} text-slate-100 flex flex-col justify-between overflow-x-hidden font-sans select-none antialiased transition-colors duration-300`}>
+      {/* 🎃 GLOBAL HALLOWEEN DECOR OVERLAY (Moons, Ghosts, Bats, Cobwebs, Pumpkins, Spooky Mist) */}
+      <HalloweenDecorOverlay onShowToast={(msg) => notify(msg)} />
+
       {/* 1. iOS Glass Toast Notification */}
       <AnimatePresence>
         {notification && (
@@ -521,9 +528,9 @@ export default function App() {
             initial={{ opacity: 0, y: -25, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.96 }}
-            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-full bg-slate-900/90 border border-cyan-400/50 text-white font-mono text-xs font-bold shadow-[0_8px_32px_rgba(6,182,212,0.35)] flex items-center gap-2.5 backdrop-blur-2xl"
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-full bg-slate-900/90 border border-orange-500/50 text-white font-mono text-xs font-bold shadow-[0_8px_32px_rgba(249,115,22,0.4)] flex items-center gap-2.5 backdrop-blur-2xl"
           >
-            <Sparkles className="w-4 h-4 text-cyan-400 animate-spin" />
+            <span className="text-sm">🎃</span>
             <span>{notification}</span>
           </motion.div>
         )}
@@ -540,9 +547,9 @@ export default function App() {
           onEnterGames={() => {
             setCurrentDestination('games');
             if (state.settings.musicEnabled) {
-              audio.startBGM(state.settings.currentTrack || 'chill');
+              audio.startBGM(state.settings.currentTrack || 'halloween');
             }
-            notify("Bienvenue dans GAMES ! 🎮");
+            notify("🎃 Bienvenue dans GAMES • Édition Halloween ! 🎮");
           }}
           onOpenVibePreview={() => setShowVibeModal(true)}
           onOpenVwebPreview={() => setShowVwebModal(true)}
@@ -563,7 +570,7 @@ export default function App() {
           {/* Top Header - Liquid Glass Hotbar for GAMES */}
           <header className="liquid-glass-header sticky top-0 z-40 w-full px-4 sm:px-8 py-3 flex items-center justify-between">
         {/* Specular top reflection glint line */}
-        <div className="absolute inset-x-8 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/35 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-8 top-0 h-[1px] bg-gradient-to-r from-transparent via-orange-400/40 to-transparent pointer-events-none" />
 
         {/* Left: Enhanced Rich Player Profile Capsule */}
         <div
@@ -621,25 +628,29 @@ export default function App() {
             setSelectedGameForDetail(null);
             setCurrentDestination('hub');
             if (state.settings.musicEnabled) {
-              audio.startBGM('portal');
+              audio.startBGM(state.settings.currentTrack || 'halloween');
             }
           }}
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl liquid-glass-pill hover:border-cyan-400 text-cyan-300 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95 group font-mono text-xs font-bold"
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl liquid-glass-pill hover:border-orange-400 text-orange-300 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95 group font-mono text-xs font-bold"
           title="Retourner au Portail Principal (Menu des Lieux)"
         >
-          <Sparkles className="w-3.5 h-3.5 text-cyan-400 group-hover:rotate-45 transition-transform" />
-          <span>🌌 Lieux & Portail</span>
+          <span className="text-sm group-hover:rotate-12 transition-transform">🎃</span>
+          <span>Portail Vertex</span>
         </button>
 
-        {/* Center: SLEEK GAMES LOGO */}
+        {/* Center: SLEEK GAMES LOGO WITH HALLOWEEN PUMPKIN */}
         <div
-          onClick={() => { audio.playWin(); }}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-2xl liquid-glass-pill hover:border-cyan-400/70 transition-all cursor-pointer group shadow-sm active:scale-95"
-          title="Games"
+          onClick={() => { audio.playHalloweenSpook(); }}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-2xl liquid-glass-pill hover:border-orange-400/70 transition-all cursor-pointer group shadow-sm active:scale-95 border-orange-500/30"
+          title="Games • Édition Halloween"
         >
-          <Gamepad2 className="w-5 h-5 text-cyan-400 filter drop-shadow-[0_0_8px_rgba(6,182,212,0.9)] group-hover:scale-110 transition-transform" />
+          <span className="text-sm group-hover:scale-125 transition-transform">🎃</span>
+          <Gamepad2 className="w-5 h-5 text-orange-400 filter drop-shadow-[0_0_8px_rgba(249,115,22,0.9)] group-hover:scale-110 transition-transform" />
           <span className="font-mono font-black text-xs text-white tracking-wider flex items-center gap-1.5">
             GAMES
+            <span className="px-1.5 py-0.5 rounded-md text-[8px] bg-orange-500/25 text-orange-300 border border-orange-400/40 uppercase tracking-widest">
+              🎃 SPOOKY
+            </span>
             {gamepadState?.connected && (
               <span className="px-1.5 py-0.5 rounded-md text-[8px] bg-emerald-500/25 text-emerald-300 border border-emerald-400/30 uppercase tracking-widest hidden sm:inline">
                 🎮 PAD
@@ -1082,8 +1093,22 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* Quick Theme Switcher Pill (Cyber / Noir / Blanc) */}
-                  <div className="flex items-center p-1 rounded-xl liquid-glass-pill border border-white/10 gap-1 text-[11px] font-mono">
+                  {/* Quick Theme Switcher Pill (Halloween / Cyber / Noir / Blanc) */}
+                  <div className="flex items-center p-1 rounded-xl liquid-glass-pill border border-orange-500/30 gap-1 text-[11px] font-mono">
+                    <button
+                      onClick={() => {
+                        audio.playHalloweenSpook();
+                        setState(prev => ({ ...prev, settings: { ...prev.settings, colorTheme: 'halloween' } }));
+                        notify("🎃 Thème Halloween Orange & Violet activé !");
+                      }}
+                      className={`px-2 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
+                        currentTheme === 'halloween' ? 'bg-orange-500 text-slate-950 font-black shadow-[0_0_12px_#f97316]' : 'text-orange-300 hover:text-white'
+                      }`}
+                      title="Thème Spécial Halloween"
+                    >
+                      <span>🎃</span>
+                      <span className="hidden sm:inline">Halloween</span>
+                    </button>
                     <button
                       onClick={() => {
                         audio.playClick();
@@ -1136,10 +1161,45 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* 4. Main Content Body - Clean Modern Experience Catalog */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-6">
+      {/* 4. Main Content Body - Clean Modern Experience Catalog with Halloween Theme */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-6 space-y-5">
+        {/* 🎃 Spooky Halloween Event Banner */}
+        <div className="p-3.5 sm:p-4 rounded-3xl bg-gradient-to-r from-orange-950/70 via-purple-950/60 to-slate-900/80 border-2 border-orange-500/60 shadow-[0_0_30px_rgba(249,115,22,0.35)] backdrop-blur-2xl relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="absolute -right-8 -top-8 w-32 h-32 bg-orange-500/20 rounded-full blur-xl pointer-events-none" />
+          <div className="flex items-center gap-3 relative z-10">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-purple-600 flex items-center justify-center text-2xl shadow-[0_0_20px_rgba(249,115,22,0.6)] animate-bounce" style={{ animationDuration: '2s' }}>
+              🎃
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-black text-sm text-white uppercase tracking-wider">
+                  FESTIVAL D'HALLOWEEN 2026
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-black bg-orange-500/30 text-orange-300 border border-orange-400/50 animate-pulse">
+                  EN COURS 🦇
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-300 font-sans">
+                Collectez des bonbons d'Halloween 🍬, défiez les 5 arènes et débloquez des succès spectraux !
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 relative z-10">
+            <button
+              onClick={() => {
+                audio.playHalloweenSpook();
+                notify("🎃 Boo ! +100 Bonbons d'Halloween ajoutés à votre besace ! 🍬");
+              }}
+              className="px-4 py-2 rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-purple-600 hover:from-orange-400 hover:to-purple-500 text-slate-950 font-black font-mono text-xs uppercase tracking-wider shadow-[0_0_20px_rgba(249,115,22,0.5)] cursor-pointer flex items-center gap-1.5 active:scale-95 transition-all"
+            >
+              <span>🍬 RÉCOLTER BONBONS</span>
+            </button>
+          </div>
+        </div>
+
         {/* Header Controls Bar: Filter & Search Toggle Buttons */}
-        <div className="flex flex-col gap-3 mb-6">
+        <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               {/* Button 1: Toggle Filters */}
@@ -1150,15 +1210,15 @@ export default function App() {
                 }}
                 className={`px-4 py-2 rounded-2xl flex items-center gap-2 text-xs font-mono font-bold cursor-pointer transition-all shadow-md active:scale-95 ${
                   isFilterOpen || selectedCategory !== 'all'
-                    ? 'liquid-glass-pill-active border-cyan-400 text-white'
+                    ? 'liquid-glass-pill-active border-orange-400 text-white'
                     : 'liquid-glass-pill text-slate-300 hover:text-white'
                 }`}
                 title={t.filters}
               >
-                <SlidersHorizontal className="w-3.5 h-3.5 text-cyan-400" />
+                <SlidersHorizontal className="w-3.5 h-3.5 text-orange-400" />
                 <span>{t.filters}</span>
                 {selectedCategory !== 'all' && (
-                  <span className="ml-1 px-2 py-0.2 rounded-full text-[9px] bg-cyan-400 text-slate-950 font-black uppercase">
+                  <span className="ml-1 px-2 py-0.2 rounded-full text-[9px] bg-orange-400 text-slate-950 font-black uppercase">
                     {selectedCategory}
                   </span>
                 )}
@@ -1172,15 +1232,15 @@ export default function App() {
                 }}
                 className={`px-4 py-2 rounded-2xl flex items-center gap-2 text-xs font-mono font-bold cursor-pointer transition-all shadow-md active:scale-95 ${
                   isSearchOpen || searchQuery
-                    ? 'liquid-glass-pill-active border-cyan-400 text-white'
+                    ? 'liquid-glass-pill-active border-orange-400 text-white'
                     : 'liquid-glass-pill text-slate-300 hover:text-white'
                 }`}
                 title={t.search}
               >
-                <Search className="w-3.5 h-3.5 text-cyan-400" />
+                <Search className="w-3.5 h-3.5 text-orange-400" />
                 <span>{t.search}</span>
                 {searchQuery && (
-                  <span className="ml-1 px-1.5 py-0.2 rounded-full text-[9px] bg-cyan-400/25 text-cyan-200 border border-cyan-400/30 truncate max-w-[80px]">
+                  <span className="ml-1 px-1.5 py-0.2 rounded-full text-[9px] bg-orange-400/25 text-orange-200 border border-orange-400/30 truncate max-w-[80px]">
                     "{searchQuery}"
                   </span>
                 )}
@@ -1188,8 +1248,8 @@ export default function App() {
             </div>
 
             {/* Total experiences count */}
-            <span className="text-xs font-mono text-slate-400 hidden sm:inline-block">
-              {filteredGames.length} / {GAMES_LIST.length} {t.gamesCount}
+            <span className="text-xs font-mono text-orange-300/80 hidden sm:inline-block">
+              🎃 {filteredGames.length} / {GAMES_LIST.length} {t.gamesCount}
             </span>
           </div>
 
@@ -1284,7 +1344,7 @@ export default function App() {
                   audio.playClick();
                   setSelectedGameForDetail(game);
                 }}
-                className="aspect-square liquid-glass-card rounded-3xl border border-white/12 hover:border-cyan-400/80 transition-all overflow-hidden group shadow-xl hover:shadow-[0_15px_35px_rgba(6,182,212,0.35)] backdrop-blur-2xl relative cursor-pointer active:scale-95 flex flex-col justify-end"
+                className="aspect-square liquid-glass-card rounded-3xl border border-orange-500/30 hover:border-orange-400 transition-all overflow-hidden group shadow-xl hover:shadow-[0_15px_35px_rgba(249,115,22,0.4)] backdrop-blur-2xl relative cursor-pointer active:scale-95 flex flex-col justify-end"
               >
                 {/* 1:1 Full Cover Illustration */}
                 <div className="absolute inset-0 z-0">
@@ -1292,10 +1352,18 @@ export default function App() {
                 </div>
 
                 {/* Top Subtle Sheen */}
-                <div className="absolute inset-x-6 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none z-10" />
+                <div className="absolute inset-x-6 top-0 h-[1px] bg-gradient-to-r from-transparent via-orange-400/60 to-transparent pointer-events-none z-10" />
 
-                {/* Top Left: Floating Status Badge */}
-                <div className="absolute top-2.5 left-2.5 z-10">
+                {/* 🕸️ Spooky Corner Spiderweb on every Game Card */}
+                <div className="absolute top-0 right-0 w-14 h-14 pointer-events-none z-10 opacity-70 group-hover:opacity-100 transition-opacity">
+                  <svg viewBox="0 0 50 50" className="w-full h-full text-orange-400/80 fill-none stroke-current stroke-[1.2]">
+                    <path d="M50,0 Q25,0 0,0 M50,0 Q50,25 50,50 M50,0 L0,50 M50,0 L18,50 M50,0 L50,18" />
+                    <path d="M40,0 Q35,15 50,20 M30,0 Q22,28 50,35 M20,0 Q12,38 50,45" />
+                  </svg>
+                </div>
+
+                {/* Top Left: Floating Status Badge & Mini Pumpkin */}
+                <div className="absolute top-2.5 left-2.5 z-10 flex items-center gap-1">
                   {game.isPaid ? (
                     isUnlocked ? (
                       <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-black tracking-wider bg-emerald-500/35 text-emerald-300 border border-emerald-400/50 backdrop-blur-md shadow-md flex items-center gap-1">
@@ -1307,16 +1375,17 @@ export default function App() {
                       </span>
                     )
                   ) : (
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-black tracking-wider bg-cyan-500/35 text-cyan-300 border border-cyan-400/50 backdrop-blur-md shadow-md flex items-center gap-1">
-                      <Sparkles className="w-2.5 h-2.5 text-cyan-400" /> {t.free}
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-black tracking-wider bg-orange-500/35 text-orange-200 border border-orange-400/50 backdrop-blur-md shadow-md flex items-center gap-1">
+                      <Sparkles className="w-2.5 h-2.5 text-orange-300" /> {t.free}
                     </span>
                   )}
+                  <span className="text-[10px] animate-pulse">🎃</span>
                 </div>
 
                 {/* Bottom Bar: Gradient Overlay with ONLY Short Game Name & Favorite Heart on the Right */}
                 <div className="relative z-10 p-2.5 pt-8 bg-gradient-to-t from-slate-950 via-slate-950/85 to-transparent flex items-center justify-between gap-1.5">
-                  <span className="font-black text-white text-xs sm:text-sm font-mono tracking-tight truncate drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                    {game.name}
+                  <span className="font-black text-white text-xs sm:text-sm font-mono tracking-tight truncate drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] flex items-center gap-1">
+                    <span>{game.name}</span>
                   </span>
 
                   {/* Favorite Like Button nicely positioned to the right of the title */}

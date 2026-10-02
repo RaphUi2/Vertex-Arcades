@@ -43,29 +43,35 @@ export function ArcadePassV3Modal({
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           className="liquid-glass-container w-full max-w-4xl max-h-[92vh] rounded-3xl p-5 sm:p-7 flex flex-col justify-between overflow-hidden shadow-2xl relative border border-white/15 text-slate-100"
         >
-          {/* Top Specular Glint */}
-          <div className="absolute inset-x-12 top-0 h-[1px] bg-gradient-to-r from-transparent via-purple-300/50 to-transparent pointer-events-none" />
+          {/* Top Specular Glint & Corner Spiderweb */}
+          <div className="absolute inset-x-12 top-0 h-[1px] bg-gradient-to-r from-transparent via-orange-400/60 to-transparent pointer-events-none" />
+          <div className="absolute top-0 right-12 w-12 h-12 pointer-events-none opacity-60">
+            <svg viewBox="0 0 50 50" className="w-full h-full text-orange-400 fill-none stroke-current stroke-[1.2]">
+              <path d="M50,0 Q25,0 0,0 M50,0 Q50,25 50,50 M50,0 L0,50" />
+            </svg>
+          </div>
 
           {/* Header */}
-          <div className="flex items-center justify-between pb-4 border-b border-white/10">
+          <div className="flex items-center justify-between pb-4 border-b border-orange-500/20">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-purple-500/20 border border-purple-400/50 flex items-center justify-center text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.35)] text-xl">
-                👑
+              <div className="w-11 h-11 rounded-2xl bg-orange-500/20 border border-orange-400/50 flex items-center justify-center text-orange-300 shadow-[0_0_15px_rgba(249,115,22,0.4)] text-xl">
+                🎃
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-black text-white font-mono tracking-tight uppercase">
-                    {t.arcadePass}
+                  <h2 className="text-lg font-black text-white font-mono tracking-tight uppercase flex items-center gap-1.5">
+                    <span>{t.arcadePass}</span>
+                    <span className="text-sm">👑</span>
                   </h2>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-400/30">
-                    {language === 'en' ? 'SEASON 3' : language === 'es' ? 'TEMPORADA 3' : 'SAISON 3'}
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-orange-500/20 text-orange-300 border border-orange-400/30">
+                    🎃 PASS HALLOWEEN
                   </span>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-400/40 animate-pulse">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-400/40 animate-pulse">
                     {language === 'en' ? 'Ends: Oct 31 at 14:00' : language === 'es' ? 'Fin: 31 oct. 14h' : 'Fin : 31 oct. à 14h'}
                   </span>
                 </div>
-                <p className="text-xs text-slate-300">
-                  {t.arcadePassSubtitle} • {t.seasonEndsDate}
+                <p className="text-xs text-orange-200/80">
+                  {t.arcadePassSubtitle} • 🍬 Débloquez les récompenses d'Halloween !
                 </p>
               </div>
             </div>

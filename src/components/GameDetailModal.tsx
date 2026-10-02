@@ -104,19 +104,24 @@ export function GameDetailModal({
         onClick={(e) => e.stopPropagation()}
         className="w-full max-w-2xl max-h-[94dvh] sm:max-h-[90vh] rounded-3xl p-4 sm:p-6 flex flex-col justify-between overflow-hidden shadow-2xl relative border border-white/15 bg-slate-900/95 text-slate-100"
       >
-        {/* Top Sheen */}
-        <div className="absolute inset-x-12 top-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/40 to-transparent pointer-events-none" />
+        {/* Top Sheen & Corner Spiderweb */}
+        <div className="absolute inset-x-12 top-0 h-[1px] bg-gradient-to-r from-transparent via-orange-400/60 to-transparent pointer-events-none" />
+        <div className="absolute top-0 right-14 w-12 h-12 pointer-events-none opacity-60">
+          <svg viewBox="0 0 50 50" className="w-full h-full text-orange-400 fill-none stroke-current stroke-[1.2]">
+            <path d="M50,0 Q25,0 0,0 M50,0 Q50,25 50,50 M50,0 L0,50" />
+          </svg>
+        </div>
 
         {/* Header controls: [← Retour] on the left, [X] on the right */}
-        <div className="flex items-center justify-between pb-3 mb-2 border-b border-white/10 shrink-0">
+        <div className="flex items-center justify-between pb-3 mb-2 border-b border-orange-500/20 shrink-0">
           <button
             onClick={() => {
               audio.playClick();
               onClose();
             }}
-            className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-mono font-bold text-white flex items-center gap-1.5 cursor-pointer shadow-sm border border-white/15 active:scale-95 transition-all"
+            className="px-3.5 py-1.5 rounded-xl bg-orange-500/15 hover:bg-orange-500/25 text-xs font-mono font-bold text-white flex items-center gap-1.5 cursor-pointer shadow-sm border border-orange-400/30 active:scale-95 transition-all"
           >
-            <ArrowLeft className="w-4 h-4 text-cyan-400" />
+            <ArrowLeft className="w-4 h-4 text-orange-400" />
             <span>{language === 'en' ? 'Back' : language === 'es' ? 'Volver' : 'Retour'}</span>
           </button>
 

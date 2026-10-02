@@ -9,7 +9,7 @@ export interface AppSettings {
   musicEnabled: boolean;
   sfxVolume: number; // 0 to 100
   musicVolume: number; // 0 to 100
-  currentTrack: 'portal' | 'chill' | 'synthwave' | 'hyper' | 'neon';
+  currentTrack: 'halloween' | 'portal' | 'chill' | 'synthwave' | 'hyper' | 'neon';
   graphicsQuality: 'eco' | 'balanced' | 'ultra';
   particleDensity: 'faible' | 'normal' | 'extreme';
   glowEffects: boolean;
@@ -18,7 +18,7 @@ export interface AppSettings {
   showFps: boolean;
   controllerLayout: 'xbox' | 'playstation';
   mobileControlsEnabled: boolean;
-  colorTheme?: 'cyber' | 'dark' | 'light';
+  colorTheme?: 'halloween' | 'cyber' | 'dark' | 'light';
   playButtonColor?: 'emerald' | 'cyan' | 'purple' | 'rose' | 'amber' | 'zinc' | 'white';
   monochromeMode?: boolean; // legacy alias
 }

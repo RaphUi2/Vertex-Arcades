@@ -123,8 +123,13 @@ export function VibePreviewModal({
           exit={{ opacity: 0, scale: 0.94, y: 15 }}
           className="liquid-glass-container w-full max-w-3xl max-h-[92dvh] rounded-3xl p-5 sm:p-7 flex flex-col justify-between overflow-hidden shadow-2xl relative border border-fuchsia-400/30 text-slate-100"
         >
-          {/* Top Sheen */}
-          <div className="absolute inset-x-12 top-0 h-[1px] bg-gradient-to-r from-transparent via-fuchsia-400/60 to-transparent pointer-events-none" />
+          {/* Top Sheen & Corner Spiderweb */}
+          <div className="absolute inset-x-12 top-0 h-[1px] bg-gradient-to-r from-transparent via-orange-400/60 to-transparent pointer-events-none" />
+          <div className="absolute top-0 right-14 w-12 h-12 pointer-events-none opacity-60">
+            <svg viewBox="0 0 50 50" className="w-full h-full text-orange-400 fill-none stroke-current stroke-[1.2]">
+              <path d="M50,0 Q25,0 0,0 M50,0 Q50,25 50,50 M50,0 L0,50" />
+            </svg>
+          </div>
 
           {/* Close button */}
           <button
@@ -139,20 +144,21 @@ export function VibePreviewModal({
           </button>
 
           {/* Modal Header */}
-          <div className="flex items-center gap-3.5 pb-4 border-b border-white/10 shrink-0">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-fuchsia-500/30 to-purple-600/30 border border-fuchsia-400/60 flex items-center justify-center text-fuchsia-300 shadow-[0_0_20px_rgba(217,70,239,0.4)]">
-              <Radio className="w-6 h-6 animate-pulse" />
+          <div className="flex items-center gap-3.5 pb-4 border-b border-orange-500/20 shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500/30 to-purple-600/30 border border-orange-400/60 flex items-center justify-center text-orange-300 shadow-[0_0_20px_rgba(249,115,22,0.4)]">
+              🎃
             </div>
             <div>
               <div className="flex items-center gap-2.5">
-                <h2 className="text-xl font-black text-white font-mono tracking-tight uppercase">
-                  VIBE
+                <h2 className="text-xl font-black text-white font-mono tracking-tight uppercase flex items-center gap-1.5">
+                  <span>VIBE</span>
+                  <span className="text-sm">🕯️</span>
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black tracking-wider uppercase bg-fuchsia-500/25 text-fuchsia-300 border border-fuchsia-400/60 shadow-[0_0_12px_rgba(217,70,239,0.5)] animate-pulse">
-                  Coming Soon!
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black tracking-wider uppercase bg-orange-500/25 text-orange-300 border border-orange-400/60 shadow-[0_0_12px_rgba(249,115,22,0.5)] animate-pulse">
+                  🎃 Halloween Vibe
                 </span>
               </div>
-              <p className="text-xs text-slate-300">
+              <p className="text-xs text-orange-200/80">
                 {language === 'en'
                   ? 'The chill music lounge, spatial 3D hangout and social radio station of Vertex.'
                   : language === 'es'

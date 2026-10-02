@@ -293,25 +293,31 @@ export function ProfileCreatorModal({
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           className="liquid-glass-container w-full max-w-4xl max-h-[94dvh] rounded-3xl p-4 sm:p-7 flex flex-col justify-between overflow-hidden shadow-2xl relative border border-white/15 text-slate-100"
         >
-          {/* Top Glint Sheen */}
-          <div className="absolute inset-x-12 top-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-300/50 to-transparent pointer-events-none" />
+          {/* Top Glint Sheen & Corner Spiderweb */}
+          <div className="absolute inset-x-12 top-0 h-[1px] bg-gradient-to-r from-transparent via-orange-400/60 to-transparent pointer-events-none" />
+          <div className="absolute top-0 right-12 w-12 h-12 pointer-events-none opacity-60">
+            <svg viewBox="0 0 50 50" className="w-full h-full text-orange-400 fill-none stroke-current stroke-[1.2]">
+              <path d="M50,0 Q25,0 0,0 M50,0 Q50,25 50,50 M50,0 L0,50" />
+            </svg>
+          </div>
 
           {/* Modal Header */}
-          <div className="flex items-center justify-between pb-3 border-b border-white/10 shrink-0">
+          <div className="flex items-center justify-between pb-3 border-b border-orange-500/20 shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-cyan-500/25 to-blue-600/25 border border-cyan-400/50 flex items-center justify-center text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
-                <User className="w-6 h-6" />
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-orange-500/25 to-purple-600/25 border border-orange-400/50 flex items-center justify-center text-orange-300 shadow-[0_0_15px_rgba(249,115,22,0.4)]">
+                🎃
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-black text-white font-mono tracking-tight uppercase">
-                    {language === 'en' ? 'Player Profile & Social Pass' : language === 'es' ? 'Perfil de Jugador y Pase Social' : 'Profil Joueur & Carte Sociale'}
+                  <h2 className="text-lg font-black text-white font-mono tracking-tight uppercase flex items-center gap-1.5">
+                    <span>{language === 'en' ? 'Player Profile & Social Pass' : language === 'es' ? 'Perfil de Jugador y Pase Social' : 'Profil Joueur & Carte Sociale'}</span>
+                    <span className="text-sm">🦇</span>
                   </h2>
-                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-400/40 flex items-center gap-1">
-                    <Sparkles className="w-2.5 h-2.5" /> Multi-Amis
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-orange-500/20 text-orange-300 border border-orange-400/40 flex items-center gap-1">
+                    <Sparkles className="w-2.5 h-2.5" /> 🎃 Halloween Edition
                   </span>
                 </div>
-                <p className="text-xs text-slate-300">
+                <p className="text-xs text-orange-200/80">
                   {language === 'en'
                     ? 'Customize your gamer identity, signature game, and status for your friends.'
                     : language === 'es'

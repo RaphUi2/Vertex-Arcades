@@ -285,9 +285,185 @@
 }
 
 /* ===================================================
-   LIQUID GLASS THEMES: NOIR (DARK) & BLANC (LIGHT)
-   Replaces cyan/blue accents with crisp black/white without breaking colors!
+   LIQUID GLASS THEMES: HALLOWEEN, NOIR (DARK) & BLANC (LIGHT)
    =================================================== */
+
+/* --- 🎃 THÈME HALLOWEEN ULTRA-SPOOKY (DEFAULT & FESTIVE VIBE) --- */
+.theme-halloween {
+  background-color: #07030e !important;
+  color: #fff7ed !important;
+  --color-primary: #f97316;
+  --color-primary-hover: #ea580c;
+  --color-secondary: #a855f7;
+  --color-accent: #fb923c;
+}
+
+.theme-halloween ::-webkit-scrollbar-track {
+  background: #07030e !important;
+}
+
+.theme-halloween ::-webkit-scrollbar-thumb {
+  background: #c2410c !important;
+  border-color: #07030e !important;
+  box-shadow: 0 0 10px rgba(249, 115, 22, 0.6) !important;
+}
+
+.theme-halloween ::-webkit-scrollbar-thumb:hover {
+  background: #ea580c !important;
+}
+
+.theme-halloween .arcade-modal-backdrop {
+  background-color: rgba(7, 3, 14, 0.92) !important;
+  backdrop-filter: blur(12px) saturate(180%) !important;
+}
+
+.theme-halloween .arcade-panel {
+  background: linear-gradient(180deg, rgba(28, 10, 40, 0.98) 0%, rgba(16, 5, 24, 0.99) 100%) !important;
+  border-color: rgba(249, 115, 22, 0.45) !important;
+  box-shadow: 
+    0 25px 70px rgba(0, 0, 0, 0.9),
+    0 0 35px rgba(249, 115, 22, 0.22),
+    inset 0 1px 1px rgba(251, 146, 60, 0.4) !important;
+}
+
+.theme-halloween .arcade-card {
+  background: linear-gradient(180deg, rgba(28, 10, 40, 0.88) 0%, rgba(14, 4, 22, 0.96) 100%) !important;
+  border-color: rgba(249, 115, 22, 0.35) !important;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.75), 0 0 15px rgba(249, 115, 22, 0.12) !important;
+}
+
+.theme-halloween .arcade-card:hover {
+  border-color: rgba(249, 115, 22, 0.85) !important;
+  box-shadow: 0 8px 35px rgba(249, 115, 22, 0.35), inset 0 1px 1px rgba(251, 146, 60, 0.5) !important;
+}
+
+.theme-halloween .arcade-btn {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #c2410c 100%) !important;
+  color: #ffffff !important;
+  border-top-color: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: 0 4px 18px rgba(249, 115, 22, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+}
+
+.theme-halloween .arcade-btn:hover {
+  box-shadow: 0 6px 25px rgba(249, 115, 22, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+}
+
+.theme-halloween .liquid-glass-container {
+  background: linear-gradient(135deg, rgba(38, 14, 50, 0.9) 0%, rgba(22, 8, 34, 0.95) 50%, rgba(10, 3, 18, 0.99) 100%) !important;
+  border-color: rgba(249, 115, 22, 0.45) !important;
+  box-shadow: 
+    0 16px 50px 0 rgba(0, 0, 0, 0.88),
+    0 0 35px rgba(249, 115, 22, 0.25),
+    inset 0 1px 2px 0 rgba(251, 146, 60, 0.5),
+    inset 0 -1px 2px 0 rgba(0, 0, 0, 0.6) !important;
+}
+
+.theme-halloween .liquid-glass-card {
+  background: linear-gradient(180deg, rgba(32, 12, 44, 0.88) 0%, rgba(22, 7, 34, 0.95) 50%, rgba(10, 3, 18, 0.99) 100%) !important;
+  border-color: rgba(249, 115, 22, 0.35) !important;
+  box-shadow: 
+    0 12px 35px -4px rgba(0, 0, 0, 0.8),
+    0 0 22px rgba(249, 115, 22, 0.18),
+    inset 0 1px 1px 0 rgba(251, 146, 60, 0.35) !important;
+}
+
+.theme-halloween .liquid-glass-card:hover {
+  border-color: rgba(249, 115, 22, 0.9) !important;
+  box-shadow: 
+    0 22px 55px -4px rgba(0, 0, 0, 0.9),
+    0 0 40px rgba(249, 115, 22, 0.5),
+    inset 0 1px 2px 0 rgba(251, 191, 36, 0.6) !important;
+}
+
+.theme-halloween .liquid-glass-header {
+  background: linear-gradient(180deg, rgba(26, 9, 36, 0.96) 0%, rgba(14, 4, 22, 0.95) 100%) !important;
+  border-bottom-color: rgba(249, 115, 22, 0.4) !important;
+  box-shadow: 
+    0 10px 32px -5px rgba(0, 0, 0, 0.8),
+    0 0 25px rgba(249, 115, 22, 0.2) !important;
+}
+
+.theme-halloween .liquid-glass-drawer {
+  background: linear-gradient(180deg, rgba(26, 9, 38, 0.99) 0%, rgba(8, 2, 14, 0.99) 100%) !important;
+  border-left-color: rgba(249, 115, 22, 0.45) !important;
+  box-shadow: 
+    -20px 0 60px rgba(0, 0, 0, 0.95),
+    0 0 45px rgba(249, 115, 22, 0.25) !important;
+}
+
+.theme-halloween .liquid-glass-pill {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.14) 0%, rgba(168, 85, 247, 0.1) 100%) !important;
+  border-color: rgba(249, 115, 22, 0.3) !important;
+  color: #ffedd5 !important;
+}
+
+.theme-halloween .liquid-glass-pill:hover {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.28) 0%, rgba(168, 85, 247, 0.2) 100%) !important;
+  border-color: rgba(249, 115, 22, 0.7) !important;
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.4) !important;
+  color: #ffffff !important;
+}
+
+.theme-halloween .liquid-glass-pill-active {
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #c2410c 100%) !important;
+  color: #ffffff !important;
+  border-color: #fed7aa !important;
+  box-shadow: 
+    0 0 28px rgba(249, 115, 22, 0.8),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9) !important;
+  font-weight: 900 !important;
+}
+
+.theme-halloween .liquid-glass-input {
+  background: rgba(26, 10, 38, 0.85) !important;
+  border-color: rgba(249, 115, 22, 0.4) !important;
+  color: #fff7ed !important;
+}
+
+.theme-halloween .liquid-glass-input:focus-within {
+  border-color: rgba(249, 115, 22, 0.9) !important;
+  box-shadow: 0 0 25px rgba(249, 115, 22, 0.55) !important;
+}
+
+.theme-halloween .liquid-glass-menu-item {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%) !important;
+  border-color: rgba(249, 115, 22, 0.25) !important;
+}
+
+.theme-halloween .liquid-glass-menu-item:hover {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.25) 0%, rgba(168, 85, 247, 0.18) 100%) !important;
+  border-color: rgba(249, 115, 22, 0.75) !important;
+  box-shadow: 0 0 25px rgba(249, 115, 22, 0.38) !important;
+}
+
+/* Automatic accent mappings to Halloween Orange/Purple */
+.theme-halloween .text-cyan-400 {
+  color: #fb923c !important;
+}
+
+.theme-halloween .text-cyan-300 {
+  color: #fed7aa !important;
+}
+
+.theme-halloween .border-cyan-500\/30,
+.theme-halloween .border-cyan-500\/40,
+.theme-halloween .border-cyan-400\/50,
+.theme-halloween .border-cyan-400\/40 {
+  border-color: rgba(249, 115, 22, 0.45) !important;
+}
+
+.theme-halloween .bg-cyan-500\/20,
+.theme-halloween .bg-cyan-500\/10 {
+  background-color: rgba(249, 115, 22, 0.18) !important;
+}
+
+.theme-halloween .hover\:border-cyan-400:hover {
+  border-color: rgba(249, 115, 22, 0.8) !important;
+}
+
+.theme-halloween .hover\:text-cyan-300:hover {
+  color: #fdba74 !important;
+}
 
 /* --- THÈME NOIR (DARK EDITION) --- */
 .theme-dark {
